@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "generator": "@sdkwork/sdk-generator",
+  "sdk": {
+    "name": "sdkwork-notary-app-sdk",
+    "version": "0.1.0",
+    "language": "typescript",
+    "sdkType": "app",
+    "protocol": "http",
+    "packageName": "sdkwork-notary-app-sdk-generated-typescript"
+  },
+  "generatedFiles": [
+    {
+      "path": "bin/publish-core.mjs",
+      "sha256": "98ad0918a78bfbe22bf8f12fec709b0bed545b9e01edd40f5e4abf31a23378a5"
+    },
+    {
+      "path": "bin/publish.ps1",
+      "sha256": "78c6419400b988409d9393c2ecd85aa02dd6760f73edb3cc84cb28fefc51b41e"
+    },
+    {
+      "path": "bin/publish.sh",
+      "sha256": "899087c23e670b6951a12a13490fd557f761c96d78fabfb7e58a37e367db889f"
+    },
+    {
+      "path": "bin/sdk-gen.bat",
+      "sha256": "2d56891dc8276339ebbffc78ada3cc1bf73e2831453da89d95fcd2277bb4a05b"
+    },
+    {
+      "path": "bin/sdk-gen.sh",
+      "sha256": "c9bab3f87d5327833ca9a392f6b8e6b6d3386a46836cc3c48ef48313b603bd90"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "fb941a0806986a54fc192f98a98f6d9c282b8d350b2b19a3e71dda404e92d545"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "7840cc7d2b36ff364ac16c2fc5ec15b861bfe96854eecf81fb59b00edb8b1447"
+    },
+    {
+      "path": "package.json",
+      "sha256": "8d1182cc89aeaec8c3d11042441cd9c87f80b189c6f0ca4baf5943f9d5604b02"
+    },
+    {
+      "path": "README.md",
+      "sha256": "199cd690bca1db8500b59a084a8e97c3b3d6c1216da625fc6bc35abf59be8b92"
+    },
+    {
+      "path": "sdkwork-sdk.json",
+      "sha256": "105c9537ed186e21164117c3aeae59e33d704175cfa82f4bdc8a419ea6ba7964"
+    },
+    {
+      "path": "src/api/base.ts",
+      "sha256": "02ad25e6bf331ff241ba387c2947ddf1900dd849038e08c2757416a3aa788a04"
+    },
+    {
+      "path": "src/api/index.ts",
+      "sha256": "ab3452ac0c294702c96645a43cba2f2242b625f57d1b3c1d80b34b0f0e02bcc7"
+    },
+    {
+      "path": "src/api/notary.ts",
+      "sha256": "12ced35a4ef68445aebc8b3f8de26e774a570e6379caedec95eb916953cb3994"
+    },
+    {
+      "path": "src/api/paths.ts",
+      "sha256": "4ffed7b7d576dc11081bf6b43511465d3a5db410bd25c425ef47b69b154981ad"
+    },
+    {
+      "path": "src/auth/index.ts",
+      "sha256": "657fc63738bdcd61d83133120732a477dd127448cf2c51229b05d21f5e1f5c04"
+    },
+    {
+      "path": "src/http/client.ts",
+      "sha256": "8200225b1363ec0ef556e9f10b7e80c3ce37c311e0641054c88615329a052eb8"
+    },
+    {
+      "path": "src/http/index.ts",
+      "sha256": "fc204fbe89750b9d25ecaffe41003e6ac243a1a895b65e65856202ab825d2dbe"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "1b72e156546dff1aa4a094a8fb926ab543ccd7e320d3aacef790509f4df5f48b"
+    },
+    {
+      "path": "src/sdk.ts",
+      "sha256": "5744637a377a2b9ce60ceb22e61833681dbdf6a67bc45ef2eecee696edcb4549"
+    },
+    {
+      "path": "src/types/common.ts",
+      "sha256": "d2506be8c4bdbe8e7059393467e6e71d75ef1d8c018dbf997bb0ab2a77b6c7b6"
+    },
+    {
+      "path": "src/types/complete-notary-case-request.ts",
+      "sha256": "355c3f9bd1f744fa40efbc7ebe8cf316fac5eced363456103ab5301bd35dd404"
+    },
+    {
+      "path": "src/types/create-case-assignment-request.ts",
+      "sha256": "6ff0b42e848eddf18bbf508ed5805620a4af16bfcf2a7c7552d81f981626d66a"
+    },
+    {
+      "path": "src/types/create-notary-case-file-request.ts",
+      "sha256": "11eaf7448a2d4bc457aba5de3748ad60abd67b82c3749ec91f83811c3cf3652f"
+    },
+    {
+      "path": "src/types/create-notary-case-request.ts",
+      "sha256": "287300994572cd5e9f36794e21456352793f2a17a4cf897e33a947c64c4aca82"
+    },
+    {
+      "path": "src/types/create-notary-download-package-request.ts",
+      "sha256": "b710b8516a9134d57cd4ca35243bbb768d7d90ddcbe45f520a6d4974d35b5b52"
+    },
+    {
+      "path": "src/types/create-notary-party-request.ts",
+      "sha256": "52319688303f295010e93fff6262f55709526aeec6f1e88a3cbf3b9cab4f3be2"
+    },
+    {
+      "path": "src/types/create-party-signature-invite-request.ts",
+      "sha256": "25b031b4cf6c16be7a9941ae0666db7bd65ef32c483a127c99509f47c5979dc0"
+    },
+    {
+      "path": "src/types/create-party-signature-request.ts",
+      "sha256": "653fd3917bb8a50988c0f7378cd80b33d3167a47be6a4e4b2e73406867901216"
+    },
+    {
+      "path": "src/types/create-party-video-invite-request.ts",
+      "sha256": "320f8a17fab5dee90c5122b88596932704273c3210a95e87337331af309084f5"
+    },
+    {
+      "path": "src/types/field-error.ts",
+      "sha256": "44b8c95731a9dd8f7b30bb07a415b9541460964861f9ee806c31a4291953bf60"
+    },
+    {
+      "path": "src/types/index.ts",
+      "sha256": "7f2e636083d2b7897d34f487a3e0042e09628a345f5652ffd1c14132dd3aa19e"
+    },
+    {
+      "path": "src/types/notary-access.ts",
+      "sha256": "af9564c7d1e2fb784bde1b32c63db216d968100f7d93c3a5b9961e88e1433a0e"
+    },
+    {
+      "path": "src/types/notary-case-assignment.ts",
+      "sha256": "c8ac945a26265e2564a87876cfdf8ad9f04bdd9ca063d13b046284d9d611bf52"
+    },
+    {
+      "path": "src/types/notary-case-command-request.ts",
+      "sha256": "e7e367291fbff2b93a691bd4b7e07d84dc3581bbfe9d443e4982a734ca2c2b00"
+    },
+    {
+      "path": "src/types/notary-case-page.ts",
+      "sha256": "8c524be55479bfd1f41a16520637726f53aabb930d2470a8e08619f77c64d950"
+    },
+    {
+      "path": "src/types/notary-case-status.ts",
+      "sha256": "fc72d79bf7596d286cc50680c2a4af0d687116f9d7c58e44742bf25cb30e964a"
+    },
+    {
+      "path": "src/types/notary-case.ts",
+      "sha256": "3b2cad95d29749465be03d349a51396cd2bfb44c2826027be5b61cb909ef6a04"
+    },
+    {
+      "path": "src/types/notary-document-category.ts",
+      "sha256": "ad8b576a153def25e0fc54570e4b29d746c5b837bc3b75aa1453f3c59c2b7570"
+    },
+    {
+      "path": "src/types/notary-document-list.ts",
+      "sha256": "82576a9422ac7f938bf9041f00a6078ac3b7f050ef2b47ad2cca5e511533cca1"
+    },
+    {
+      "path": "src/types/notary-document.ts",
+      "sha256": "f83b54b35e2c1047198deb0e0ab3e895f83cb08ac1d7da7302d30efc55430e58"
+    },
+    {
+      "path": "src/types/notary-download-package.ts",
+      "sha256": "86ac0644a9437a7a26089537a1e3a41cc93f67f9556f17ac962acfc4ef9020d9"
+    },
+    {
+      "path": "src/types/notary-matter-page.ts",
+      "sha256": "6580b3e45c93eefc13115b0cfd2ee10685c098b97948da5f33edded21ed25fdd"
+    },
+    {
+      "path": "src/types/notary-matter.ts",
+      "sha256": "98429abfda3690da3cf441ecb61c65fae4c95d5ab94d5f17842a72074639a501"
+    },
+    {
+      "path": "src/types/notary-party-list.ts",
+      "sha256": "361f871be4ebdda506715904df570731fc616f2188648378cf53f071b9135d34"
+    },
+    {
+      "path": "src/types/notary-staff-member-page.ts",
+      "sha256": "a8b8aaceeb80fdfe842441d35aeae74d0f9b2bd721b5548991659f4fa7e02a5b"
+    },
+    {
+      "path": "src/types/notary-staff-member.ts",
+      "sha256": "3362af7ae22e38958ff9dfebd0846bd8ed26b4c6e54230822a3bb8921282bbf1"
+    },
+    {
+      "path": "src/types/page-info.ts",
+      "sha256": "8c708d699c5cab3536f6dc6b0057b41bce834ec1c7082befab0932db3e2d7e57"
+    },
+    {
+      "path": "src/types/party-signature-invite.ts",
+      "sha256": "0df3a1520b02cd0675c906e0a470dc9a0901351c5e7d46bbcf808f667fde8cb6"
+    },
+    {
+      "path": "src/types/party-video-invite.ts",
+      "sha256": "05d29302781e72bec2d026bf0f75319167908dbb550335f671dbd6a0472835b1"
+    },
+    {
+      "path": "src/types/party.ts",
+      "sha256": "e19e5a20d1a3483f12dd2c2851a4f40edc26a02aa14851c244a0728a8c067765"
+    },
+    {
+      "path": "src/types/problem-detail.ts",
+      "sha256": "b922ec892532116b01b2e163a80ea33b8854241aae34d602eb6752a998658748"
+    },
+    {
+      "path": "src/types/reject-notary-case-request.ts",
+      "sha256": "e6d74fc0c1228bc2f6a3ceb935844226db49dcef646877108ca9f851cb0c767c"
+    },
+    {
+      "path": "src/types/timeline-event-list.ts",
+      "sha256": "d89cc56754f307a59952079ef7320baf3fd018963c8e0024204d1867a5560a93"
+    },
+    {
+      "path": "src/types/timeline-event.ts",
+      "sha256": "4fb3934cabce6e73366f8db2a605e949ef8cad68d817d077af8a53e398c68c30"
+    },
+    {
+      "path": "src/types/update-notary-case-request.ts",
+      "sha256": "232e4cbeca72cbe2907224a9194fa5f436d827c39b21a93b8e20047c8cb2984c"
+    },
+    {
+      "path": "src/types/update-notary-party-request.ts",
+      "sha256": "895ec8618e22948aa60702027eb92e059e06fb109f5c47388cbbba46210e7ee7"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "7c8a6c2b00fb208ec28e1e6045194487d1b3e563d6c44cef4783fd4fe0e8ffad"
+    }
+  ],
+  "scaffoldFiles": [
+    "custom/build-runtime.mjs",
+    "custom/README.md"
+  ],
+  "customRoots": [
+    "custom/"
+  ]
+}

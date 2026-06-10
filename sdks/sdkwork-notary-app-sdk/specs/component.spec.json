@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-app-sdk",
+    "displayName": "SDKWork Notary App API SDK",
+    "version": "0.1.0",
+    "type": "sdk-family",
+    "root": "sdkwork-notary/sdks/sdkwork-notary-app-sdk",
+    "domain": "notary",
+    "capability": "notary",
+    "surface": "app",
+    "languages": ["typescript", "rust", "java", "python", "go"],
+    "generated": true,
+    "private": false,
+    "manifests": [".sdkwork-assembly.json", "sdk-manifest.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "API_SPEC.md",
+      "path": "../../../sdkwork-specs/API_SPEC.md",
+      "purpose": "HTTP/OpenAPI and generated SDK contract rules."
+    },
+    {
+      "file": "SDK_SPEC.md",
+      "path": "../../../sdkwork-specs/SDK_SPEC.md",
+      "purpose": "SDK generation, SDK dependencies, and SDK integration rules."
+    },
+    {
+      "file": "SDK_WORKSPACE_GENERATION_SPEC.md",
+      "path": "../../../sdkwork-specs/SDK_WORKSPACE_GENERATION_SPEC.md",
+      "purpose": "SDK workspace and authority naming rules."
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored composed facade boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "Canonical SDKWork names."
+    },
+    {
+      "file": "TYPESCRIPT_CODE_SPEC.md",
+      "path": "../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md",
+      "purpose": "TypeScript composed facade rules."
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "path": "../../../sdkwork-specs/TEST_SPEC.md",
+      "purpose": "Contract and SDK verification expectations."
+    }
+  ],
+  "contracts": {
+    "apiAuthority": {
+      "name": "sdkwork-notary.app",
+      "prefix": "/app/v3/api",
+      "authorityOpenApi": "../../generated/openapi/notary-app-api.openapi.json",
+      "owner": "sdkwork-notary"
+    },
+    "sdkDependencies": [
+      {
+        "workspace": "sdkwork-appbase-app-sdk",
+        "role": "appbase-app-capability",
+        "required": true,
+        "dependencyMode": "consumer-sdk",
+        "apiPrefix": "/app/v3/api",
+        "apiAuthority": "sdkwork-appbase.app",
+        "generatedTransportImportPolicy": "forbidden",
+        "packageByLanguage": {
+          "typescript": "@sdkwork/appbase-app-sdk",
+          "rust": "sdkwork-appbase-app-sdk",
+          "java": "com.sdkwork:sdkwork-appbase-app-sdk",
+          "python": "sdkwork-appbase-app-sdk",
+          "go": "github.com/sdkwork/sdkwork-appbase-app-sdk"
+        }
+      },
+      {
+        "workspace": "sdkwork-commerce-app-sdk",
+        "role": "commerce-app-capability",
+        "required": true,
+        "dependencyMode": "consumer-sdk",
+        "apiPrefix": "/app/v3/api",
+        "apiAuthority": "sdkwork-commerce.app",
+        "generatedTransportImportPolicy": "forbidden",
+        "packageByLanguage": {
+          "typescript": "@sdkwork/commerce-app-sdk",
+          "rust": "sdkwork-commerce-app-sdk",
+          "java": "com.sdkwork:sdkwork-commerce-app-sdk",
+          "python": "sdkwork-commerce-app-sdk",
+          "go": "github.com/sdkwork/sdkwork-commerce-app-sdk"
+        }
+      },
+      {
+        "workspace": "sdkwork-drive-app-sdk",
+        "role": "drive-app-capability",
+        "required": true,
+        "dependencyMode": "consumer-sdk",
+        "apiPrefix": "/app/v3/api",
+        "apiAuthority": "sdkwork-drive.app",
+        "generatedTransportImportPolicy": "forbidden",
+        "packageByLanguage": {
+          "typescript": "@sdkwork/drive-app-sdk",
+          "rust": "sdkwork-drive-app-sdk",
+          "java": "com.sdkwork:sdkwork-drive-app-sdk",
+          "python": "sdkwork-drive-app-sdk",
+          "go": "github.com/sdkwork/sdkwork-drive-app-sdk"
+        }
+      }
+    ],
+    "dependencyApiExports": [],
+    "publicExports": [
+      "./sdkwork-notary-app-sdk-typescript/src",
+      "./sdkwork-notary-app-sdk-typescript/composed"
+    ],
+    "runtimeEntrypoints": ["sdkwork-notary-app-sdk-typescript/composed/index.ts#createNotaryApi"],
+    "routeManifest": null,
+    "sdkClients": [],
+    "events": [],
+    "configKeys": []
+  },
+  "verification": {
+    "commands": ["pnpm test"]
+  }
+}

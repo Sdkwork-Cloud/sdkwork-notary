@@ -1,0 +1,16 @@
+{
+  "name": "sdkwork-notary-workspace",
+  "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "test": "pnpm.cmd test:contracts",
+    "test:contracts": "node --test sdks/test/*.test.mjs",
+    "test:rust": "cargo test --workspace --target-dir target-codex-test",
+    "sdk:generate:app": "node sdks/sdkwork-notary-app-sdk/bin/generate-sdk.mjs",
+    "sdk:generate:backend": "node sdks/sdkwork-notary-backend-sdk/bin/generate-sdk.mjs",
+    "sdk:generate": "pnpm sdk:generate:app && pnpm sdk:generate:backend",
+    "verify": "pnpm.cmd test:contracts && pnpm.cmd test:rust"
+  }
+}

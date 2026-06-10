@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "generator": "@sdkwork/sdk-generator",
+  "sdk": {
+    "name": "sdkwork-notary-backend-sdk",
+    "version": "0.1.0",
+    "language": "typescript",
+    "sdkType": "backend",
+    "protocol": "http",
+    "packageName": "sdkwork-notary-backend-sdk-generated-typescript"
+  },
+  "generatedFiles": [
+    {
+      "path": "bin/publish-core.mjs",
+      "sha256": "98ad0918a78bfbe22bf8f12fec709b0bed545b9e01edd40f5e4abf31a23378a5"
+    },
+    {
+      "path": "bin/publish.ps1",
+      "sha256": "78c6419400b988409d9393c2ecd85aa02dd6760f73edb3cc84cb28fefc51b41e"
+    },
+    {
+      "path": "bin/publish.sh",
+      "sha256": "899087c23e670b6951a12a13490fd557f761c96d78fabfb7e58a37e367db889f"
+    },
+    {
+      "path": "bin/sdk-gen.bat",
+      "sha256": "1fa0948b506e5deecf73be9371db39a042e48555d018292334fa0004a897fcbe"
+    },
+    {
+      "path": "bin/sdk-gen.sh",
+      "sha256": "215c7192b3f5891efebd79d6e2938a520ac6c9c6eb6b64979371c1ee7a58fd3d"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "sha256": "fb941a0806986a54fc192f98a98f6d9c282b8d350b2b19a3e71dda404e92d545"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "7840cc7d2b36ff364ac16c2fc5ec15b861bfe96854eecf81fb59b00edb8b1447"
+    },
+    {
+      "path": "package.json",
+      "sha256": "c63de1ee5f4e791555ec83587c79eb8f2a8c8757694243d76f62817b2f75bdd9"
+    },
+    {
+      "path": "README.md",
+      "sha256": "97744aba704dbf8a3653f78e2bd7b1c683acb90f9a9bd5088e825b42c6080911"
+    },
+    {
+      "path": "sdkwork-sdk.json",
+      "sha256": "13fc5cb2ec948cde8bf9d245915d32a6732235968dedf19a519e672bc52ae0d2"
+    },
+    {
+      "path": "src/api/base.ts",
+      "sha256": "02ad25e6bf331ff241ba387c2947ddf1900dd849038e08c2757416a3aa788a04"
+    },
+    {
+      "path": "src/api/index.ts",
+      "sha256": "2053579decc1e4978a2979ba4c09613c04f2cd57d9d5ad040ea2af8f5d8a2698"
+    },
+    {
+      "path": "src/api/notary.ts",
+      "sha256": "92d571b19f6fef2e35593a6727d845b83d0a952e1b90eb59457e126d532b6002"
+    },
+    {
+      "path": "src/api/paths.ts",
+      "sha256": "fb06a3db13e96bb5b349ddc1831aa6d350c17b09d05ea92a36438131140f666e"
+    },
+    {
+      "path": "src/auth/index.ts",
+      "sha256": "657fc63738bdcd61d83133120732a477dd127448cf2c51229b05d21f5e1f5c04"
+    },
+    {
+      "path": "src/http/client.ts",
+      "sha256": "e1026e5587705492dcf32bf25ebb2584d5645b11a1046db92e9d4808f4b3edc0"
+    },
+    {
+      "path": "src/http/index.ts",
+      "sha256": "fc204fbe89750b9d25ecaffe41003e6ac243a1a895b65e65856202ab825d2dbe"
+    },
+    {
+      "path": "src/index.ts",
+      "sha256": "3a4a3f9c5ce1c5bf55baf261e7b648091cbef7ba2c30ea402dd15f3f37820956"
+    },
+    {
+      "path": "src/sdk.ts",
+      "sha256": "f059f0233872fee465e03a61ec7dcd6a9c12a84f81c982e833f0d98ac66dbbce"
+    },
+    {
+      "path": "src/types/common.ts",
+      "sha256": "351d721c3c6f48f4453f92276856105120d72eb8d2fa9cd28de8e3854bf10f6c"
+    },
+    {
+      "path": "src/types/create-case-assignment-request.ts",
+      "sha256": "6ff0b42e848eddf18bbf508ed5805620a4af16bfcf2a7c7552d81f981626d66a"
+    },
+    {
+      "path": "src/types/create-notary-matter-request.ts",
+      "sha256": "e712ea2ad0a58eac299cfab99e0d5ae2140d189d52eba40b85a65eecd83068f7"
+    },
+    {
+      "path": "src/types/create-notary-organization-profile-request.ts",
+      "sha256": "06306250585f04764949b9ee6f00ddb188f42f0964ce4ee30bfc69dcbec0240f"
+    },
+    {
+      "path": "src/types/index.ts",
+      "sha256": "6531d69280f4a8b05aa5403ace589129385536ef20f66e27c70a9ec2e0130433"
+    },
+    {
+      "path": "src/types/notary-case-assignment.ts",
+      "sha256": "c8ac945a26265e2564a87876cfdf8ad9f04bdd9ca063d13b046284d9d611bf52"
+    },
+    {
+      "path": "src/types/notary-case-page.ts",
+      "sha256": "8c524be55479bfd1f41a16520637726f53aabb930d2470a8e08619f77c64d950"
+    },
+    {
+      "path": "src/types/notary-case-status.ts",
+      "sha256": "fc72d79bf7596d286cc50680c2a4af0d687116f9d7c58e44742bf25cb30e964a"
+    },
+    {
+      "path": "src/types/notary-case-summary.ts",
+      "sha256": "65bd2cad008b9f4e0250233f045719780c07f24d2ed06a8fcda6f28fe7a2ba63"
+    },
+    {
+      "path": "src/types/notary-case.ts",
+      "sha256": "5e472f7864584ddab4e733d75d8d8c15c1fb62559af73172187960eb95b64c5c"
+    },
+    {
+      "path": "src/types/notary-matter-page.ts",
+      "sha256": "6580b3e45c93eefc13115b0cfd2ee10685c098b97948da5f33edded21ed25fdd"
+    },
+    {
+      "path": "src/types/notary-matter.ts",
+      "sha256": "a81e075b73c56bcab3d5d43a16c389d50ce1e1bb94067ec4943fbced4502015e"
+    },
+    {
+      "path": "src/types/notary-organization-profile-page.ts",
+      "sha256": "d3f746556e254470ff1453f04e9241c302d3fd8ba1cae9c2a85554905f1d8093"
+    },
+    {
+      "path": "src/types/notary-organization-profile.ts",
+      "sha256": "db1fec20b0fdb07a05e6545476cde2c096e0557e2b76bfd806135317acce1300"
+    },
+    {
+      "path": "src/types/notary-staff-member-page.ts",
+      "sha256": "a8b8aaceeb80fdfe842441d35aeae74d0f9b2bd721b5548991659f4fa7e02a5b"
+    },
+    {
+      "path": "src/types/notary-staff-member.ts",
+      "sha256": "3362af7ae22e38958ff9dfebd0846bd8ed26b4c6e54230822a3bb8921282bbf1"
+    },
+    {
+      "path": "src/types/page-info.ts",
+      "sha256": "8c708d699c5cab3536f6dc6b0057b41bce834ec1c7082befab0932db3e2d7e57"
+    },
+    {
+      "path": "src/types/problem-detail.ts",
+      "sha256": "a24530000bd9db9c1bb9690e3b3dcda80a606a79f0f276a9c4a572bed43201d9"
+    },
+    {
+      "path": "src/types/update-notary-matter-request.ts",
+      "sha256": "60e9770686f4bb5604bde99eac72fd9e62d82ef74ca83a22582dccbfca2b4991"
+    },
+    {
+      "path": "src/types/update-notary-organization-profile-request.ts",
+      "sha256": "060b0ef6ba6ab64db7f7061244bbbee7c500bca1339d835beca39aef3c435970"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "7c8a6c2b00fb208ec28e1e6045194487d1b3e563d6c44cef4783fd4fe0e8ffad"
+    }
+  ],
+  "scaffoldFiles": [
+    "custom/build-runtime.mjs",
+    "custom/README.md"
+  ],
+  "customRoots": [
+    "custom/"
+  ]
+}

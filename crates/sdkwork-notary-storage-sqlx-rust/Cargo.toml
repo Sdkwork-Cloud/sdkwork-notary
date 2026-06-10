@@ -1,0 +1,18 @@
+[package]
+name = "sdkwork-notary-storage-sqlx-rust"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "sdkwork_notary_storage_sqlx"
+
+[dependencies]
+async-trait = "0.1.89"
+sdkwork-notary-core-rust = { path = "../sdkwork-notary-core-rust" }
+sdkwork-notary-runtime-rust = { path = "../sdkwork-notary-runtime-rust" }
+serde_json = "1.0"
+sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio", "sqlite"] }
+
+[dev-dependencies]
+tokio = { version = "1.52", features = ["macros", "rt-multi-thread"] }

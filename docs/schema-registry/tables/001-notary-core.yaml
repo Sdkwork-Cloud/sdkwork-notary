@@ -1,0 +1,263 @@
+module: notary
+owner: sdkwork-notary
+description: Minimal notary-owned persistence. Commerce, Drive, and Appbase remain their own systems of record.
+compliance_level: L3
+system_of_record: true
+write_owner: sdkwork-notary
+read_consumers:
+  - sdkwork-notary-app-api
+  - sdkwork-notary-backend-api
+change_channel: notary_case_event
+api_serialization:
+  id: string
+  decimal: string
+  time: iso8601_utc
+cross_domain_references:
+  - references: iam_organization.id
+  - references: iam_organization_membership.id
+  - references: iam_role.id
+  - references: iam_position.id
+  - references: iam_department.id
+  - references: commerce_order.id
+  - references: commerce_order_item.id
+  - references: commerce_product_sku.id
+  - references: dr_drive_space.id
+  - references: dr_drive_node.id
+security:
+  sensitivity: confidential
+  pii: true
+  encrypted_fields: [identity_no_encrypted, phone_encrypted, address_encrypted]
+  hashed_fields: [identity_no_hash]
+tables:
+  - table: notary_organization_profile
+    domain: notary
+    bounded_context: notary-case-management
+    profile: tenant_entity
+    compliance_level: L3
+    system_of_record: true
+    write_owner: sdkwork-notary
+    description: Organization-level enablement for notary business and its notary Drive space.
+    columns:
+      - name: id
+        type: varchar(64)
+        primary_key: true
+      - name: tenant_id
+        type: varchar(64)
+        required: true
+      - name: organization_id
+        type: varchar(64)
+        required: true
+        references: iam_organization.id
+      - name: status
+        type: varchar(32)
+        required: true
+        enum: [active, suspended, closed]
+      - name: drive_space_id
+        type: varchar(64)
+        required: true
+        references: dr_drive_space.id
+      - name: drive_space_type
+        type: constant
+        required: true
+        value: notary
+      - name: opened_by_membership_id
+        type: varchar(64)
+        references: iam_organization_membership.id
+      - name: opened_at
+        type: instant
+        required: true
+      - name: settings_json
+        type: json
+        required: true
+      - name: created_at
+        type: instant
+        required: true
+      - name: updated_at
+        type: instant
+        required: true
+      - name: version
+        type: int64
+        required: true
+    indexes:
+      - name: uk_notary_organization_profile_org
+        unique: true
+        columns: [tenant_id, organization_id]
+      - name: idx_notary_organization_profile_status
+        columns: [tenant_id, organization_id, status, updated_at]
+  - table: notary_case
+    domain: notary
+    bounded_context: notary-case-management
+    profile: tenant_entity
+    compliance_level: L3
+    system_of_record: true
+    write_owner: sdkwork-notary
+    description: Case dossier for one notary order item. Order and SKU facts are owned by Commerce.
+    columns:
+      - name: id
+        type: varchar(64)
+        primary_key: true
+      - name: tenant_id
+        type: varchar(64)
+        required: true
+      - name: organization_id
+        type: varchar(64)
+        required: true
+      - name: case_no
+        type: varchar(64)
+        required: true
+      - name: status
+        type: varchar(32)
+        required: true
+        enum: [pending_review, processing, completed, rejected, cancelled, create_failed]
+      - name: applicant_user_id
+        type: varchar(64)
+        required: true
+      - name: primary_notary_membership_id
+        type: varchar(64)
+        references: iam_organization_membership.id
+      - name: order_id
+        type: varchar(64)
+        required: true
+        references: commerce_order.id
+      - name: order_item_id
+        type: varchar(64)
+        required: true
+        references: commerce_order_item.id
+      - name: sku_id
+        type: varchar(64)
+        required: true
+        references: commerce_product_sku.id
+      - name: drive_space_id
+        type: varchar(64)
+        required: true
+        references: dr_drive_space.id
+      - name: drive_space_type
+        type: constant
+        value: notary
+      - name: drive_folder_node_id
+        type: varchar(64)
+        required: true
+        references: dr_drive_node.id
+      - name: fee_amount_snapshot
+        type: decimal
+        required: true
+      - name: created_at
+        type: instant
+        required: true
+      - name: updated_at
+        type: instant
+        required: true
+    indexes:
+      - name: idx_notary_case_org_status_updated
+        columns: [tenant_id, organization_id, status, updated_at]
+      - name: idx_notary_case_drive_folder
+        columns: [tenant_id, drive_space_type, drive_space_id, drive_folder_node_id]
+  - table: notary_party
+    domain: notary
+    bounded_context: notary-case-management
+    profile: tenant_entity
+    compliance_level: L3
+    system_of_record: true
+    write_owner: sdkwork-notary
+    description: Party facts for one notary case. Stores order_id and sku_id for efficient case/order/product filtering.
+    columns:
+      - name: id
+        type: varchar(64)
+        primary_key: true
+      - name: tenant_id
+        type: varchar(64)
+        required: true
+      - name: organization_id
+        type: varchar(64)
+        required: true
+      - name: case_id
+        type: varchar(64)
+        required: true
+        references: notary_case.id
+      - name: order_id
+        type: varchar(64)
+        required: true
+        references: commerce_order.id
+      - name: order_item_id
+        type: varchar(64)
+        required: true
+        references: commerce_order_item.id
+      - name: sku_id
+        type: varchar(64)
+        required: true
+        references: commerce_product_sku.id
+      - name: name
+        type: varchar(128)
+        required: true
+      - name: identity_no_hash
+        type: varchar(128)
+        required: true
+      - name: identity_no_encrypted
+        type: encrypted_text
+        required: true
+      - name: phone_encrypted
+        type: encrypted_text
+      - name: address_encrypted
+        type: encrypted_text
+      - name: signature_node_id
+        type: varchar(64)
+        references: dr_drive_node.id
+    indexes:
+      - name: idx_notary_party_case_sort
+        columns: [tenant_id, case_id, status, sort_order]
+      - name: idx_notary_party_identity_hash
+        columns: [tenant_id, identity_no_hash]
+  - table: notary_case_assignment
+    domain: notary
+    bounded_context: notary-case-management
+    profile: relation_entity
+    compliance_level: L2
+    system_of_record: true
+    write_owner: sdkwork-notary
+    description: Assignment facts for cases. Staff identity and departments remain in IAM membership, role, position, and department tables.
+    columns:
+      - name: id
+        type: varchar(64)
+        primary_key: true
+      - name: case_id
+        type: varchar(64)
+        references: notary_case.id
+      - name: organization_membership_id
+        type: varchar(64)
+        references: iam_organization_membership.id
+      - name: assignment_role
+        type: varchar(32)
+        enum: [primary_notary, assistant, reviewer, approver]
+    indexes:
+      - name: idx_notary_case_assignment_member
+        columns: [tenant_id, organization_id, organization_membership_id, status, assigned_at]
+  - table: notary_case_event
+    domain: notary
+    bounded_context: notary-case-management
+    profile: event_log
+    compliance_level: L3
+    system_of_record: true
+    write_owner: sdkwork-notary
+    description: Timeline and audit-facing business events for frontend display and process traceability.
+    columns:
+      - name: id
+        type: varchar(64)
+        primary_key: true
+      - name: case_id
+        type: varchar(64)
+        references: notary_case.id
+      - name: event_type
+        type: varchar(64)
+        required: true
+      - name: event_title
+        type: varchar(200)
+        required: true
+      - name: actor_membership_id
+        type: varchar(64)
+        references: iam_organization_membership.id
+      - name: occurred_at
+        type: instant
+        required: true
+    indexes:
+      - name: idx_notary_case_event_case_time
+        columns: [tenant_id, case_id, occurred_at]

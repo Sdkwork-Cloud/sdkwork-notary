@@ -1,0 +1,1 @@
+export type NotaryCaseStatus = 'PENDING_REVIEW' | 'PROCESSING' | 'COMPLETED' | 'REJECTED' | 'CANCELLED' | 'CREATE_FAILED';

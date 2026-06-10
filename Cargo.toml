@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/sdkwork-notary-core-rust",
+  "crates/sdkwork-notary-runtime-rust",
+  "crates/sdkwork-notary-storage-sqlx-rust",
+  "packages/native-rust/routes/app-api/sdkwork-routes-notary-app-api",
+  "packages/native-rust/routes/backend-api/sdkwork-routes-notary-backend-api",
+]
+
+[workspace.package]
+edition = "2021"
+license = "SEE LICENSE IN LICENSE"
+version = "0.1.0"

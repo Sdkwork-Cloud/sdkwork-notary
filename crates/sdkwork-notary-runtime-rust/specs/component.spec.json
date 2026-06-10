@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-runtime-rust",
+    "displayName": "SDKWork Notary Runtime Rust",
+    "version": "0.1.0",
+    "type": "rust-crate",
+    "root": "sdkwork-notary/crates/sdkwork-notary-runtime-rust",
+    "domain": "notary",
+    "capability": "notary-runtime",
+    "languages": ["rust"],
+    "generated": false,
+    "manifests": ["Cargo.toml"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component-local contract and discovery rules."
+    },
+    {
+      "file": "RUST_CODE_SPEC.md",
+      "path": "../../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "purpose": "Rust crate structure and verification rules."
+    },
+    {
+      "file": "WEB_BACKEND_SPEC.md",
+      "path": "../../../../sdkwork-specs/WEB_BACKEND_SPEC.md",
+      "purpose": "Service/use-case and backend layering boundaries."
+    },
+    {
+      "file": "SDK_SPEC.md",
+      "path": "../../../../sdkwork-specs/SDK_SPEC.md",
+      "purpose": "Dependency SDK and generated transport boundaries."
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "path": "../../../../sdkwork-specs/TEST_SPEC.md",
+      "purpose": "Runtime and contract verification expectations."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["sdkwork_notary_runtime::*"],
+    "runtimeEntrypoints": [
+      "notary_runtime_contract",
+      "ensure_notary_business_open",
+      "create_notary_case",
+      "list_case_files"
+    ],
+    "routeManifest": null,
+    "sdkClients": [
+      "sdkwork-appbase-app-sdk",
+      "sdkwork-commerce-app-sdk",
+      "sdkwork-drive-app-sdk"
+    ],
+    "events": ["notary.case.submitted"],
+    "configKeys": []
+  },
+  "verification": {
+    "commands": [
+      "cargo test -p sdkwork-notary-runtime-rust --target-dir target-codex-test"
+    ]
+  }
+}

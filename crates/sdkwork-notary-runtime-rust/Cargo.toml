@@ -1,0 +1,16 @@
+[package]
+name = "sdkwork-notary-runtime-rust"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "sdkwork_notary_runtime"
+
+[dependencies]
+async-trait = "0.1.89"
+serde_json = "1.0"
+sdkwork-notary-core-rust = { path = "../sdkwork-notary-core-rust" }
+
+[dev-dependencies]
+tokio = { version = "1.52", features = ["macros", "rt-multi-thread"] }

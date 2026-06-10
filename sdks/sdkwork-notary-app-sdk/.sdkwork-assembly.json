@@ -1,0 +1,72 @@
+{
+  "workspace": "sdkwork-notary-app-sdk",
+  "sdkFamily": "sdkwork-notary-app-sdk",
+  "title": "SDKWork Notary App API SDK",
+  "apiVersion": "0.1.0",
+  "openapiVersion": "3.1.2",
+  "authoritySpec": "../../generated/openapi/notary-app-api.openapi.json",
+  "generationInputSpec": "../../generated/openapi/notary-app-api.openapi.json",
+  "derivedSpecs": {
+    "default": "../../generated/openapi/notary-app-api.openapi.json"
+  },
+  "sdkOwner": "sdkwork-notary",
+  "apiAuthority": "sdkwork-notary.app",
+  "discoverySurface": {
+    "sdkTarget": "app",
+    "apiPrefix": "/app/v3/api",
+    "schemaUrl": "/app/v3/openapi.json",
+    "generatedProtocols": ["http-openapi"],
+    "manualTransports": []
+  },
+  "sdkDependencies": [
+    {
+      "workspace": "sdkwork-appbase-app-sdk",
+      "role": "appbase-app-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/app/v3/api",
+      "apiAuthority": "sdkwork-appbase.app",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/appbase-app-sdk",
+        "rust": "sdkwork-appbase-app-sdk",
+        "java": "com.sdkwork:sdkwork-appbase-app-sdk",
+        "python": "sdkwork-appbase-app-sdk",
+        "go": "github.com/sdkwork/sdkwork-appbase-app-sdk"
+      }
+    },
+    {
+      "workspace": "sdkwork-commerce-app-sdk",
+      "role": "commerce-app-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/app/v3/api",
+      "apiAuthority": "sdkwork-commerce.app",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/commerce-app-sdk",
+        "rust": "sdkwork-commerce-app-sdk",
+        "java": "com.sdkwork:sdkwork-commerce-app-sdk",
+        "python": "sdkwork-commerce-app-sdk",
+        "go": "github.com/sdkwork/sdkwork-commerce-app-sdk"
+      }
+    },
+    {
+      "workspace": "sdkwork-drive-app-sdk",
+      "role": "drive-app-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/app/v3/api",
+      "apiAuthority": "sdkwork-drive.app",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/drive-app-sdk",
+        "rust": "sdkwork-drive-app-sdk",
+        "java": "com.sdkwork:sdkwork-drive-app-sdk",
+        "python": "sdkwork-drive-app-sdk",
+        "go": "github.com/sdkwork/sdkwork-drive-app-sdk"
+      }
+    }
+  ],
+  "dependencyApiExports": []
+}

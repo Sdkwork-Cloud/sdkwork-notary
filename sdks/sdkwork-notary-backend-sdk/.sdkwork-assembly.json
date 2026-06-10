@@ -1,0 +1,72 @@
+{
+  "workspace": "sdkwork-notary-backend-sdk",
+  "sdkFamily": "sdkwork-notary-backend-sdk",
+  "title": "SDKWork Notary Backend API SDK",
+  "apiVersion": "0.1.0",
+  "openapiVersion": "3.1.2",
+  "authoritySpec": "../../generated/openapi/notary-backend-api.openapi.json",
+  "generationInputSpec": "../../generated/openapi/notary-backend-api.openapi.json",
+  "derivedSpecs": {
+    "default": "../../generated/openapi/notary-backend-api.openapi.json"
+  },
+  "sdkOwner": "sdkwork-notary",
+  "apiAuthority": "sdkwork-notary.backend",
+  "discoverySurface": {
+    "sdkTarget": "backend",
+    "apiPrefix": "/backend/v3/api",
+    "schemaUrl": "/backend/v3/openapi.json",
+    "generatedProtocols": ["http-openapi"],
+    "manualTransports": []
+  },
+  "sdkDependencies": [
+    {
+      "workspace": "sdkwork-appbase-backend-sdk",
+      "role": "appbase-backend-management-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/backend/v3/api",
+      "apiAuthority": "sdkwork-appbase.backend",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/appbase-backend-sdk",
+        "rust": "sdkwork-appbase-backend-sdk",
+        "java": "com.sdkwork:sdkwork-appbase-backend-sdk",
+        "python": "sdkwork-appbase-backend-sdk",
+        "go": "github.com/sdkwork/sdkwork-appbase-backend-sdk"
+      }
+    },
+    {
+      "workspace": "sdkwork-commerce-backend-sdk",
+      "role": "commerce-backend-management-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/backend/v3/api",
+      "apiAuthority": "sdkwork-commerce.backend",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/commerce-backend-sdk",
+        "rust": "sdkwork-commerce-backend-sdk",
+        "java": "com.sdkwork:sdkwork-commerce-backend-sdk",
+        "python": "sdkwork-commerce-backend-sdk",
+        "go": "github.com/sdkwork/sdkwork-commerce-backend-sdk"
+      }
+    },
+    {
+      "workspace": "sdkwork-drive-backend-sdk",
+      "role": "drive-backend-management-capability",
+      "required": true,
+      "dependencyMode": "consumer-sdk",
+      "apiPrefix": "/backend/v3/api",
+      "apiAuthority": "sdkwork-drive.backend",
+      "generatedTransportImportPolicy": "forbidden",
+      "packageByLanguage": {
+        "typescript": "@sdkwork/drive-backend-sdk",
+        "rust": "sdkwork-drive-backend-sdk",
+        "java": "com.sdkwork:sdkwork-drive-backend-sdk",
+        "python": "sdkwork-drive-backend-sdk",
+        "go": "github.com/sdkwork/sdkwork-drive-backend-sdk"
+      }
+    }
+  ],
+  "dependencyApiExports": []
+}

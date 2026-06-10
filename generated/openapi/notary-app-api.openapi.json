@@ -1,0 +1,3162 @@
+{
+  "openapi": "3.1.2",
+  "info": {
+    "title": "SDKWork Notary App API",
+    "version": "0.1.0",
+    "description": "User-facing notary API. Commerce owns orders and SKU-backed matters, Drive owns files and folders, and Appbase owns organization members."
+  },
+  "servers": [
+    {
+      "url": "/app/v3/api"
+    }
+  ],
+  "tags": [
+    {
+      "name": "notary",
+      "description": "Notary app workflows"
+    }
+  ],
+  "x-sdkwork-owner": "sdkwork-notary",
+  "x-sdkwork-api-authority": "sdkwork-notary.app",
+  "paths": {
+    "/app/v3/api/notary/access": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.access.retrieve",
+        "summary": "Retrieve current notary business access",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryAccess",
+        "x-sdkwork-permission": "notary.access.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.access.read",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryAccessResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/matters": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.matters.list",
+        "summary": "List active SKU-backed notary matters",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryMatter",
+        "x-sdkwork-permission": "notary.matters.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.matters.list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryMatterPageResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.list",
+        "summary": "List notary cases",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCase",
+        "x-sdkwork-permission": "notary.cases.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Query"
+          },
+          {
+            "$ref": "#/components/parameters/CaseStatus"
+          },
+          {
+            "$ref": "#/components/parameters/SkuId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryCasePageResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.create",
+        "summary": "Create a notary case, Commerce order item, and Drive notary folder",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCase",
+        "x-sdkwork-permission": "notary.cases.create",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.create",
+        "x-sdkwork-idempotent": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotaryCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/NotaryCaseResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.retrieve",
+        "summary": "Retrieve a notary case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCase",
+        "x-sdkwork-permission": "notary.cases.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.retrieve",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryCaseResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.update",
+        "summary": "Update mutable notary case fields",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCase",
+        "x-sdkwork-permission": "notary.cases.update",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.update",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotaryCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryCaseResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/acceptances": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.acceptances.create",
+        "summary": "Accept a pending notary case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCaseAcceptance",
+        "x-sdkwork-permission": "notary.cases.accept",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.accept",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CaseCommandRequestBody"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryCaseResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/rejections": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.rejections.create",
+        "summary": "Reject a notary case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCaseRejection",
+        "x-sdkwork-permission": "notary.cases.reject",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.reject",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectNotaryCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryCaseResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/completions": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.completions.create",
+        "summary": "Complete a notary case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCaseCompletion",
+        "x-sdkwork-permission": "notary.cases.complete",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.complete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteNotaryCaseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryCaseResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/parties": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.parties.list",
+        "summary": "List parties for a case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryParty",
+        "x-sdkwork-permission": "notary.parties.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.parties.list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryPartyListResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.parties.create",
+        "summary": "Create a party for a case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryParty",
+        "x-sdkwork-permission": "notary.parties.create",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.parties.create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotaryPartyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/NotaryPartyResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/parties/{partyId}": {
+      "patch": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.parties.update",
+        "summary": "Update party information",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryParty",
+        "x-sdkwork-permission": "notary.parties.update",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.parties.update",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          },
+          {
+            "$ref": "#/components/parameters/PartyId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotaryPartyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryPartyResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.parties.delete",
+        "summary": "Remove a party from a case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryParty",
+        "x-sdkwork-permission": "notary.parties.delete",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.parties.delete",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          },
+          {
+            "$ref": "#/components/parameters/PartyId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Party removed"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/signatures": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.parties.signatures.create",
+        "summary": "Attach a Drive-backed signature node to a party",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryPartySignature",
+        "x-sdkwork-permission": "notary.parties.signatures.create",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.parties.signature.create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          },
+          {
+            "$ref": "#/components/parameters/PartyId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePartySignatureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/NotaryPartyResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/video_invites": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.parties.videoInvites.create",
+        "summary": "Create a video verification invite for a notary party",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryPartyVideoInvite",
+        "x-sdkwork-permission": "notary.parties.video_invites.create",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.parties.video_invite.create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          },
+          {
+            "$ref": "#/components/parameters/PartyId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePartyVideoInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/PartyVideoInviteResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/signature_invites": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.parties.signatureInvites.create",
+        "summary": "Create a mobile signature invite for a notary party",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryPartySignatureInvite",
+        "x-sdkwork-permission": "notary.parties.signature_invites.create",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.parties.signature_invite.create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          },
+          {
+            "$ref": "#/components/parameters/PartyId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePartySignatureInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/PartySignatureInviteResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/files": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.files.list",
+        "summary": "List Drive-backed files in a notary case folder",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCaseFile",
+        "x-sdkwork-permission": "notary.files.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.files.list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          },
+          {
+            "$ref": "#/components/parameters/FileCategory"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryDocumentListResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.files.create",
+        "summary": "Attach a Drive node to a notary case through Drive node properties",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCaseFile",
+        "x-sdkwork-permission": "notary.files.create",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.files.create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotaryCaseFileRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/NotaryDocumentResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/download_packages": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.downloadPackages.create",
+        "summary": "Create a Drive-backed download package for case files",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryDownloadPackage",
+        "x-sdkwork-permission": "notary.files.download",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.files.download_package.create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotaryDownloadPackageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/NotaryDownloadPackageResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/events": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.events.list",
+        "summary": "List case timeline events",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCaseEvent",
+        "x-sdkwork-permission": "notary.events.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.events.list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/TimelineEventListResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/staff": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.staff.list",
+        "summary": "List IAM organization members enabled for notary business",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryStaff",
+        "x-sdkwork-permission": "notary.staff.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.staff.list",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageSize"
+          },
+          {
+            "$ref": "#/components/parameters/Cursor"
+          },
+          {
+            "$ref": "#/components/parameters/Query"
+          },
+          {
+            "$ref": "#/components/parameters/StaffRole"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryStaffMemberPageResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/cases/{caseId}/assignments": {
+      "post": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.cases.assignments.create",
+        "summary": "Assign an IAM organization member to a notary case",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryCaseAssignment",
+        "x-sdkwork-permission": "notary.cases.assignments.create",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.cases.assignments.create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/CaseId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCaseAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/NotaryCaseAssignmentResponse"
+          },
+          "400": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "AuthToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "SDKWork auth token carried as Authorization: Bearer <auth_token>."
+      },
+      "AccessToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Access-Token",
+        "description": "SDKWork access isolation token."
+      }
+    },
+    "parameters": {
+      "IdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "CaseId": {
+        "name": "caseId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PartyId": {
+        "name": "partyId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PageSize": {
+        "name": "page_size",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 20
+        }
+      },
+      "Cursor": {
+        "name": "cursor",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "Query": {
+        "name": "q",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "maxLength": 100
+        }
+      },
+      "CaseStatus": {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/NotaryCaseStatus"
+        }
+      },
+      "SkuId": {
+        "name": "sku_id",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "FileCategory": {
+        "name": "category",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/NotaryDocumentCategory"
+        }
+      },
+      "StaffRole": {
+        "name": "staff_role",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "notary",
+            "assistant",
+            "reviewer",
+            "approver"
+          ]
+        }
+      }
+    },
+    "requestBodies": {
+      "CaseCommandRequestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryCaseCommandRequest"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "ProblemResponse": {
+        "description": "Problem detail",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
+            }
+          }
+        }
+      },
+      "NotaryAccessResponse": {
+        "description": "Current notary access",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryAccess"
+            }
+          }
+        }
+      },
+      "NotaryMatterPageResponse": {
+        "description": "Notary matter page",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryMatterPage"
+            }
+          }
+        }
+      },
+      "NotaryCasePageResponse": {
+        "description": "Notary case page",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryCasePage"
+            }
+          }
+        }
+      },
+      "NotaryCaseResponse": {
+        "description": "Notary case",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryCase"
+            }
+          }
+        }
+      },
+      "NotaryPartyListResponse": {
+        "description": "Party list",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryPartyList"
+            }
+          }
+        }
+      },
+      "NotaryPartyResponse": {
+        "description": "Party",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Party"
+            }
+          }
+        }
+      },
+      "PartyVideoInviteResponse": {
+        "description": "Party video verification invite",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PartyVideoInvite"
+            }
+          }
+        }
+      },
+      "PartySignatureInviteResponse": {
+        "description": "Party mobile signature invite",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/PartySignatureInvite"
+            }
+          }
+        }
+      },
+      "NotaryDocumentListResponse": {
+        "description": "Document list",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryDocumentList"
+            }
+          }
+        }
+      },
+      "NotaryDocumentResponse": {
+        "description": "Document",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryDocument"
+            }
+          }
+        }
+      },
+      "NotaryDownloadPackageResponse": {
+        "description": "Download package",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryDownloadPackage"
+            }
+          }
+        }
+      },
+      "TimelineEventListResponse": {
+        "description": "Timeline events",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/TimelineEventList"
+            }
+          }
+        }
+      },
+      "NotaryCaseAssignmentResponse": {
+        "description": "Case assignment",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryCaseAssignment"
+            }
+          }
+        }
+      },
+      "NotaryStaffMemberPageResponse": {
+        "description": "Staff member page",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryStaffMemberPage"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ProblemDetail": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          }
+        }
+      },
+      "FieldError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "message"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "PageInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "hasMore"
+        ],
+        "properties": {
+          "nextCursor": {
+            "type": "string"
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        }
+      },
+      "NotaryAccess": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "visible",
+          "organizationVerified",
+          "notaryBusinessEnabled",
+          "memberId",
+          "permissions"
+        ],
+        "properties": {
+          "visible": {
+            "type": "boolean"
+          },
+          "organizationVerified": {
+            "type": "boolean"
+          },
+          "notaryBusinessEnabled": {
+            "type": "boolean"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "organizationId": {
+            "type": "string"
+          },
+          "memberId": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "NotaryMatter": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "skuId",
+          "spuId",
+          "skuNo",
+          "title",
+          "priceAmount",
+          "currencyCode",
+          "status"
+        ],
+        "properties": {
+          "skuId": {
+            "type": "string"
+          },
+          "spuId": {
+            "type": "string"
+          },
+          "skuNo": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "priceAmount": {
+            "type": "string",
+            "x-sdkwork-decimal-string": true
+          },
+          "currencyCode": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive",
+              "draft"
+            ]
+          },
+          "spec": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "NotaryMatterPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotaryMatter"
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      },
+      "NotaryCaseStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING_REVIEW",
+          "PROCESSING",
+          "COMPLETED",
+          "REJECTED",
+          "CANCELLED",
+          "CREATE_FAILED"
+        ]
+      },
+      "Party": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "role",
+          "identityId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "partyType": {
+            "type": "string",
+            "enum": [
+              "natural_person",
+              "legal_person",
+              "organization"
+            ]
+          },
+          "identityType": {
+            "type": "string"
+          },
+          "identityId": {
+            "type": "string",
+            "description": "Masked identity number for display."
+          },
+          "identityNoLast4": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "identityValidDateStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "identityValidDateEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "signatureUrl": {
+            "type": "string"
+          },
+          "signatureNodeId": {
+            "type": "string"
+          },
+          "verificationStatus": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "verified",
+              "failed",
+              "expired"
+            ]
+          }
+        }
+      },
+      "NotaryDocumentCategory": {
+        "type": "string",
+        "enum": [
+          "identity",
+          "evidence",
+          "notary"
+        ]
+      },
+      "NotaryDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "size",
+          "status",
+          "category"
+        ],
+        "properties": {
+          "nodeId": {
+            "type": "string"
+          },
+          "driveSpaceId": {
+            "type": "string"
+          },
+          "driveSpaceType": {
+            "type": "string",
+            "enum": [
+              "notary"
+            ]
+          },
+          "parentNodeId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "pending",
+              "error"
+            ]
+          },
+          "category": {
+            "$ref": "#/components/schemas/NotaryDocumentCategory"
+          },
+          "materialCode": {
+            "type": "string"
+          },
+          "partyId": {
+            "type": "string"
+          },
+          "mediaResource": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "TimelineEvent": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "time",
+          "event",
+          "actor"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "event": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "NotaryCase": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "caseNo",
+          "createTime",
+          "applicant",
+          "title",
+          "notary",
+          "remarks",
+          "type",
+          "status",
+          "fee",
+          "orderId",
+          "orderItemId",
+          "skuId",
+          "driveSpaceId",
+          "driveSpaceType",
+          "driveFolderNodeId",
+          "parties",
+          "documents",
+          "timeline"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "processTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "applicant": {
+            "type": "string"
+          },
+          "applicantUserId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "notary": {
+            "type": "string"
+          },
+          "primaryNotaryMembershipId": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/NotaryCaseStatus"
+          },
+          "fee": {
+            "type": "string",
+            "x-sdkwork-decimal-string": true
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "orderId": {
+            "type": "string"
+          },
+          "orderItemId": {
+            "type": "string"
+          },
+          "skuId": {
+            "type": "string"
+          },
+          "driveSpaceId": {
+            "type": "string"
+          },
+          "driveSpaceType": {
+            "type": "string",
+            "enum": [
+              "notary"
+            ]
+          },
+          "driveFolderNodeId": {
+            "type": "string"
+          },
+          "parties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Party"
+            }
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotaryDocument"
+            }
+          },
+          "timeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineEvent"
+            }
+          },
+          "version": {
+            "type": "string",
+            "format": "int64",
+            "x-sdkwork-int64-string": true
+          }
+        }
+      },
+      "NotaryCasePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotaryCase"
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      },
+      "CreateNotaryCaseRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "skuId",
+          "title",
+          "applicantName"
+        ],
+        "properties": {
+          "skuId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "remarks": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "applicantName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "primaryNotaryMembershipId": {
+            "type": "string",
+            "description": "Organization member id selected as the primary notary for this case."
+          },
+          "parties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateNotaryPartyRequest"
+            }
+          },
+          "initialDriveNodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "driveFolderName": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      },
+      "UpdateNotaryCaseRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "remarks": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "version": {
+            "type": "string",
+            "format": "int64",
+            "x-sdkwork-int64-string": true
+          }
+        }
+      },
+      "NotaryCaseCommandRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "remarks": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "version": {
+            "type": "string",
+            "format": "int64",
+            "x-sdkwork-int64-string": true
+          }
+        }
+      },
+      "RejectNotaryCaseRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "version": {
+            "type": "string",
+            "format": "int64",
+            "x-sdkwork-int64-string": true
+          }
+        }
+      },
+      "CompleteNotaryCaseRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "chainHash": {
+            "type": "string"
+          },
+          "certificateNodeId": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "version": {
+            "type": "string",
+            "format": "int64",
+            "x-sdkwork-int64-string": true
+          }
+        }
+      },
+      "CreateNotaryPartyRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "role",
+          "identityNo"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "partyType": {
+            "type": "string",
+            "enum": [
+              "natural_person",
+              "legal_person",
+              "organization"
+            ],
+            "default": "natural_person"
+          },
+          "identityType": {
+            "type": "string",
+            "default": "resident_identity_card"
+          },
+          "identityNo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "gender": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "remarks": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "identityValidDateStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "identityValidDateEnd": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "UpdateNotaryPartyRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "role": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "remarks": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "identityValidDateStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "identityValidDateEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "version": {
+            "type": "string",
+            "format": "int64",
+            "x-sdkwork-int64-string": true
+          }
+        }
+      },
+      "CreatePartySignatureRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "signatureNodeId"
+        ],
+        "properties": {
+          "signatureNodeId": {
+            "type": "string"
+          },
+          "signatureUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "CreatePartyVideoInviteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "identity_verification",
+              "material_confirmation",
+              "remote_inquiry"
+            ],
+            "default": "identity_verification"
+          },
+          "expiresInSeconds": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 3600,
+            "default": 600
+          }
+        }
+      },
+      "CreatePartySignatureInviteRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "remote_signature",
+              "onsite_signature_confirmation",
+              "material_signature"
+            ],
+            "default": "remote_signature"
+          },
+          "expiresInSeconds": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 3600,
+            "default": 600
+          }
+        }
+      },
+      "CreateNotaryCaseFileRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "driveNodeId",
+          "category"
+        ],
+        "properties": {
+          "driveNodeId": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/NotaryDocumentCategory"
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "pending",
+              "error"
+            ],
+            "default": "pending"
+          },
+          "materialCode": {
+            "type": "string"
+          },
+          "partyId": {
+            "type": "string"
+          },
+          "remarks": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateNotaryDownloadPackageRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "nodeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "packageName": {
+            "type": "string",
+            "maxLength": 255
+          }
+        }
+      },
+      "NotaryDownloadPackage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packageId",
+          "driveSpaceId",
+          "driveSpaceType",
+          "caseId",
+          "status"
+        ],
+        "properties": {
+          "packageId": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string"
+          },
+          "driveSpaceId": {
+            "type": "string"
+          },
+          "driveSpaceType": {
+            "type": "string",
+            "enum": [
+              "notary"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "preparing",
+              "ready",
+              "failed"
+            ]
+          },
+          "downloadUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PartyVideoInvite": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "inviteId",
+          "caseId",
+          "partyId",
+          "conversationId",
+          "inviteUrl",
+          "expiresAt",
+          "driveSpaceId",
+          "driveSpaceType",
+          "driveFolderNodeId"
+        ],
+        "properties": {
+          "inviteId": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string"
+          },
+          "partyId": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "identity_verification",
+              "material_confirmation",
+              "remote_inquiry"
+            ]
+          },
+          "conversationId": {
+            "type": "string"
+          },
+          "inviteUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "driveSpaceId": {
+            "type": "string"
+          },
+          "driveSpaceType": {
+            "type": "string",
+            "enum": [
+              "notary"
+            ]
+          },
+          "driveFolderNodeId": {
+            "type": "string"
+          }
+        }
+      },
+      "PartySignatureInvite": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "inviteId",
+          "caseId",
+          "partyId",
+          "inviteUrl",
+          "signingUrl",
+          "expiresAt",
+          "driveSpaceId",
+          "driveSpaceType",
+          "driveFolderNodeId"
+        ],
+        "properties": {
+          "inviteId": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string"
+          },
+          "partyId": {
+            "type": "string"
+          },
+          "partyName": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "remote_signature",
+              "onsite_signature_confirmation",
+              "material_signature"
+            ]
+          },
+          "inviteUrl": {
+            "type": "string"
+          },
+          "signingUrl": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "driveSpaceId": {
+            "type": "string"
+          },
+          "driveSpaceType": {
+            "type": "string",
+            "enum": [
+              "notary"
+            ]
+          },
+          "driveFolderNodeId": {
+            "type": "string"
+          }
+        }
+      },
+      "NotaryPartyList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Party"
+            }
+          }
+        }
+      },
+      "NotaryDocumentList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotaryDocument"
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      },
+      "TimelineEventList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TimelineEvent"
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      },
+      "CreateCaseAssignmentRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "organizationMembershipId",
+          "assignmentRole"
+        ],
+        "properties": {
+          "organizationMembershipId": {
+            "type": "string"
+          },
+          "assignmentRole": {
+            "type": "string",
+            "enum": [
+              "primary_notary",
+              "assistant",
+              "reviewer",
+              "approver"
+            ]
+          }
+        }
+      },
+      "NotaryCaseAssignment": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "caseId",
+          "organizationMembershipId",
+          "userId",
+          "assignmentRole",
+          "status",
+          "assignedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "caseId": {
+            "type": "string"
+          },
+          "organizationMembershipId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "assignmentRole": {
+            "type": "string",
+            "enum": [
+              "primary_notary",
+              "assistant",
+              "reviewer",
+              "approver"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "released"
+            ]
+          },
+          "assignedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NotaryStaffMember": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "membershipId",
+          "userId",
+          "displayName",
+          "status",
+          "roles",
+          "positions",
+          "departments"
+        ],
+        "properties": {
+          "membershipId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "employeeNo": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "positions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notaryStaffRole": {
+            "type": "string",
+            "enum": [
+              "notary",
+              "assistant",
+              "reviewer",
+              "approver"
+            ]
+          }
+        }
+      },
+      "NotaryStaffMemberPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotaryStaffMember"
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      }
+    }
+  }
+}

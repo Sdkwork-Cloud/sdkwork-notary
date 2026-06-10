@@ -1,0 +1,10 @@
+[package]
+name = "sdkwork-notary-core-rust"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "sdkwork_notary_core"
+
+[dependencies]
