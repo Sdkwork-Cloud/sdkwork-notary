@@ -193,7 +193,7 @@ test("real notary UI drives documents, signatures, video, and staff selection th
   assert(signatureQr.includes("<QRCode value={signatureUrl}"));
 });
 
-test("real chat shell gates notary navigation with notary access SDK state", () => {
+test("real chat shell exposes notary entries while notary workflows stay SDK-backed", () => {
   const accessService = readText(
     chatPcRoot,
     "packages/sdkwork-clawchat-pc-chat/src/services/NotaryAccessService.ts",
@@ -204,26 +204,58 @@ test("real chat shell gates notary navigation with notary access SDK state", () 
     "notaryBusinessEnabled === true",
     "organizationVerified === true",
     "canUseNotary",
-    "canShowNotaryMenu",
     "subscribe",
   ]) {
     assert(accessService.includes(token), `NotaryAccessService.ts must include ${token}`);
   }
+  assert(!accessService.includes("canShowNotaryMenu"));
+  assert(!/\bvisible:\s*boolean/u.test(accessService));
+  assert(!/\bvisible:\s*false/u.test(accessService));
 
   const sidebar = readText(chatPcRoot, "packages/sdkwork-clawchat-pc-chat/src/components/Sidebar.tsx");
-  assert(sidebar.includes("notaryAccessService"));
-  assert(sidebar.includes("filterNotaryModules"));
-  assert(sidebar.includes('modId === "notary" && canShowNotaryMenu'));
+  assert(sidebar.includes("ALWAYS_CONFIGURABLE_MODULES.has(m)"));
+  assert(sidebar.includes('modId === "notary"'));
+  assert(!sidebar.includes("notaryAccessService.canShowNotaryMenu"));
+  assert(!sidebar.includes("filterNotaryModules"));
+  assert(!sidebar.includes('modId === "notary" && canShowNotaryMenu'));
 
   const settings = readText(
     chatPcRoot,
     "packages/sdkwork-clawchat-pc-chat/src/components/SettingsModal.tsx",
   );
-  assert(settings.includes("notaryAccessService.canShowNotaryMenu"));
-  assert(settings.includes("filterNotaryModules"));
+  assert(settings.includes("ALWAYS_CONFIGURABLE_MODULES"));
+  assert(settings.includes("ALWAYS_CONFIGURABLE_MODULES.has(mod.id)"));
+  assert(!settings.includes("notaryAccessService.canShowNotaryMenu"));
+  assert(!settings.includes("filterNotaryModules"));
+
+  const settingsService = readText(
+    chatPcRoot,
+    "packages/sdkwork-clawchat-pc-chat/src/services/SettingsService.ts",
+  );
+  assert(settingsService.includes('export const ALWAYS_CONFIGURABLE_MODULES = new Set(["notary"]);'));
+
+  const workspaceService = readText(
+    chatPcRoot,
+    "packages/sdkwork-clawchat-pc-workspace/src/services/WorkspaceService.ts",
+  );
+  assert(workspaceService.includes("id: 'notary'"));
+  assert(workspaceService.includes("nameKey: 'apps.notary'"));
+  assert(workspaceService.includes("iconName: 'ShieldCheck'"));
+
+  const workspaceView = readText(chatPcRoot, "packages/sdkwork-clawchat-pc-workspace/src/index.tsx");
+  assert(workspaceView.includes("onAppSelect(app.id)"));
+  assert(!workspaceService.includes("notaryAccessService"));
+  assert(!workspaceView.includes("notaryAccessService"));
+  assert(!workspaceService.includes("canUseNotary"));
+  assert(!workspaceView.includes("canUseNotary"));
+  assert(!workspaceService.includes("canShowNotaryMenu"));
+  assert(!workspaceView.includes("canShowNotaryMenu"));
 
   const chatLayout = readText(chatPcRoot, "packages/sdkwork-clawchat-pc-chat/src/pages/ChatLayout.tsx");
-  assert(chatLayout.includes("notaryAccessService"));
   assert(chatLayout.includes("handleTabChange"));
-  assert(chatLayout.includes("notaryAccess?.canUseNotary"));
+  assert(chatLayout.includes('appId === "notary") setActiveTab("notary")'));
+  assert(chatLayout.includes('case "notary":'));
+  assert(chatLayout.includes("return <NotaryView />;"));
+  assert(!chatLayout.includes("notaryAccessService.canUseNotary"));
+  assert(!chatLayout.includes("notaryAccess?.canUseNotary"));
 });
