@@ -41,7 +41,7 @@
       "required": true,
       "dependencyMode": "consumer-sdk",
       "apiPrefix": "/app/v3/api",
-      "apiAuthority": "sdkwork-appbase.app",
+      "apiAuthority": "sdkwork-appbase-app-api",
       "generatedTransportImportPolicy": "forbidden",
       "packageByLanguage": {
         "typescript": "@sdkwork/appbase-app-sdk",
@@ -89,6 +89,6 @@
   "baseUrl": "http://127.0.0.1:18080",
   "standardProfile": "sdkwork-v3",
   "fixedSdkVersion": "0.1.0",
-  "ownerOnlyOperationCount": 22,
+  "ownerOnlyOperationCount": 24,
   "managedBy": "sdkwork-notary-contract"
 }

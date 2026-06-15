@@ -4,8 +4,8 @@ members = [
   "crates/sdkwork-notary-core-rust",
   "crates/sdkwork-notary-runtime-rust",
   "crates/sdkwork-notary-storage-sqlx-rust",
-  "packages/native-rust/routes/app-api/sdkwork-routes-notary-app-api",
-  "packages/native-rust/routes/backend-api/sdkwork-routes-notary-backend-api",
+  "crates/sdkwork-router-notary-app-api",
+  "crates/sdkwork-router-notary-backend-api",
 ]
 
 [workspace.package]

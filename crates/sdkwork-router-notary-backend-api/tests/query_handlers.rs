@@ -5,7 +5,7 @@ use std::{
 
 use async_trait::async_trait;
 use axum::extract::{Query, State};
-use sdkwork_routes_notary_backend_api::{
+use sdkwork_router_notary_backend_api::{
     handlers,
     service_port::{NotaryBackendApiState, NotaryRouteError},
     NotaryBackendApiServicePort, NotaryRequestContext,

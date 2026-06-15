@@ -9,36 +9,44 @@ use sdkwork_notary_runtime::{
     NotaryCaseEventRecord, NotaryCaseListQuery, NotaryCaseRepositoryPort, NotaryCaseUpdateCommand,
     NotaryOrganizationProfile, NotaryPartyRecord,
 };
-use sdkwork_routes_notary_backend_api::{
-    NotaryBackendApiServicePort, NotaryBackendRuntimeService, NotaryRequestContext,
+use sdkwork_router_notary_app_api::{
+    NotaryAppApiServicePort, NotaryAppRuntimeService, NotaryRequestContext,
 };
 use serde_json::json;
 
 #[tokio::test]
-async fn backend_runtime_service_dispatches_route_operations_to_notary_runtime() {
-    let service = NotaryBackendRuntimeService::new(
-        RecordingAppbase::with_admin_member(),
+async fn app_runtime_service_dispatches_route_operations_to_notary_runtime() {
+    let service = NotaryAppRuntimeService::new(
+        RecordingAppbase::with_notary_member(),
         RecordingCommerce::default(),
         RecordingDrive::default(),
-        RecordingNotaryRepository::default(),
+        RecordingNotaryRepository::with_profile(),
     );
 
-    let opened = service
+    let created = service
         .handle(
             request_context(),
-            "notary.organizationProfiles.create",
+            "notary.cases.create",
             BTreeMap::new(),
             json!({
                 "organizationId": "org-1",
-                "openedByMembershipId": "member-admin-1"
+                "skuId": "sku-electronic-contract",
+                "title": "Electronic contract preservation",
+                "applicantName": "Zhang San Network",
+                "primaryNotaryMembershipId": "member-notary-1",
+                "idempotencyKey": "idem-route-service-1"
             }),
         )
         .await
         .unwrap();
 
-    assert_eq!(opened["organizationId"], "org-1");
-    assert_eq!(opened["driveSpaceType"], "notary");
-    assert_eq!(opened["driveSpaceId"], "space-notary-org-1");
+    assert_eq!(created["orderId"], "order-sku-electronic-contract");
+    assert_eq!(created["orderItemId"], "item-sku-electronic-contract");
+    assert_eq!(created["driveSpaceType"], "notary");
+    assert_eq!(
+        created["driveFolderNodeId"],
+        "folder-order-sku-electronic-contract"
+    );
 }
 
 fn request_context() -> NotaryRequestContext {
@@ -46,30 +54,30 @@ fn request_context() -> NotaryRequestContext {
         tenant_id: "tenant-1".to_string(),
         organization_id: Some("org-1".to_string()),
         user_id: "user-1".to_string(),
-        membership_id: Some("member-admin-1".to_string()),
+        membership_id: Some("member-notary-1".to_string()),
         session_id: "session-1".to_string(),
-        app_id: "sdkwork-admin".to_string(),
+        app_id: "sdkwork-chat-pc".to_string(),
     }
 }
 
 #[derive(Default)]
 struct RecordingAppbase {
-    members: Vec<AppbaseOrganizationMember>,
+    member: Option<AppbaseOrganizationMember>,
 }
 
 impl RecordingAppbase {
-    fn with_admin_member() -> Self {
+    fn with_notary_member() -> Self {
         Self {
-            members: vec![AppbaseOrganizationMember {
-                membership_id: "member-admin-1".to_string(),
+            member: Some(AppbaseOrganizationMember {
+                membership_id: "member-notary-1".to_string(),
                 user_id: "user-1".to_string(),
                 organization_id: "org-1".to_string(),
                 enterprise_verified: true,
                 notary_enabled: true,
-                roles: vec!["notary_admin".to_string()],
-                positions: vec!["notary director".to_string()],
+                roles: vec!["notary".to_string()],
+                positions: vec!["notary".to_string()],
                 departments: vec!["notary-office".to_string()],
-            }],
+            }),
         }
     }
 }
@@ -82,9 +90,9 @@ impl AppbasePort for RecordingAppbase {
         membership_id: &str,
     ) -> Result<Option<AppbaseOrganizationMember>, NotaryServiceError> {
         Ok(self
-            .members
-            .iter()
-            .find(|member| {
+            .member
+            .as_ref()
+            .filter(|member| {
                 member.organization_id == organization_id && member.membership_id == membership_id
             })
             .cloned())
@@ -95,10 +103,11 @@ impl AppbasePort for RecordingAppbase {
         organization_id: &str,
     ) -> Result<Vec<AppbaseOrganizationMember>, NotaryServiceError> {
         Ok(self
-            .members
-            .iter()
+            .member
+            .as_ref()
             .filter(|member| member.organization_id == organization_id)
             .cloned()
+            .into_iter()
             .collect())
     }
 }
@@ -157,6 +166,21 @@ impl DrivePort for RecordingDrive {
 #[derive(Default)]
 struct RecordingNotaryRepository {
     profile: Option<NotaryOrganizationProfile>,
+    cases: Vec<NotaryCaseRecord>,
+}
+
+impl RecordingNotaryRepository {
+    fn with_profile() -> Self {
+        Self {
+            profile: Some(NotaryOrganizationProfile {
+                organization_id: "org-1".to_string(),
+                drive_space_id: "space-notary-org-1".to_string(),
+                drive_space_type: "notary".to_string(),
+                status: "active".to_string(),
+            }),
+            cases: Vec::new(),
+        }
+    }
 }
 
 #[async_trait]
@@ -188,6 +212,7 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
         &mut self,
         record: NotaryCaseRecord,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
+        self.cases.push(record.clone());
         Ok(record)
     }
 
@@ -212,23 +237,46 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
 
     async fn get_case(
         &mut self,
-        _case_id: &str,
+        case_id: &str,
     ) -> Result<Option<NotaryCaseRecord>, NotaryServiceError> {
-        Ok(None)
+        Ok(self
+            .cases
+            .iter()
+            .find(|record| record.case_id == case_id)
+            .cloned())
     }
 
     async fn update_case(
         &mut self,
-        _command: NotaryCaseUpdateCommand,
+        command: NotaryCaseUpdateCommand,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
-        Err(NotaryServiceError::not_found("notary case not found"))
+        let record = self
+            .cases
+            .iter_mut()
+            .find(|record| record.case_id == command.case_id)
+            .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+
+        if let Some(title) = command.title {
+            record.title = title;
+        }
+        if let Some(remarks) = command.remarks {
+            record.remarks = Some(remarks);
+        }
+        if let Some(status) = command.status {
+            record.status = status;
+        }
+        if let Some(chain_hash) = command.chain_hash {
+            record.chain_hash = Some(chain_hash);
+        }
+
+        Ok(record.clone())
     }
 
     async fn list_cases(
         &mut self,
         _query: NotaryCaseListQuery,
     ) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
-        Ok(Vec::new())
+        Ok(self.cases.clone())
     }
 
     async fn list_parties(

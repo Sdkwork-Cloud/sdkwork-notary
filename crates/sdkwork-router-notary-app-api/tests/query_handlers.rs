@@ -5,7 +5,7 @@ use std::{
 
 use async_trait::async_trait;
 use axum::extract::{Path, Query, State};
-use sdkwork_routes_notary_app_api::{
+use sdkwork_router_notary_app_api::{
     handlers,
     service_port::{NotaryAppApiState, NotaryRouteError},
     NotaryAppApiServicePort, NotaryRequestContext,
@@ -106,6 +106,37 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
     assert_eq!(calls[3].operation_id, "notary.cases.events.list");
     assert_eq!(calls[3].body["page_size"], "50");
     assert_eq!(calls[3].body["cursor"], "event-cursor");
+}
+
+#[tokio::test]
+async fn dashboard_and_report_handlers_forward_app_operations_to_service() {
+    let service = Arc::new(RecordingService::default());
+    let state = NotaryAppApiState::new(service.clone(), request_context());
+
+    let _ = handlers::retrieve_dashboard_statistics(State(state.clone()))
+        .await
+        .unwrap();
+
+    let _ = handlers::retrieve_monthly_report(
+        State(state),
+        Query(BTreeMap::from([
+            ("month".to_string(), "2026-06".to_string()),
+            ("format".to_string(), "csv".to_string()),
+        ])),
+    )
+    .await
+    .unwrap();
+
+    let calls = service.calls.lock().unwrap();
+    assert_eq!(
+        calls[0].operation_id,
+        "notary.dashboard.statistics.retrieve"
+    );
+    assert_eq!(calls[0].body, Value::Null);
+
+    assert_eq!(calls[1].operation_id, "notary.reports.monthly.retrieve");
+    assert_eq!(calls[1].body["month"], "2026-06");
+    assert_eq!(calls[1].body["format"], "csv");
 }
 
 #[derive(Default)]

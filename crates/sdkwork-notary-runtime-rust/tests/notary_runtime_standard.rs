@@ -67,6 +67,8 @@ fn runtime_contract_declares_commerce_drive_iam_and_notary_storage_ports() {
             "notary.cases.files.list",
             "notary.cases.events.list",
             "notary.reports.caseSummary.retrieve",
+            "notary.dashboard.statistics.retrieve",
+            "notary.reports.monthly.retrieve",
         ],
     );
     assert_eq!(
@@ -611,6 +613,77 @@ async fn app_operation_dispatcher_forwards_openapi_filters_to_repository_and_dri
         repository.events.last().unwrap(),
         "list_events:case-1:1:event-0"
     );
+}
+
+#[tokio::test]
+async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_report() {
+    let mut completed_case = sample_case_record("case-2");
+    completed_case.status = NotaryCaseStatus::Completed;
+    completed_case.case_no = "NT-20260610-002".to_string();
+    completed_case.title = "Completed evidence preservation".to_string();
+
+    let mut rejected_case = sample_case_record("case-3");
+    rejected_case.status = NotaryCaseStatus::Rejected;
+    rejected_case.case_no = "NT-20260610-003".to_string();
+    rejected_case.title = "Rejected evidence preservation".to_string();
+
+    let mut appbase = RecordingAppbase::default();
+    let mut commerce = RecordingCommerce::default();
+    let mut drive = RecordingDrive::default();
+    let mut repository = RecordingNotaryCaseRepository::default()
+        .with_case(sample_case_record("case-1"))
+        .with_case(completed_case)
+        .with_case(rejected_case);
+
+    let statistics = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.dashboard.statistics.retrieve",
+        BTreeMap::new(),
+        serde_json::Value::Null,
+        &mut NotaryRuntimePorts {
+            appbase: &mut appbase,
+            commerce: &mut commerce,
+            drive: &mut drive,
+            repository: &mut repository,
+        },
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(statistics["pendingReviewQueue"]["count"], 0);
+    assert_eq!(statistics["todayCompleted"]["count"], 1);
+    assert_eq!(statistics["anomalyIntercepted"]["count"], 1);
+    assert_eq!(statistics["monthlyPreservationTotal"]["count"], 3);
+    assert_eq!(
+        statistics["monthlyPreservationTotal"]["blockchainSyncStatus"],
+        "OK"
+    );
+    assert_eq!(repository.events[0], "list_cases:org-1::::500:");
+
+    let report = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.reports.monthly.retrieve",
+        BTreeMap::new(),
+        json!({"organizationId": "org-1", "month": "2026-06", "format": "csv"}),
+        &mut NotaryRuntimePorts {
+            appbase: &mut appbase,
+            commerce: &mut commerce,
+            drive: &mut drive,
+            repository: &mut repository,
+        },
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(report["reportId"], "notary-monthly-2026-06-csv");
+    assert_eq!(report["month"], "2026-06");
+    assert_eq!(report["format"], "csv");
+    assert_eq!(report["caseCount"], 3);
+    assert_eq!(
+        report["downloadUrl"],
+        "sdkwork://notary/reports/notary-monthly-2026-06-csv.csv"
+    );
+    assert_eq!(repository.events[1], "list_cases:org-1::::500:");
 }
 
 #[tokio::test]

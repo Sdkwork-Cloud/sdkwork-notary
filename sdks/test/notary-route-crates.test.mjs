@@ -9,8 +9,8 @@ const workspaceRoot = path.resolve(testDir, "..", "..");
 
 const routeCrates = [
   {
-    root: "packages/native-rust/routes/app-api/sdkwork-routes-notary-app-api",
-    packageName: "sdkwork-routes-notary-app-api",
+    root: "crates/sdkwork-router-notary-app-api",
+    packageName: "sdkwork-router-notary-app-api",
     builder: "build_sdkwork_notary_app_api_router",
     manifestFn: "sdkwork_notary_app_api_route_manifest",
     surface: "app-api",
@@ -32,8 +32,8 @@ const routeCrates = [
     ],
   },
   {
-    root: "packages/native-rust/routes/backend-api/sdkwork-routes-notary-backend-api",
-    packageName: "sdkwork-routes-notary-backend-api",
+    root: "crates/sdkwork-router-notary-backend-api",
+    packageName: "sdkwork-router-notary-backend-api",
     builder: "build_sdkwork_notary_backend_api_router",
     manifestFn: "sdkwork_notary_backend_api_route_manifest",
     surface: "backend-api",
@@ -84,6 +84,8 @@ test("notary Rust route crates are workspace members with standard component spe
       workspaceManifest.includes(`"${routeCrate.root}"`),
       `${routeCrate.packageName} must be a Cargo workspace member`,
     );
+    assert(!workspaceManifest.includes("packages/native-rust"));
+    assert(!workspaceManifest.includes("sdkwork-routes-notary"));
     for (const relativePath of [
       "Cargo.toml",
       "README.md",

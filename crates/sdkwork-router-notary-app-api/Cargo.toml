@@ -1,18 +1,18 @@
 [package]
-name = "sdkwork-routes-notary-app-api"
+name = "sdkwork-router-notary-app-api"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "sdkwork_routes_notary_app_api"
+name = "sdkwork_router_notary_app_api"
 
 [dependencies]
 async-trait = "0.1.89"
 axum = "0.7"
 serde_json = "1.0"
-sdkwork-notary-core-rust = { path = "../../../../../crates/sdkwork-notary-core-rust" }
-sdkwork-notary-runtime-rust = { path = "../../../../../crates/sdkwork-notary-runtime-rust" }
+sdkwork-notary-core-rust = { path = "../sdkwork-notary-core-rust" }
+sdkwork-notary-runtime-rust = { path = "../sdkwork-notary-runtime-rust" }
 tokio = { version = "1.52", features = ["sync"] }
 
 [dev-dependencies]

@@ -16,7 +16,15 @@ pub fn build_sdkwork_notary_app_api_router(
 ) -> Router {
     Router::new()
         .route("/app/v3/api/notary/access", get(handlers::retrieve_access))
+        .route(
+            "/app/v3/api/notary/dashboard/statistics",
+            get(handlers::retrieve_dashboard_statistics),
+        )
         .route("/app/v3/api/notary/matters", get(handlers::list_matters))
+        .route(
+            "/app/v3/api/notary/reports/monthly",
+            get(handlers::retrieve_monthly_report),
+        )
         .route("/app/v3/api/notary/staff", get(handlers::list_staff))
         .route(
             "/app/v3/api/notary/cases",

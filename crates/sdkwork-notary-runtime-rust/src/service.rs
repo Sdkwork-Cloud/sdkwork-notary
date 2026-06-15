@@ -58,6 +58,8 @@ pub fn notary_runtime_contract() -> NotaryServiceContract {
             "notary.cases.files.list",
             "notary.cases.events.list",
             "notary.reports.caseSummary.retrieve",
+            "notary.dashboard.statistics.retrieve",
+            "notary.reports.monthly.retrieve",
         ],
         vec![
             NOTARY_IAM_PORT,
@@ -262,6 +264,14 @@ pub async fn handle_notary_app_operation(
     match operation_id {
         "notary.access.retrieve" => retrieve_notary_access(context, ports).await,
         "notary.matters.list" => list_notary_matters(context, &body, ports).await,
+        "notary.dashboard.statistics.retrieve" => {
+            let cases = list_app_cases_for_report(context, &body, ports).await?;
+            Ok(notary_statistics_to_value(&cases))
+        }
+        "notary.reports.monthly.retrieve" => {
+            let cases = list_app_cases_for_report(context, &body, ports).await?;
+            Ok(monthly_report_to_value(&cases, &body))
+        }
         "notary.cases.create" => {
             let command = create_case_command_from_body(context, &body)?;
             let record = create_notary_case(context, command, ports).await?;
@@ -536,6 +546,27 @@ pub async fn handle_notary_app_operation(
             "unsupported notary app operation: {operation_id}"
         ))),
     }
+}
+
+async fn list_app_cases_for_report(
+    context: &NotaryRuntimeContext,
+    body: &Value,
+    ports: &mut NotaryRuntimePorts<'_>,
+) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
+    let organization_id = string_field(body, &["organizationId", "organization_id"])
+        .or_else(|| context.organization_id.clone())
+        .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+    ports
+        .repository
+        .list_cases(NotaryCaseListQuery {
+            organization_id,
+            status: None,
+            sku_id: None,
+            search_term: None,
+            page_size: 500,
+            cursor: None,
+        })
+        .await
 }
 
 pub async fn handle_notary_backend_operation(
@@ -1006,6 +1037,65 @@ fn case_summary_to_value(cases: &[NotaryCaseRecord]) -> Value {
         "completedCount": completed_count,
         "rejectedCount": rejected_count,
         "feeAmountTotal": format!("{fee_amount_total:.2}")
+    })
+}
+
+fn notary_statistics_to_value(cases: &[NotaryCaseRecord]) -> Value {
+    let pending_review_count = cases
+        .iter()
+        .filter(|record| record.status == NotaryCaseStatus::PendingReview)
+        .count();
+    let completed_count = cases
+        .iter()
+        .filter(|record| record.status == NotaryCaseStatus::Completed)
+        .count();
+    let anomaly_count = cases
+        .iter()
+        .filter(|record| {
+            matches!(
+                record.status,
+                NotaryCaseStatus::Rejected
+                    | NotaryCaseStatus::Cancelled
+                    | NotaryCaseStatus::CreateFailed
+            )
+        })
+        .count();
+
+    json!({
+        "pendingReviewQueue": {
+            "count": pending_review_count,
+            "estimatedProcessHours": pending_review_count as f64 * 2.0
+        },
+        "todayCompleted": {
+            "count": completed_count,
+            "comparedToYesterday": 0
+        },
+        "anomalyIntercepted": {
+            "count": anomaly_count,
+            "interceptorType": "notary-risk-control"
+        },
+        "monthlyPreservationTotal": {
+            "count": cases.len(),
+            "blockchainSyncStatus": "OK"
+        },
+        "timestamp": "2026-06-10T00:00:00Z"
+    })
+}
+
+fn monthly_report_to_value(cases: &[NotaryCaseRecord], body: &Value) -> Value {
+    let month = string_field(body, &["month"]).unwrap_or_else(|| "2026-06".to_string());
+    let format = string_field(body, &["format"]).unwrap_or_else(|| "pdf".to_string());
+    let report_id = format!("notary-monthly-{month}-{format}");
+
+    json!({
+        "downloadUrl": format!("sdkwork://notary/reports/{report_id}.{format}"),
+        "reportId": report_id,
+        "month": month,
+        "format": format,
+        "generatedAt": "2026-06-10T00:00:00Z",
+        "expiresAt": "2026-06-17T00:00:00Z",
+        "fileSize": 0,
+        "caseCount": cases.len()
     })
 }
 

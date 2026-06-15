@@ -1,5 +1,7 @@
 pub const NOTARY_ACCESS: &str = "/app/v3/api/notary/access";
+pub const NOTARY_DASHBOARD_STATISTICS: &str = "/app/v3/api/notary/dashboard/statistics";
 pub const NOTARY_MATTERS: &str = "/app/v3/api/notary/matters";
+pub const NOTARY_REPORTS_MONTHLY: &str = "/app/v3/api/notary/reports/monthly";
 pub const NOTARY_STAFF: &str = "/app/v3/api/notary/staff";
 pub const NOTARY_CASES: &str = "/app/v3/api/notary/cases";
 pub const NOTARY_CASE: &str = "/app/v3/api/notary/cases/:case_id";

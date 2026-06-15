@@ -1660,6 +1660,132 @@
           }
         }
       }
+    },
+    "/app/v3/api/notary/dashboard/statistics": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.dashboard.statistics.retrieve",
+        "summary": "Retrieve notary dashboard statistics",
+        "description": "Returns pending review queue count, today completed count, anomaly intercepted count, and monthly preservation total for the current organization",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryDashboardStatistics",
+        "x-sdkwork-permission": "notary.dashboard.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.dashboard.statistics.retrieve",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/NotaryStatisticsResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/app/v3/api/notary/reports/monthly": {
+      "get": {
+        "tags": [
+          "notary"
+        ],
+        "operationId": "notary.reports.monthly.retrieve",
+        "summary": "Download monthly business report",
+        "description": "Generate and download monthly business report for notary operations",
+        "security": [
+          {
+            "AuthToken": [],
+            "AccessToken": []
+          }
+        ],
+        "x-sdkwork-owner": "sdkwork-notary",
+        "x-sdkwork-api-authority": "sdkwork-notary.app",
+        "x-sdkwork-domain": "notary",
+        "x-sdkwork-resource": "notaryMonthlyReport",
+        "x-sdkwork-permission": "notary.reports.read",
+        "x-sdkwork-tenant-scope": "tenant",
+        "x-sdkwork-data-scope": "organization",
+        "x-sdkwork-audit-event": "notary.reports.monthly.retrieve",
+        "parameters": [
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "description": "Month in YYYY-MM format, defaults to current month",
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}$",
+              "example": "2026-06"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "description": "Report format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "excel",
+                "csv"
+              ],
+              "default": "pdf"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/MonthlyReportResponse"
+          },
+          "401": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1930,6 +2056,26 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/NotaryStaffMemberPage"
+            }
+          }
+        }
+      },
+      "NotaryStatisticsResponse": {
+        "description": "Notary dashboard statistics",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/NotaryStatistics"
+            }
+          }
+        }
+      },
+      "MonthlyReportResponse": {
+        "description": "Monthly business report download",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/MonthlyReport"
             }
           }
         }
@@ -3154,6 +3300,144 @@
           },
           "pageInfo": {
             "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      },
+      "NotaryStatistics": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pendingReviewQueue",
+          "todayCompleted",
+          "anomalyIntercepted",
+          "monthlyPreservationTotal"
+        ],
+        "properties": {
+          "pendingReviewQueue": {
+            "type": "object",
+            "required": [
+              "count"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Number of cases pending review"
+              },
+              "estimatedProcessHours": {
+                "type": "number",
+                "format": "float",
+                "description": "Estimated hours to process pending cases"
+              }
+            }
+          },
+          "todayCompleted": {
+            "type": "object",
+            "required": [
+              "count"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Number of cases completed today"
+              },
+              "comparedToYesterday": {
+                "type": "integer",
+                "description": "Difference compared to yesterday"
+              }
+            }
+          },
+          "anomalyIntercepted": {
+            "type": "object",
+            "required": [
+              "count"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Number of anomaly cases intercepted by risk control"
+              },
+              "interceptorType": {
+                "type": "string",
+                "description": "Type of risk control interceptor"
+              }
+            }
+          },
+          "monthlyPreservationTotal": {
+            "type": "object",
+            "required": [
+              "count"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "description": "Total number of cases preserved this month"
+              },
+              "blockchainSyncStatus": {
+                "type": "string",
+                "enum": [
+                  "OK",
+                  "PENDING",
+                  "ERROR"
+                ],
+                "default": "OK",
+                "description": "Blockchain synchronization status"
+              }
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the statistics were computed"
+          }
+        }
+      },
+      "MonthlyReport": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "downloadUrl",
+          "reportId"
+        ],
+        "properties": {
+          "downloadUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to download the report file"
+          },
+          "reportId": {
+            "type": "string",
+            "description": "Unique report identifier"
+          },
+          "month": {
+            "type": "string",
+            "description": "Month the report covers in YYYY-MM format"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "pdf",
+              "excel",
+              "csv"
+            ],
+            "description": "Report file format"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the report was generated"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the download URL expires"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "Report file size in bytes"
+          },
+          "caseCount": {
+            "type": "integer",
+            "description": "Number of cases included in the report"
           }
         }
       }

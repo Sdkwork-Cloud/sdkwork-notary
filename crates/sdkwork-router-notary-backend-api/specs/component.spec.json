@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "kind": "sdkwork.component.spec",
   "component": {
-    "name": "sdkwork-routes-notary-backend-api",
-    "displayName": "SDKWork Routes Notary Backend API",
+    "name": "sdkwork-router-notary-backend-api",
+    "displayName": "SDKWork Router Notary Backend API",
     "version": "0.1.0",
     "type": "rust-route-crate",
-    "root": "sdkwork-notary/packages/native-rust/routes/backend-api/sdkwork-routes-notary-backend-api",
+    "root": "sdkwork-notary/crates/sdkwork-router-notary-backend-api",
     "domain": "notary",
     "capability": "notary",
     "surface": "backend-api",
@@ -17,22 +17,22 @@
   "canonicalSpecs": [
     {
       "file": "RUST_CODE_SPEC.md",
-      "path": "../../../../../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "path": "../../../../sdkwork-specs/RUST_CODE_SPEC.md",
       "purpose": "Rust route crate structure and verification rules."
     },
     {
       "file": "WEB_BACKEND_SPEC.md",
-      "path": "../../../../../../../sdkwork-specs/WEB_BACKEND_SPEC.md",
+      "path": "../../../../sdkwork-specs/WEB_BACKEND_SPEC.md",
       "purpose": "Handler, service, repository, and route layering."
     },
     {
       "file": "API_SPEC.md",
-      "path": "../../../../../../../sdkwork-specs/API_SPEC.md",
+      "path": "../../../../sdkwork-specs/API_SPEC.md",
       "purpose": "Backend API prefix and route manifest contract."
     }
   ],
   "contracts": {
-    "publicExports": ["sdkwork_routes_notary_backend_api::*"],
+    "publicExports": ["sdkwork_router_notary_backend_api::*"],
     "runtimeEntrypoints": ["build_sdkwork_notary_backend_api_router"],
     "routeManifest": {
       "surface": "backend-api",

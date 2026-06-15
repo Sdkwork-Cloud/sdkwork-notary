@@ -2,7 +2,7 @@ pub fn sdkwork_notary_app_api_route_manifest() -> &'static str {
     r#"{
   "schemaVersion": 1,
   "kind": "sdkwork.route.manifest",
-  "packageName": "sdkwork-routes-notary-app-api",
+  "packageName": "sdkwork-router-notary-app-api",
   "surface": "app-api",
   "owner": "sdkwork-notary",
   "domain": "notary",
@@ -12,7 +12,9 @@ pub fn sdkwork_notary_app_api_route_manifest() -> &'static str {
   "prefix": "/app/v3/api",
   "routes": [
     {"method": "GET", "path": "/app/v3/api/notary/access", "operationId": "notary.access.retrieve"},
+    {"method": "GET", "path": "/app/v3/api/notary/dashboard/statistics", "operationId": "notary.dashboard.statistics.retrieve"},
     {"method": "GET", "path": "/app/v3/api/notary/matters", "operationId": "notary.matters.list"},
+    {"method": "GET", "path": "/app/v3/api/notary/reports/monthly", "operationId": "notary.reports.monthly.retrieve"},
     {"method": "GET", "path": "/app/v3/api/notary/staff", "operationId": "notary.staff.list"},
     {"method": "GET", "path": "/app/v3/api/notary/cases", "operationId": "notary.cases.list"},
     {"method": "POST", "path": "/app/v3/api/notary/cases", "operationId": "notary.cases.create"},

@@ -69,8 +69,8 @@ The runtime layer implements the main notary workflow without owning dependency 
 
 Route runtime services are implemented for both app and backend route crates, so the generated route layers can dispatch directly to `sdkwork-notary-runtime-rust` ports:
 
-- `packages/native-rust/routes/app-api/sdkwork-routes-notary-app-api`
-- `packages/native-rust/routes/backend-api/sdkwork-routes-notary-backend-api`
+- `crates/sdkwork-router-notary-app-api`
+- `crates/sdkwork-router-notary-backend-api`
 
 ## Chat PC Integration
 

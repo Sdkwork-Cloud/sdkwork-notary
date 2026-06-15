@@ -2,7 +2,7 @@ pub fn sdkwork_notary_backend_api_route_manifest() -> &'static str {
     r#"{
   "schemaVersion": 1,
   "kind": "sdkwork.route.manifest",
-  "packageName": "sdkwork-routes-notary-backend-api",
+  "packageName": "sdkwork-router-notary-backend-api",
   "surface": "backend-api",
   "owner": "sdkwork-notary",
   "domain": "notary",

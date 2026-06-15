@@ -20,6 +20,18 @@ pub async fn retrieve_access(
     .await
 }
 
+pub async fn retrieve_dashboard_statistics(
+    State(state): State<NotaryAppApiState>,
+) -> Result<Json<Value>, NotaryRouteError> {
+    call_operation(
+        state,
+        "notary.dashboard.statistics.retrieve",
+        BTreeMap::new(),
+        Value::Null,
+    )
+    .await
+}
+
 pub async fn list_matters(
     State(state): State<NotaryAppApiState>,
     Query(query): Query<BTreeMap<String, String>>,
@@ -27,6 +39,19 @@ pub async fn list_matters(
     call_operation(
         state,
         "notary.matters.list",
+        BTreeMap::new(),
+        query_body(query),
+    )
+    .await
+}
+
+pub async fn retrieve_monthly_report(
+    State(state): State<NotaryAppApiState>,
+    Query(query): Query<BTreeMap<String, String>>,
+) -> Result<Json<Value>, NotaryRouteError> {
+    call_operation(
+        state,
+        "notary.reports.monthly.retrieve",
         BTreeMap::new(),
         query_body(query),
     )
