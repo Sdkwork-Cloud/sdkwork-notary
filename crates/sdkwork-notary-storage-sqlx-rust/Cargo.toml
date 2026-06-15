@@ -9,6 +9,7 @@ name = "sdkwork_notary_storage_sqlx"
 
 [dependencies]
 sdkwork-pool-config = { path = "../../../sdkwork-pool/crates/sdkwork-pool-config" }
+sdkwork-pool-sqlx = { path = "../../../sdkwork-pool/crates/sdkwork-pool-sqlx" }
 async-trait = "0.1.89"
 sdkwork-notary-core-rust = { path = "../sdkwork-notary-core-rust" }
 sdkwork-notary-runtime-rust = { path = "../sdkwork-notary-runtime-rust" }
