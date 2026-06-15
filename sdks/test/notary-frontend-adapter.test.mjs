@@ -8,7 +8,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(testDir, "..", "..");
 const chatPcRoot = process.env.SDKWORK_CHAT_PC_ROOT
   ? path.resolve(process.env.SDKWORK_CHAT_PC_ROOT)
-  : path.resolve(workspaceRoot, "..", "craw-chat", "apps", "sdkwork-chat-pc");
+  : path.resolve(workspaceRoot, "..", "sdkwork-im", "apps", "sdkwork-chat-pc");
 const notaryServicePath = "packages/sdkwork-clawchat-pc-notary/src/services/NotaryService.ts";
 
 function readChatPcText(relativePath) {

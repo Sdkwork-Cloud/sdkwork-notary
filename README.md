@@ -76,7 +76,7 @@ Route runtime services are implemented for both app and backend route crates, so
 
 The frontend notary package is integrated directly in the real Craw Chat PC application root:
 
-- `E:\sdkwork-space\craw-chat\apps\sdkwork-chat-pc`
+- `E:\sdkwork-space\sdkwork-im\apps\sdkwork-chat-pc`
 - `packages/sdkwork-clawchat-pc-core/src/sdk/notaryAppSdkClient.ts`
 - `packages/sdkwork-clawchat-pc-notary/src/services/NotaryService.ts`
 

@@ -8,7 +8,7 @@ const testDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(testDir, "..", "..");
 const chatPcRoot = process.env.SDKWORK_CHAT_PC_ROOT
   ? path.resolve(process.env.SDKWORK_CHAT_PC_ROOT)
-  : path.resolve(workspaceRoot, "..", "craw-chat", "apps", "sdkwork-chat-pc");
+  : path.resolve(workspaceRoot, "..", "sdkwork-im", "apps", "sdkwork-chat-pc");
 
 function readText(root, relativePath) {
   return readFileSync(path.join(root, relativePath), "utf8");
