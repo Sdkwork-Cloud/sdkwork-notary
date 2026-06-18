@@ -28,7 +28,7 @@ Expected: FAIL because the SQL, OpenAPI, SDK manifests, and composed facade file
 ### Task 2: Database Contract
 
 **Files:**
-- Create: `crates/sdkwork-notary-storage-sqlx-rust/migrations/0001_notary_foundation.sql`
+- Create: `crates/sdkwork-notary-case-repository-sqlx/migrations/0001_notary_foundation.sql`
 - Create: `docs/schema-registry/tables/001-notary-core.yaml`
 
 - [ ] **Step 1: Implement minimal SQL**

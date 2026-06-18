@@ -178,14 +178,12 @@ export interface UploadCaseFileInput {
 
 export interface DeleteCaseFileInput {
   nodeId: string;
-  tenantId?: string;
   operatorId?: string;
   strategy?: "delete" | "trash";
 }
 
 export interface CreateCaseFileDownloadUrlInput {
   nodeId: string;
-  tenantId?: string;
   requestedTtlSeconds?: number;
   expiresInSeconds?: number;
   disposition?: "inline" | "attachment";
@@ -425,7 +423,6 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
     }
 
     const response = await createDriveNodeDownloadUrl(drive, nodeId, {
-      tenantId: await resolveTenantId(appbase, input.tenantId),
       ...(input.requestedTtlSeconds ?? input.expiresInSeconds
         ? { requestedTtlSeconds: input.requestedTtlSeconds ?? input.expiresInSeconds }
         : {})
@@ -441,7 +438,6 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
 
     await deleteDriveNode(drive, {
       nodeId,
-      tenantId: await resolveTenantId(appbase, input.tenantId),
       operatorId: input.operatorId,
       strategy: input.strategy ?? "delete"
     });
@@ -499,12 +495,11 @@ async function createDriveFileNode(drive: DriveAppSdkPort, input: unknown): Prom
 
 async function deleteDriveNode(
   drive: DriveAppSdkPort,
-  input: Required<Pick<DeleteCaseFileInput, "nodeId" | "tenantId" | "strategy">> & {
+  input: Required<Pick<DeleteCaseFileInput, "nodeId" | "strategy">> & {
     operatorId?: string;
   },
 ): Promise<unknown> {
   const params = {
-    tenantId: input.tenantId,
     ...(input.operatorId ? { operatorId: input.operatorId } : {})
   };
   if (input.strategy === "trash") {
@@ -533,7 +528,7 @@ async function deleteDriveNode(
 async function createDriveNodeDownloadUrl(
   drive: DriveAppSdkPort,
   nodeId: string,
-  input: { tenantId: string; requestedTtlSeconds?: number },
+  input: { requestedTtlSeconds?: number },
 ): Promise<unknown> {
   if (drive.drive?.nodes?.downloadUrls?.create) {
     return drive.drive.nodes.downloadUrls.create(nodeId, input);
@@ -548,19 +543,6 @@ async function createDriveNodeDownloadUrl(
     return drive.downloadUrls.create({ nodeId, ...input });
   }
   throw new Error("Drive node download URL capability is required for notary case files");
-}
-
-async function resolveTenantId(appbase: AppbaseAppSdkPort, tenantId?: string): Promise<string> {
-  const normalized = tenantId?.trim();
-  if (normalized) {
-    return normalized;
-  }
-  const currentOrganization = await appbase.iam?.organizations?.current?.retrieve().catch(() => undefined);
-  const resolved = stringField(currentOrganization, ["tenantId", "tenant_id"]);
-  if (resolved) {
-    return resolved;
-  }
-  throw new Error("tenantId is required for notary case file Drive operations");
 }
 
 function normalizeDownloadUrlResponse(value: unknown): Record<string, unknown> {

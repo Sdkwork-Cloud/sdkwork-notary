@@ -17,7 +17,7 @@ function readJson(relativePath) {
 
 test("notary SQLx storage crate is part of the workspace and verify command", () => {
   const workspaceManifest = readText("Cargo.toml");
-  assert(workspaceManifest.includes('"crates/sdkwork-notary-storage-sqlx-rust"'));
+  assert(workspaceManifest.includes('"crates/sdkwork-notary-case-repository-sqlx"'));
 
   const packageManifest = readJson("package.json");
   assert.equal(
@@ -26,16 +26,18 @@ test("notary SQLx storage crate is part of the workspace and verify command", ()
   );
   assert(packageManifest.scripts.verify.includes("test:rust"));
 
-  const crateRoot = "crates/sdkwork-notary-storage-sqlx-rust";
+  const crateRoot = "crates/sdkwork-notary-case-repository-sqlx";
   assert(existsSync(path.join(workspaceRoot, crateRoot, "Cargo.toml")));
   assert(existsSync(path.join(workspaceRoot, crateRoot, "src", "lib.rs")));
   assert(existsSync(path.join(workspaceRoot, crateRoot, "src", "sqlite_case_repository.rs")));
+  assert(existsSync(path.join(workspaceRoot, crateRoot, "src", "postgres_case_repository.rs")));
   assert(existsSync(path.join(workspaceRoot, crateRoot, "tests", "sqlite_case_repository.rs")));
+  assert(existsSync(path.join(workspaceRoot, crateRoot, "tests", "postgres_case_repository_api.rs")));
 });
 
 test("notary SQLx storage keeps ownership local and does not join dependency tables", () => {
   const source = readText(
-    "crates/sdkwork-notary-storage-sqlx-rust/src/sqlite_case_repository.rs",
+    "crates/sdkwork-notary-case-repository-sqlx/src/sqlite_case_repository.rs",
   );
 
   for (const api of [
@@ -44,6 +46,7 @@ test("notary SQLx storage keeps ownership local and does not join dependency tab
     "upsert_organization_profile",
     "list_organization_profiles",
     "insert_case",
+    "delete_case",
     "insert_party",
     "append_event",
     "get_case",

@@ -219,7 +219,7 @@ function enumValues(openapi, schemaOrRef) {
 }
 
 test("notary migration defines the minimal notary-owned table set and reuses existing domains", () => {
-  const sql = readText("crates/sdkwork-notary-storage-sqlx-rust/migrations/0001_notary_foundation.sql");
+  const sql = readText("crates/sdkwork-notary-case-repository-sqlx/migrations/0001_notary_foundation.sql");
   const normalizedSql = sql.toLowerCase();
 
   for (const table of ownTables) {

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-case-repository-sqlx",
+    "displayName": "SDKWork Notary Case Repository SQLx",
+    "version": "0.1.0",
+    "type": "rust-crate",
+    "root": "sdkwork-notary/crates/sdkwork-notary-case-repository-sqlx",
+    "domain": "notary",
+    "capability": "notary-case-repository",
+    "languages": ["rust"],
+    "generated": false,
+    "manifests": ["Cargo.toml"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component-local contract and discovery rules."
+    },
+    {
+      "file": "RUST_CODE_SPEC.md",
+      "path": "../../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "purpose": "Rust repository crate structure and verification rules."
+    },
+    {
+      "file": "DATABASE_SPEC.md",
+      "path": "../../../../sdkwork-specs/DATABASE_SPEC.md",
+      "purpose": "Notary-owned schema and SQLx repository expectations."
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "path": "../../../../sdkwork-specs/TEST_SPEC.md",
+      "purpose": "Repository and migration verification expectations."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["sdkwork_notary_case_repository_sqlx::*"],
+    "runtimeEntrypoints": ["notary_foundation_migration_sql", "SqliteNotaryCaseRepository"],
+    "routeManifest": null,
+    "sdkClients": [],
+    "events": [],
+    "configKeys": ["NOTARY_PII_VAULT_KEY"]
+  },
+  "verification": {
+    "commands": [
+      "cargo test -p sdkwork-notary-case-repository-sqlx --target-dir target-codex-test"
+    ]
+  }
+}

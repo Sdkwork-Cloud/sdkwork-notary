@@ -32,7 +32,7 @@ function openApiOperationIds(relativePath) {
 }
 
 function notaryRuntimeContractSource() {
-  const service = readText("crates/sdkwork-notary-runtime-rust/src/service.rs");
+  const service = readText("crates/sdkwork-notary-case-service/src/service.rs");
   return sourceSlice(
     service,
     "pub fn notary_runtime_contract()",
@@ -50,7 +50,11 @@ function sourceSlice(source, startNeedle, endNeedle, label) {
 }
 
 test("notary Rust runtime crates declare SDKWork component metadata", () => {
-  for (const crateName of ["sdkwork-notary-core-rust", "sdkwork-notary-runtime-rust"]) {
+  for (const crateName of [
+    "sdkwork-notary-case-contract",
+    "sdkwork-notary-case-service",
+    "sdkwork-notary-case-repository-sqlx",
+  ]) {
     const root = path.join("crates", crateName);
     assert(existsSync(path.join(workspaceRoot, root, "README.md")), `${crateName} needs README`);
     assert(
@@ -63,7 +67,11 @@ test("notary Rust runtime crates declare SDKWork component metadata", () => {
     assert.equal(spec.component.name, crateName);
     assert.equal(spec.component.domain, "notary");
     assert(spec.canonicalSpecs.some((entry) => entry.file === "RUST_CODE_SPEC.md"));
-    assert(spec.canonicalSpecs.some((entry) => entry.file === "WEB_BACKEND_SPEC.md"));
+    if (crateName === "sdkwork-notary-case-repository-sqlx") {
+      assert(spec.canonicalSpecs.some((entry) => entry.file === "DATABASE_SPEC.md"));
+    } else {
+      assert(spec.canonicalSpecs.some((entry) => entry.file === "WEB_BACKEND_SPEC.md"));
+    }
   }
 });
 
@@ -83,7 +91,7 @@ test("notary runtime service contract declares every OpenAPI operation", () => {
 });
 
 test("notary runtime dispatchers handle every OpenAPI operation", () => {
-  const service = readText("crates/sdkwork-notary-runtime-rust/src/service.rs");
+  const service = readText("crates/sdkwork-notary-case-service/src/service.rs");
   const appDispatcher = sourceSlice(
     service,
     "pub async fn handle_notary_app_operation",
@@ -117,9 +125,9 @@ test("notary runtime dispatchers handle every OpenAPI operation", () => {
 });
 
 test("notary case runtime record carries primary notary member references", () => {
-  const domain = readText("crates/sdkwork-notary-core-rust/src/domain.rs");
-  const service = readText("crates/sdkwork-notary-runtime-rust/src/service.rs");
-  const storage = readText("crates/sdkwork-notary-storage-sqlx-rust/src/sqlite_case_repository.rs");
+  const domain = readText("crates/sdkwork-notary-case-contract/src/domain.rs");
+  const service = readText("crates/sdkwork-notary-case-service/src/service.rs");
+  const storage = readText("crates/sdkwork-notary-case-repository-sqlx/src/sqlite_case_repository.rs");
 
   const recordStart = domain.indexOf("pub struct NotaryCaseRecord");
   const recordEnd = domain.indexOf("impl NotaryCaseStatus");
@@ -144,16 +152,43 @@ test("notary case runtime record carries primary notary member references", () =
 
 test("workspace verification includes contract tests and Rust runtime tests", () => {
   const packageManifest = readJson("package.json");
-  assert.equal(packageManifest.scripts["test:contracts"], "node --test sdks/test/*.test.mjs");
+  assert.equal(
+    packageManifest.scripts["test:contracts"],
+    "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs",
+  );
+  assert.equal(
+    packageManifest.scripts["test:topology-baggage"],
+    "node --test scripts/dev/sdkwork-notary-topology-baggage.test.mjs",
+  );
   assert.equal(
     packageManifest.scripts["test:rust"],
     "cargo test --workspace --target-dir target-codex-test",
   );
+  assert(packageManifest.scripts.verify.includes("test:topology-validate"));
   assert(packageManifest.scripts.verify.includes("test:contracts"));
   assert(packageManifest.scripts.verify.includes("test:rust"));
+  assert(packageManifest.scripts.verify.includes("cargo fmt --all --check"));
 
   const readme = readText("README.md");
-  assert(readme.includes("sdkwork-notary-runtime-rust"));
-  assert(readme.includes("packages/sdkwork-clawchat-pc-notary/src/services/NotaryService.ts"));
-  assert(readme.includes("cargo test --workspace --target-dir target-codex-test"));
+  assert(readme.includes("sdkwork-notary-case-service"));
+  assert(readme.includes("packages/sdkwork-im-pc-notary/src/services/NotaryService.ts"));
+  assert(readme.includes("pnpm verify"));
+  assert(readme.includes("pnpm test:rust"));
+});
+
+test("notary workspace uses RUST_CODE_SPEC compliant crate names", () => {
+  const workspaceManifest = readText("Cargo.toml");
+  for (const forbidden of [
+    "sdkwork-notary-core-rust",
+    "sdkwork-notary-runtime-rust",
+    "sdkwork-notary-storage-sqlx-rust",
+  ]) {
+    assert(!workspaceManifest.includes(forbidden), `forbidden crate name must be removed: ${forbidden}`);
+  }
+  assert(existsSync(path.join(workspaceRoot, "specs/topology.spec.json")));
+  assert(existsSync(path.join(workspaceRoot, "scripts/lib/notary-topology.mjs")));
+  assert(existsSync(path.join(workspaceRoot, "apis/app-api/notary/notary-app-api.openapi.json")));
+  assert(
+    existsSync(path.join(workspaceRoot, "apis/backend-api/notary/notary-backend-api.openapi.json")),
+  );
 });

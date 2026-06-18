@@ -1,23 +1,21 @@
-use async_trait::async_trait;
-use sdkwork_notary_core::{
-    NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand,
-    NotaryRuntimeContext, NotaryServiceError,
+use sdkwork_notary_case_contract::{
+    NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand, NotaryRuntimeContext,
 };
-use sdkwork_notary_runtime::{
+use sdkwork_notary_case_service::{
     create_notary_case, ensure_notary_business_open, handle_notary_app_operation,
     handle_notary_backend_operation, list_case_files, notary_runtime_contract,
-    AppbaseOrganizationMember, AppbasePort, CommerceCreateOrderCommand, CommerceMatterCommand,
-    CommerceMatterListQuery, CommerceMatterRecord, CommerceMatterUpdateCommand,
-    CommerceOrderReference, CommercePort, DriveCreateFolderCommand, DriveCreateSpaceCommand,
-    DriveFolderReference, DriveListNodesQuery, DriveNodeReference, DrivePort,
-    NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListQuery,
-    NotaryCaseEventRecord, NotaryCaseListQuery, NotaryCaseRepositoryPort, NotaryCaseUpdateCommand,
-    NotaryOrganizationProfileUpdateCommand, NotaryPartyRecord, NotaryPartyUpdateCommand,
-    NotaryRuntimePorts, NOTARY_CASE_REPOSITORY_PORT, NOTARY_COMMERCE_PORT, NOTARY_DRIVE_PORT,
-    NOTARY_IAM_PORT,
+    AppbaseOrganizationMember, NotaryCaseEventRecord, NotaryPartyRecord, NotaryRuntimePorts,
+    NOTARY_CASE_REPOSITORY_PORT, NOTARY_COMMERCE_PORT, NOTARY_DRIVE_PORT, NOTARY_IAM_PORT,
 };
 use serde_json::json;
 use std::collections::BTreeMap;
+
+mod recording_ports;
+
+use recording_ports::{
+    sample_matter_record, RecordingAppbase, RecordingCommerce, RecordingDrive,
+    RecordingNotaryCaseRepository,
+};
 
 #[test]
 fn runtime_contract_declares_commerce_drive_iam_and_notary_storage_ports() {
@@ -89,6 +87,7 @@ async fn opening_notary_business_creates_notary_drive_space_before_profile() {
         membership_id: "member-owner".to_string(),
         user_id: "user-1".to_string(),
         organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
         notary_enabled: true,
         roles: vec!["notary_admin".to_string()],
@@ -104,11 +103,11 @@ async fn opening_notary_business_creates_notary_drive_space_before_profile() {
         &context,
         "org-1",
         "member-owner",
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -117,9 +116,12 @@ async fn opening_notary_business_creates_notary_drive_space_before_profile() {
     assert_eq!(profile.organization_id, "org-1");
     assert_eq!(profile.drive_space_id, "space-notary-org-1");
     assert_eq!(profile.drive_space_type, "notary");
-    assert_eq!(drive.events, vec!["create_space:notary:organization:org-1"],);
     assert_eq!(
-        repository.events,
+        drive.events(),
+        vec!["create_space:notary:organization:org-1"],
+    );
+    assert_eq!(
+        repository.events(),
         vec!["upsert_profile:org-1:space-notary-org-1:notary"],
     );
 }
@@ -128,8 +130,9 @@ async fn opening_notary_business_creates_notary_drive_space_before_profile() {
 async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-notary-1".to_string(),
+        user_id: "user-1".to_string(),
         organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
         notary_enabled: true,
         roles: vec!["notary".to_string()],
@@ -160,11 +163,11 @@ async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
                 phone: Some("13800138000".to_string()),
             }],
         },
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -175,13 +178,10 @@ async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
         created.primary_notary_membership_id,
         Some("member-notary-1".to_string())
     );
-    assert_eq!(
-        created.primary_notary_user_id,
-        Some("user-notary-1".to_string())
-    );
+    assert_eq!(created.primary_notary_user_id, Some("user-1".to_string()));
     assert_eq!(
         created.primary_notary_name,
-        Some("member-notary-1".to_string())
+        Some("Notary Staff".to_string())
     );
     assert_eq!(created.order_id, "order-sku-electronic-contract");
     assert_eq!(created.order_item_id, "item-sku-electronic-contract");
@@ -193,15 +193,15 @@ async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
         "folder-order-sku-electronic-contract"
     );
     assert_eq!(
-        commerce.events,
+        commerce.events(),
         vec!["create_order:sku-electronic-contract:notary:idem-case-1"],
     );
     assert_eq!(
-        drive.events,
+        drive.events(),
         vec!["create_folder:notary:space-notary-org-1:电子合同存证办理"],
     );
     assert_eq!(
-        repository.events,
+        repository.events(),
         vec![
             "insert_case:order-sku-electronic-contract:item-sku-electronic-contract:sku-electronic-contract:folder-order-sku-electronic-contract",
             "insert_party:张三:order-sku-electronic-contract:sku-electronic-contract",
@@ -211,11 +211,84 @@ async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
 }
 
 #[tokio::test]
+async fn creating_case_compensates_when_party_insert_fails() {
+    let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
+        membership_id: "member-notary-1".to_string(),
+        user_id: "user-1".to_string(),
+        organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
+        enterprise_verified: true,
+        notary_enabled: true,
+        roles: vec!["notary".to_string()],
+        positions: vec!["公证员".to_string()],
+        departments: vec!["公证一部".to_string()],
+    });
+    let mut commerce = RecordingCommerce::default();
+    let mut drive = RecordingDrive::default();
+    let mut repository = RecordingNotaryCaseRepository::default()
+        .with_profile("org-1", "space-notary-org-1")
+        .with_insert_party_failure("case-item-sku-electronic-contract");
+    let context = runtime_context();
+
+    let error = create_notary_case(
+        &context,
+        NotaryCaseCommand {
+            organization_id: "org-1".to_string(),
+            sku_id: "sku-electronic-contract".to_string(),
+            drive_folder_name: None,
+            title: "电子合同存证办理".to_string(),
+            applicant_name: "张三网络科技".to_string(),
+            remarks: None,
+            primary_notary_membership_id: Some("member-notary-1".to_string()),
+            idempotency_key: "idem-case-party-failure".to_string(),
+            parties: vec![NotaryPartyCommand {
+                name: "张三".to_string(),
+                party_role: "申请人".to_string(),
+                identity_no: "110105199001011234".to_string(),
+                phone: Some("13800138000".to_string()),
+            }],
+        },
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap_err();
+
+    assert_eq!(error.code(), "provider-unavailable");
+    assert_eq!(
+        commerce.events(),
+        vec![
+            "create_order:sku-electronic-contract:notary:idem-case-party-failure",
+            "cancel_order:order-sku-electronic-contract",
+        ],
+    );
+    assert_eq!(
+        drive.events(),
+        vec![
+            "create_folder:notary:space-notary-org-1:电子合同存证办理",
+            "delete_folder:notary:space-notary-org-1:folder-order-sku-electronic-contract",
+        ],
+    );
+    assert_eq!(
+        repository.events(),
+        vec![
+            "insert_case:order-sku-electronic-contract:item-sku-electronic-contract:sku-electronic-contract:folder-order-sku-electronic-contract",
+            "delete_case:case-item-sku-electronic-contract",
+        ],
+    );
+}
+
+#[tokio::test]
 async fn creating_case_uses_frontend_drive_folder_name_when_provided() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-notary-1".to_string(),
+        user_id: "user-1".to_string(),
         organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
         notary_enabled: true,
         roles: vec!["notary".to_string()],
@@ -240,18 +313,18 @@ async fn creating_case_uses_frontend_drive_folder_name_when_provided() {
             idempotency_key: "idem-case-folder-name".to_string(),
             parties: Vec::new(),
         },
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
 
     assert_eq!(
-        drive.events,
+        drive.events(),
         vec!["create_folder:notary:space-notary-org-1:NT-20260610-custom-folder"]
     );
 }
@@ -262,6 +335,7 @@ async fn creating_case_rejects_users_without_notary_business_access() {
         membership_id: "member-sales-1".to_string(),
         user_id: "user-sales-1".to_string(),
         organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
         notary_enabled: false,
         roles: vec!["sales".to_string()],
@@ -287,20 +361,142 @@ async fn creating_case_rejects_users_without_notary_business_access() {
             idempotency_key: "idem-case-1".to_string(),
             parties: Vec::new(),
         },
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap_err();
 
     assert_eq!(error.code(), "unauthorized");
-    assert!(commerce.events.is_empty());
-    assert!(drive.events.is_empty());
-    assert!(repository.events.is_empty());
+    assert!(commerce.is_empty());
+    assert!(drive.events().is_empty());
+    assert!(repository.is_empty());
+}
+
+#[tokio::test]
+async fn creating_case_replays_existing_idempotency_key_without_duplicate_side_effects() {
+    let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
+        membership_id: "member-notary-1".to_string(),
+        user_id: "user-1".to_string(),
+        organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
+        enterprise_verified: true,
+        notary_enabled: true,
+        roles: vec!["notary".to_string()],
+        positions: vec!["公证员".to_string()],
+        departments: vec!["公证一部".to_string()],
+    });
+    let mut commerce = RecordingCommerce::default();
+    let mut drive = RecordingDrive::default();
+    let mut repository =
+        RecordingNotaryCaseRepository::default().with_profile("org-1", "space-notary-org-1");
+    let context = runtime_context();
+    let command = NotaryCaseCommand {
+        organization_id: "org-1".to_string(),
+        sku_id: "sku-electronic-contract".to_string(),
+        drive_folder_name: None,
+        title: "电子合同存证办理".to_string(),
+        applicant_name: "张三网络科技".to_string(),
+        remarks: None,
+        primary_notary_membership_id: Some("member-notary-1".to_string()),
+        idempotency_key: "idem-case-replay".to_string(),
+        parties: Vec::new(),
+    };
+
+    let first = create_notary_case(
+        &context,
+        command.clone(),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap();
+    let commerce_calls_after_first = commerce.events().len();
+    let drive_calls_after_first = drive.events().len();
+
+    let replayed = create_notary_case(
+        &context,
+        command,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(replayed.case_id, first.case_id);
+    assert_eq!(commerce.events().len(), commerce_calls_after_first);
+    assert_eq!(drive.events().len(), drive_calls_after_first);
+}
+
+#[tokio::test]
+async fn retrieving_case_rejects_cross_organization_access() {
+    let mut appbase = RecordingAppbase::default();
+    let mut commerce = RecordingCommerce::default();
+    let mut drive = RecordingDrive::default();
+    let mut repository =
+        RecordingNotaryCaseRepository::default().with_case(sample_case_record("case-1"));
+    let mut context = runtime_context();
+    context.organization_id = Some("org-2".to_string());
+
+    let mut path_params = BTreeMap::new();
+    path_params.insert("caseId".to_string(), "case-1".to_string());
+    let error = handle_notary_app_operation(
+        &context,
+        "notary.cases.retrieve",
+        path_params,
+        serde_json::Value::Null,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap_err();
+
+    assert_eq!(error.code(), "unauthorized");
+}
+
+#[tokio::test]
+async fn accepting_case_rejects_invalid_status_transitions() {
+    let mut appbase = RecordingAppbase::default();
+    let mut commerce = RecordingCommerce::default();
+    let mut drive = RecordingDrive::default();
+    let mut repository =
+        RecordingNotaryCaseRepository::default().with_case(sample_case_record("case-1"));
+
+    let mut path_params = BTreeMap::new();
+    path_params.insert("caseId".to_string(), "case-1".to_string());
+    let error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.acceptances.create",
+        path_params,
+        json!({"remarks": "should fail"}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap_err();
+
+    assert_eq!(error.code(), "invalid-state");
+    assert!(error.message().contains("pending_review"));
 }
 
 #[tokio::test]
@@ -316,7 +512,7 @@ async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() 
         applicant_name: "张三网络科技".to_string(),
         primary_notary_name: Some("李明".to_string()),
         primary_notary_membership_id: Some("member-notary-1".to_string()),
-        primary_notary_user_id: Some("user-notary-1".to_string()),
+        primary_notary_user_id: Some("user-1".to_string()),
         status: NotaryCaseStatus::Processing,
         order_id: "order-1".to_string(),
         order_item_id: "item-1".to_string(),
@@ -338,11 +534,11 @@ async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() 
     let files = list_case_files(
         &runtime_context(),
         "case-1",
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -351,7 +547,7 @@ async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() 
     assert_eq!(files.len(), 1);
     assert_eq!(files[0].node_id, "node-folder-case-1");
     assert_eq!(
-        drive.events,
+        drive.events(),
         vec!["list_nodes:notary:space-notary-org-1:folder-case-1::50:"],
     );
 }
@@ -360,8 +556,9 @@ async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() 
 async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-notary-1".to_string(),
+        user_id: "user-1".to_string(),
         organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
         notary_enabled: true,
         roles: vec!["notary".to_string()],
@@ -394,11 +591,11 @@ async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
                 }
             ]
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -418,11 +615,11 @@ async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
         "notary.cases.files.list",
         path_params,
         serde_json::Value::Null,
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -472,11 +669,11 @@ async fn app_operation_dispatcher_returns_frontend_case_details_from_notary_and_
         "notary.cases.retrieve",
         path_params,
         serde_json::Value::Null,
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -498,18 +695,18 @@ async fn app_operation_dispatcher_returns_frontend_case_details_from_notary_and_
         "notary.cases.list",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "status": "PROCESSING", "q": "contract"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
     assert_eq!(listed["items"][0]["id"], "case-1");
     assert_eq!(
-        repository.events.last().unwrap(),
+        repository.events().last().unwrap(),
         "list_cases:org-1:processing::contract:50:"
     );
 }
@@ -550,11 +747,11 @@ async fn app_operation_dispatcher_forwards_openapi_filters_to_repository_and_dri
             "page_size": 25,
             "cursor": "case-z"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -562,7 +759,7 @@ async fn app_operation_dispatcher_forwards_openapi_filters_to_repository_and_dri
     assert_eq!(listed["items"].as_array().unwrap().len(), 1);
     assert_eq!(listed["items"][0]["skuId"], "sku-electronic-contract");
     assert_eq!(
-        repository.events.last().unwrap(),
+        repository.events().last().unwrap(),
         "list_cases:org-1:processing:sku-electronic-contract:contract:25:case-z"
     );
 
@@ -577,18 +774,18 @@ async fn app_operation_dispatcher_forwards_openapi_filters_to_repository_and_dri
             "page_size": 25,
             "cursor": "file-cursor"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
     assert_eq!(files["items"][0]["category"], "identity");
     assert_eq!(
-        drive.events.last().unwrap(),
+        drive.events().last().unwrap(),
         "list_nodes:notary:space-notary-org-1:folder-case-1:identity:25:file-cursor"
     );
 
@@ -600,17 +797,17 @@ async fn app_operation_dispatcher_forwards_openapi_filters_to_repository_and_dri
             "page_size": 1,
             "cursor": "event-0"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
     assert_eq!(
-        repository.events.last().unwrap(),
+        repository.events().last().unwrap(),
         "list_events:case-1:1:event-0"
     );
 }
@@ -621,6 +818,7 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
     completed_case.status = NotaryCaseStatus::Completed;
     completed_case.case_no = "NT-20260610-002".to_string();
     completed_case.title = "Completed evidence preservation".to_string();
+    completed_case.chain_hash = Some("chain-hash-case-2".to_string());
 
     let mut rejected_case = sample_case_record("case-3");
     rejected_case.status = NotaryCaseStatus::Rejected;
@@ -640,11 +838,11 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
         "notary.dashboard.statistics.retrieve",
         BTreeMap::new(),
         serde_json::Value::Null,
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -658,18 +856,18 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
         statistics["monthlyPreservationTotal"]["blockchainSyncStatus"],
         "OK"
     );
-    assert_eq!(repository.events[0], "list_cases:org-1::::500:");
+    assert_eq!(repository.events()[0], "list_cases:org-1::::500:");
 
     let report = handle_notary_app_operation(
         &runtime_context(),
         "notary.reports.monthly.retrieve",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "month": "2026-06", "format": "csv"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -683,7 +881,7 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
         report["downloadUrl"],
         "sdkwork://notary/reports/notary-monthly-2026-06-csv.csv"
     );
-    assert_eq!(repository.events[1], "list_cases:org-1::::500:");
+    assert_eq!(repository.events()[1], "list_cases:org-1::::500:");
 }
 
 #[tokio::test]
@@ -691,8 +889,9 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
     let mut appbase = RecordingAppbase::default();
     let mut commerce = RecordingCommerce::default();
     let mut drive = RecordingDrive::default();
-    let mut repository =
-        RecordingNotaryCaseRepository::default().with_case(sample_case_record("case-1"));
+    let mut case = sample_case_record("case-1");
+    case.status = NotaryCaseStatus::PendingReview;
+    let mut repository = RecordingNotaryCaseRepository::default().with_case(case);
 
     let mut path_params = BTreeMap::new();
     path_params.insert("caseId".to_string(), "case-1".to_string());
@@ -701,18 +900,18 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
         "notary.cases.acceptances.create",
         path_params.clone(),
         json!({"remarks": "materials accepted"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
     assert_eq!(accepted["status"], "PROCESSING");
     assert!(repository
-        .events
+        .events()
         .contains(&"append_event:notary.case.accepted".to_string()));
 
     let with_party = handle_notary_app_operation(
@@ -725,18 +924,18 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
             "identityNo": "110105199202021234",
             "phone": "13900139000"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
     assert_eq!(with_party["parties"][0]["name"], "Li Si");
     assert!(repository
-        .events
+        .events()
         .contains(&"append_event:notary.party.created".to_string()));
 
     let party_id = with_party["parties"][0]["id"].as_str().unwrap().to_string();
@@ -747,11 +946,11 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
         "notary.cases.parties.videoInvites.create",
         invite_params,
         json!({"purpose": "identity_verification"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -768,7 +967,7 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
     assert!(invite_url.contains("caseId=case-1"));
     assert!(invite_url.contains("partyId=party-case-1-1"));
     assert_eq!(
-        repository.events.last().unwrap(),
+        repository.events().last().unwrap(),
         "append_event:notary.party.video_invite.created"
     );
 
@@ -779,11 +978,11 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
         "notary.cases.parties.signatureInvites.create",
         signature_invite_params,
         json!({"purpose": "remote_signature"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -801,7 +1000,7 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
         signature_invite["inviteUrl"]
     );
     assert_eq!(
-        repository.events.last().unwrap(),
+        repository.events().last().unwrap(),
         "append_event:notary.party.signature_invite.created"
     );
 
@@ -815,11 +1014,11 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
             "materialCode": "contract.pdf",
             "reviewStatus": "pending"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -833,11 +1032,11 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
         "notary.cases.downloadPackages.create",
         path_params,
         json!({"packageName": "case-1.zip"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -853,12 +1052,14 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
     completed_case.status = NotaryCaseStatus::Completed;
     completed_case.case_no = "NT-20260610-002".to_string();
     completed_case.title = "Completed evidence preservation".to_string();
+    completed_case.chain_hash = Some("chain-hash-case-2".to_string());
 
     let mut appbase = RecordingAppbase::default()
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-owner".to_string(),
             user_id: "user-1".to_string(),
             organization_id: "org-1".to_string(),
+            display_name: "Owner".to_string(),
             enterprise_verified: true,
             notary_enabled: true,
             roles: vec!["notary_admin".to_string()],
@@ -867,8 +1068,9 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
         })
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-notary-1".to_string(),
-            user_id: "user-notary-1".to_string(),
+            user_id: "user-1".to_string(),
             organization_id: "org-1".to_string(),
+            display_name: "李明".to_string(),
             enterprise_verified: true,
             notary_enabled: true,
             roles: vec!["notary".to_string()],
@@ -889,11 +1091,11 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
             "organizationId": "org-1",
             "openedByMembershipId": "member-owner"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -906,18 +1108,18 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
         "notary.organizationProfiles.list",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "pageSize": 20}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
     assert_eq!(profiles["items"][0]["organizationId"], "org-1");
     assert!(repository
-        .events
+        .events()
         .contains(&"list_profiles:org-1:20".to_string()));
 
     let staff = handle_notary_backend_operation(
@@ -925,11 +1127,11 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
         "notary.staff.list",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "staffRole": "notary"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -942,11 +1144,11 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
         "notary.cases.management.list",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "pageSize": 20}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -958,11 +1160,11 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
         "notary.reports.caseSummary.retrieve",
         BTreeMap::new(),
         json!({"organizationId": "org-1"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -978,6 +1180,7 @@ async fn app_operation_dispatcher_returns_access_and_sku_backed_matters() {
         membership_id: "member-notary-1".to_string(),
         user_id: "user-1".to_string(),
         organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
         notary_enabled: true,
         roles: vec!["notary".to_string()],
@@ -997,11 +1200,11 @@ async fn app_operation_dispatcher_returns_access_and_sku_backed_matters() {
         "notary.access.retrieve",
         BTreeMap::new(),
         serde_json::Value::Null,
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1022,11 +1225,11 @@ async fn app_operation_dispatcher_returns_access_and_sku_backed_matters() {
         "notary.matters.list",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "q": "contract", "pageSize": 20}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1036,7 +1239,7 @@ async fn app_operation_dispatcher_returns_access_and_sku_backed_matters() {
     assert_eq!(matters["items"][0]["spuId"], "spu-sku-electronic-contract");
     assert_eq!(matters["items"][0]["priceAmount"], "500.00");
     assert_eq!(
-        commerce.events.last().unwrap(),
+        commerce.events().last().unwrap(),
         "list_matters:org-1:contract::20"
     );
 }
@@ -1046,8 +1249,9 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
     let mut appbase = RecordingAppbase::default()
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-notary-1".to_string(),
-            user_id: "user-notary-1".to_string(),
+            user_id: "user-1".to_string(),
             organization_id: "org-1".to_string(),
+            display_name: "李明".to_string(),
             enterprise_verified: true,
             notary_enabled: true,
             roles: vec!["notary".to_string()],
@@ -1058,6 +1262,7 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
             membership_id: "member-assistant-1".to_string(),
             user_id: "user-assistant-1".to_string(),
             organization_id: "org-1".to_string(),
+            display_name: "Assistant".to_string(),
             enterprise_verified: true,
             notary_enabled: true,
             roles: vec!["assistant".to_string()],
@@ -1068,6 +1273,7 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
             membership_id: "member-sales-1".to_string(),
             user_id: "user-sales-1".to_string(),
             organization_id: "org-1".to_string(),
+            display_name: "Sales".to_string(),
             enterprise_verified: true,
             notary_enabled: false,
             roles: vec!["sales".to_string()],
@@ -1084,11 +1290,11 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
         "notary.staff.list",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "staffRole": "notary"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1107,11 +1313,11 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
             "organizationMembershipId": "member-notary-1",
             "assignmentRole": "primary_notary"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1119,10 +1325,10 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
 
     assert_eq!(assignment["caseId"], "case-1");
     assert_eq!(assignment["organizationMembershipId"], "member-notary-1");
-    assert_eq!(assignment["userId"], "user-notary-1");
+    assert_eq!(assignment["userId"], "user-1");
     assert_eq!(assignment["assignmentRole"], "primary_notary");
     assert_eq!(
-        repository.events,
+        repository.events(),
         vec![
             "insert_assignment:assignment-case-1-member-notary-1-primary_notary",
             "append_event:notary.case.assignment_created",
@@ -1137,6 +1343,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
             membership_id: "member-owner".to_string(),
             user_id: "user-1".to_string(),
             organization_id: "org-1".to_string(),
+            display_name: "Owner".to_string(),
             enterprise_verified: true,
             notary_enabled: true,
             roles: vec!["notary_admin".to_string()],
@@ -1145,8 +1352,9 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         })
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-notary-1".to_string(),
-            user_id: "user-notary-1".to_string(),
+            user_id: "user-1".to_string(),
             organization_id: "org-1".to_string(),
+            display_name: "李明".to_string(),
             enterprise_verified: true,
             notary_enabled: true,
             roles: vec!["notary".to_string()],
@@ -1166,11 +1374,11 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         "notary.organizationProfiles.update",
         profile_path,
         json!({"status": "suspended", "settings": {"reviewMode": "manual"}}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1192,11 +1400,11 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
             "status": "active",
             "spec": {"materialCodes": ["identity", "evidence"]}
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1216,11 +1424,11 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         "notary.matters.management.list",
         BTreeMap::new(),
         json!({"organizationId": "org-1", "q": "evidence", "pageSize": 10}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1240,11 +1448,11 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         "notary.matters.update",
         matter_path,
         json!({"title": "Updated evidence preservation", "status": "inactive"}),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1262,11 +1470,11 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
             "organizationMembershipId": "member-notary-1",
             "assignmentRole": "primary_notary"
         }),
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
@@ -1275,7 +1483,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
     assert_eq!(assignment["organizationMembershipId"], "member-notary-1");
     assert_eq!(assignment["assignmentRole"], "primary_notary");
     assert_eq!(
-        repository.events.last().unwrap(),
+        repository.events().last().unwrap(),
         "append_event:notary.case.assignment_created"
     );
 
@@ -1288,656 +1496,20 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         "notary.cases.assignments.delete",
         assignment_path,
         serde_json::Value::Null,
-        &mut NotaryRuntimePorts {
-            appbase: &mut appbase,
-            commerce: &mut commerce,
-            drive: &mut drive,
-            repository: &mut repository,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
         },
     )
     .await
     .unwrap();
     assert_eq!(released["released"], true);
     assert_eq!(
-        repository.events.last().unwrap(),
+        repository.events().last().unwrap(),
         "append_event:notary.case.assignment_released"
     );
-}
-
-#[derive(Default)]
-struct RecordingAppbase {
-    members: Vec<AppbaseOrganizationMember>,
-}
-
-impl RecordingAppbase {
-    fn with_member(mut self, member: AppbaseOrganizationMember) -> Self {
-        self.members.push(member);
-        self
-    }
-}
-
-#[async_trait]
-impl AppbasePort for RecordingAppbase {
-    async fn get_organization_member(
-        &mut self,
-        organization_id: &str,
-        membership_id: &str,
-    ) -> Result<Option<AppbaseOrganizationMember>, NotaryServiceError> {
-        Ok(self
-            .members
-            .iter()
-            .find(|member| {
-                member.organization_id == organization_id && member.membership_id == membership_id
-            })
-            .cloned())
-    }
-
-    async fn list_organization_members(
-        &mut self,
-        organization_id: &str,
-    ) -> Result<Vec<AppbaseOrganizationMember>, NotaryServiceError> {
-        Ok(self
-            .members
-            .iter()
-            .filter(|member| member.organization_id == organization_id)
-            .cloned()
-            .collect())
-    }
-}
-
-#[derive(Default)]
-struct RecordingCommerce {
-    events: Vec<String>,
-    matters: Vec<CommerceMatterRecord>,
-}
-
-impl RecordingCommerce {
-    fn with_matter(mut self, record: CommerceMatterRecord) -> Self {
-        self.matters.push(record);
-        self
-    }
-}
-
-#[async_trait]
-impl CommercePort for RecordingCommerce {
-    async fn create_notary_order(
-        &mut self,
-        command: CommerceCreateOrderCommand,
-    ) -> Result<CommerceOrderReference, NotaryServiceError> {
-        self.events.push(format!(
-            "create_order:{}:{}:{}",
-            command.sku_id, command.product_type, command.idempotency_key
-        ));
-        Ok(CommerceOrderReference {
-            order_id: format!("order-{}", command.sku_id),
-            order_item_id: format!("item-{}", command.sku_id),
-            sku_id: command.sku_id,
-            matter_title: command.title,
-            fee_amount: "500.00".to_string(),
-            currency_code: "CNY".to_string(),
-        })
-    }
-
-    async fn list_notary_matters(
-        &mut self,
-        query: CommerceMatterListQuery,
-    ) -> Result<Vec<CommerceMatterRecord>, NotaryServiceError> {
-        self.events.push(format!(
-            "list_matters:{}:{}:{}:{}",
-            query.organization_id.clone().unwrap_or_default(),
-            query.search_term.clone().unwrap_or_default(),
-            query.status.clone().unwrap_or_default(),
-            query.page_size
-        ));
-        Ok(self
-            .matters
-            .iter()
-            .filter(|record| {
-                query
-                    .status
-                    .as_ref()
-                    .is_none_or(|status| record.status.eq_ignore_ascii_case(status))
-            })
-            .filter(|record| {
-                query.search_term.as_ref().is_none_or(|search_term| {
-                    record
-                        .title
-                        .to_ascii_lowercase()
-                        .contains(&search_term.to_ascii_lowercase())
-                })
-            })
-            .take(query.page_size as usize)
-            .cloned()
-            .collect())
-    }
-
-    async fn create_notary_matter(
-        &mut self,
-        command: CommerceMatterCommand,
-    ) -> Result<CommerceMatterRecord, NotaryServiceError> {
-        let sku_id = format!("sku-{}", slug(&command.title));
-        self.events.push(format!(
-            "create_matter:{}:{}:{}",
-            sku_id, command.price_amount, command.idempotency_key
-        ));
-        let record = CommerceMatterRecord {
-            sku_id: sku_id.clone(),
-            spu_id: format!("spu-{sku_id}"),
-            sku_no: format!("SKU-{}", slug(&command.title).to_ascii_uppercase()),
-            title: command.title,
-            description: command.description,
-            price_amount: command.price_amount,
-            original_price_amount: command.original_price_amount,
-            currency_code: command.currency_code,
-            status: command.status,
-            spec: command.spec,
-        };
-        self.matters.push(record.clone());
-        Ok(record)
-    }
-
-    async fn update_notary_matter(
-        &mut self,
-        command: CommerceMatterUpdateCommand,
-    ) -> Result<CommerceMatterRecord, NotaryServiceError> {
-        let record = self
-            .matters
-            .iter_mut()
-            .find(|record| record.sku_id == command.sku_id)
-            .ok_or_else(|| NotaryServiceError::not_found("notary matter sku not found"))?;
-
-        if let Some(title) = command.title {
-            record.title = title;
-        }
-        if let Some(description) = command.description {
-            record.description = Some(description);
-        }
-        if let Some(price_amount) = command.price_amount {
-            record.price_amount = price_amount;
-        }
-        if let Some(original_price_amount) = command.original_price_amount {
-            record.original_price_amount = Some(original_price_amount);
-        }
-        if let Some(currency_code) = command.currency_code {
-            record.currency_code = currency_code;
-        }
-        if let Some(status) = command.status {
-            record.status = status;
-        }
-        if let Some(spec) = command.spec {
-            record.spec = spec;
-        }
-        self.events
-            .push(format!("update_matter:{}", command.sku_id));
-        Ok(record.clone())
-    }
-}
-
-#[derive(Default)]
-struct RecordingDrive {
-    events: Vec<String>,
-}
-
-#[async_trait]
-impl DrivePort for RecordingDrive {
-    async fn create_notary_space(
-        &mut self,
-        command: DriveCreateSpaceCommand,
-    ) -> Result<String, NotaryServiceError> {
-        self.events.push(format!(
-            "create_space:{}:{}:{}",
-            command.space_type, command.owner_subject_type, command.owner_subject_id
-        ));
-        Ok(format!("space-notary-{}", command.owner_subject_id))
-    }
-
-    async fn create_case_folder(
-        &mut self,
-        command: DriveCreateFolderCommand,
-    ) -> Result<DriveFolderReference, NotaryServiceError> {
-        self.events.push(format!(
-            "create_folder:{}:{}:{}",
-            command.space_type, command.space_id, command.folder_name
-        ));
-        Ok(DriveFolderReference {
-            folder_node_id: format!("folder-{}", command.order_id),
-            space_id: command.space_id,
-            space_type: command.space_type,
-        })
-    }
-
-    async fn list_nodes(
-        &mut self,
-        query: DriveListNodesQuery,
-    ) -> Result<Vec<DriveNodeReference>, NotaryServiceError> {
-        self.events.push(format!(
-            "list_nodes:{}:{}:{}:{}:{}:{}",
-            query.space_type,
-            query.space_id,
-            query.parent_node_id,
-            query.category.clone().unwrap_or_default(),
-            query.page_size,
-            query.cursor.clone().unwrap_or_default()
-        ));
-        Ok(vec![DriveNodeReference {
-            node_id: format!("node-{}", query.parent_node_id),
-            node_name: "合同.pdf".to_string(),
-            category: query.category.unwrap_or_else(|| "evidence".to_string()),
-            size_label: "2.4 MB".to_string(),
-            status: "verified".to_string(),
-        }])
-    }
-}
-
-#[derive(Default)]
-struct RecordingNotaryCaseRepository {
-    events: Vec<String>,
-    profiles: Vec<(String, String, String)>,
-    cases: Vec<NotaryCaseRecord>,
-    parties: Vec<NotaryPartyRecord>,
-    case_events: Vec<NotaryCaseEventRecord>,
-    assignments: Vec<NotaryCaseAssignmentRecord>,
-}
-
-impl RecordingNotaryCaseRepository {
-    fn with_profile(mut self, organization_id: &str, drive_space_id: &str) -> Self {
-        self.profiles.push((
-            organization_id.to_string(),
-            drive_space_id.to_string(),
-            "active".to_string(),
-        ));
-        self
-    }
-
-    fn with_case(mut self, record: NotaryCaseRecord) -> Self {
-        self.cases.push(record);
-        self
-    }
-
-    fn with_party(mut self, record: NotaryPartyRecord) -> Self {
-        self.parties.push(record);
-        self
-    }
-
-    fn with_event(mut self, record: NotaryCaseEventRecord) -> Self {
-        self.case_events.push(record);
-        self
-    }
-}
-
-#[async_trait]
-impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
-    async fn upsert_organization_profile(
-        &mut self,
-        organization_id: &str,
-        drive_space_id: &str,
-        drive_space_type: &str,
-    ) -> Result<sdkwork_notary_runtime::NotaryOrganizationProfile, NotaryServiceError> {
-        self.events.push(format!(
-            "upsert_profile:{organization_id}:{drive_space_id}:{drive_space_type}"
-        ));
-        if let Some(profile) = self
-            .profiles
-            .iter_mut()
-            .find(|(profile_org_id, _, _)| profile_org_id == organization_id)
-        {
-            profile.1 = drive_space_id.to_string();
-            profile.2 = "active".to_string();
-        } else {
-            self.profiles.push((
-                organization_id.to_string(),
-                drive_space_id.to_string(),
-                "active".to_string(),
-            ));
-        }
-        Ok(sdkwork_notary_runtime::NotaryOrganizationProfile {
-            organization_id: organization_id.to_string(),
-            drive_space_id: drive_space_id.to_string(),
-            drive_space_type: drive_space_type.to_string(),
-            status: "active".to_string(),
-        })
-    }
-
-    async fn get_organization_profile(
-        &mut self,
-        organization_id: &str,
-    ) -> Result<Option<sdkwork_notary_runtime::NotaryOrganizationProfile>, NotaryServiceError> {
-        Ok(self
-            .profiles
-            .iter()
-            .find(|(profile_org_id, _, _)| profile_org_id == organization_id)
-            .map(|(profile_org_id, drive_space_id, status)| {
-                sdkwork_notary_runtime::NotaryOrganizationProfile {
-                    organization_id: profile_org_id.clone(),
-                    drive_space_id: drive_space_id.clone(),
-                    drive_space_type: "notary".to_string(),
-                    status: status.clone(),
-                }
-            }))
-    }
-
-    async fn list_organization_profiles(
-        &mut self,
-        organization_id: Option<&str>,
-        page_size: i64,
-    ) -> Result<Vec<sdkwork_notary_runtime::NotaryOrganizationProfile>, NotaryServiceError> {
-        self.events.push(format!(
-            "list_profiles:{}:{}",
-            organization_id.unwrap_or_default(),
-            page_size
-        ));
-        Ok(self
-            .profiles
-            .iter()
-            .filter(|(profile_org_id, _, _)| {
-                organization_id.is_none_or(|organization_id| profile_org_id == organization_id)
-            })
-            .take(page_size as usize)
-            .map(|(profile_org_id, drive_space_id, status)| {
-                sdkwork_notary_runtime::NotaryOrganizationProfile {
-                    organization_id: profile_org_id.clone(),
-                    drive_space_id: drive_space_id.clone(),
-                    drive_space_type: "notary".to_string(),
-                    status: status.clone(),
-                }
-            })
-            .collect())
-    }
-
-    async fn update_organization_profile(
-        &mut self,
-        command: NotaryOrganizationProfileUpdateCommand,
-    ) -> Result<sdkwork_notary_runtime::NotaryOrganizationProfile, NotaryServiceError> {
-        let profile = self
-            .profiles
-            .iter_mut()
-            .find(|(profile_org_id, _, _)| profile_org_id == &command.organization_id)
-            .ok_or_else(|| {
-                NotaryServiceError::not_found("notary organization profile not found")
-            })?;
-        if let Some(status) = command.status {
-            profile.2 = status;
-        }
-        self.events
-            .push(format!("update_profile:{}", command.organization_id));
-        Ok(sdkwork_notary_runtime::NotaryOrganizationProfile {
-            organization_id: profile.0.clone(),
-            drive_space_id: profile.1.clone(),
-            drive_space_type: "notary".to_string(),
-            status: profile.2.clone(),
-        })
-    }
-
-    async fn insert_case(
-        &mut self,
-        record: NotaryCaseRecord,
-    ) -> Result<NotaryCaseRecord, NotaryServiceError> {
-        self.events.push(format!(
-            "insert_case:{}:{}:{}:{}",
-            record.order_id, record.order_item_id, record.sku_id, record.drive_folder_node_id
-        ));
-        self.cases.push(record.clone());
-        Ok(record)
-    }
-
-    async fn insert_party(
-        &mut self,
-        case_id: &str,
-        party: &NotaryPartyCommand,
-        order_id: &str,
-        order_item_id: &str,
-        sku_id: &str,
-    ) -> Result<(), NotaryServiceError> {
-        let _ = (case_id, order_item_id);
-        self.events.push(format!(
-            "insert_party:{}:{}:{}",
-            party.name, order_id, sku_id
-        ));
-        self.parties.push(NotaryPartyRecord {
-            party_id: format!("party-{case_id}-{}", self.parties.len() + 1),
-            case_id: case_id.to_string(),
-            order_id: order_id.to_string(),
-            order_item_id: order_item_id.to_string(),
-            sku_id: sku_id.to_string(),
-            name: party.name.clone(),
-            party_role: party.party_role.clone(),
-            identity_no_last4: party
-                .identity_no
-                .chars()
-                .rev()
-                .take(4)
-                .collect::<String>()
-                .chars()
-                .rev()
-                .collect(),
-            phone_masked: party.phone.clone(),
-            status: "active".to_string(),
-            signature_node_id: None,
-        });
-        Ok(())
-    }
-
-    async fn append_event(
-        &mut self,
-        case_id: &str,
-        event_type: &str,
-    ) -> Result<(), NotaryServiceError> {
-        let _ = case_id;
-        self.events.push(format!("append_event:{event_type}"));
-        Ok(())
-    }
-
-    async fn get_case(
-        &mut self,
-        case_id: &str,
-    ) -> Result<Option<NotaryCaseRecord>, NotaryServiceError> {
-        Ok(self
-            .cases
-            .iter()
-            .find(|record| record.case_id == case_id)
-            .cloned())
-    }
-
-    async fn update_case(
-        &mut self,
-        command: NotaryCaseUpdateCommand,
-    ) -> Result<NotaryCaseRecord, NotaryServiceError> {
-        let record = self
-            .cases
-            .iter_mut()
-            .find(|record| record.case_id == command.case_id)
-            .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
-
-        if let Some(title) = command.title {
-            record.title = title;
-        }
-        if let Some(remarks) = command.remarks {
-            record.remarks = Some(remarks);
-        }
-        if let Some(status) = command.status {
-            record.status = status;
-        }
-        if let Some(chain_hash) = command.chain_hash {
-            record.chain_hash = Some(chain_hash);
-        }
-        record.updated_at = "2026-06-10 10:30".to_string();
-
-        Ok(record.clone())
-    }
-
-    async fn update_party(
-        &mut self,
-        command: NotaryPartyUpdateCommand,
-    ) -> Result<NotaryPartyRecord, NotaryServiceError> {
-        let record = self
-            .parties
-            .iter_mut()
-            .find(|record| record.case_id == command.case_id && record.party_id == command.party_id)
-            .ok_or_else(|| NotaryServiceError::not_found("notary party not found"))?;
-        if let Some(name) = command.name {
-            record.name = name;
-        }
-        if let Some(party_role) = command.party_role {
-            record.party_role = party_role;
-        }
-        if let Some(identity_no) = command.identity_no {
-            record.identity_no_last4 = identity_no
-                .chars()
-                .rev()
-                .take(4)
-                .collect::<String>()
-                .chars()
-                .rev()
-                .collect();
-        }
-        if let Some(phone) = command.phone {
-            record.phone_masked = Some(phone);
-        }
-        if let Some(signature_node_id) = command.signature_node_id {
-            record.signature_node_id = Some(signature_node_id);
-        }
-        self.events
-            .push(format!("update_party:{}", record.party_id));
-        Ok(record.clone())
-    }
-
-    async fn remove_party(
-        &mut self,
-        case_id: &str,
-        party_id: &str,
-    ) -> Result<(), NotaryServiceError> {
-        let record = self
-            .parties
-            .iter_mut()
-            .find(|record| record.case_id == case_id && record.party_id == party_id)
-            .ok_or_else(|| NotaryServiceError::not_found("notary party not found"))?;
-        record.status = "removed".to_string();
-        self.events.push(format!("remove_party:{party_id}"));
-        Ok(())
-    }
-
-    async fn insert_assignment(
-        &mut self,
-        command: NotaryCaseAssignmentCommand,
-    ) -> Result<NotaryCaseAssignmentRecord, NotaryServiceError> {
-        let assignment = NotaryCaseAssignmentRecord {
-            assignment_id: format!(
-                "assignment-{}-{}-{}",
-                command.case_id, command.organization_membership_id, command.assignment_role
-            ),
-            case_id: command.case_id,
-            organization_membership_id: command.organization_membership_id,
-            user_id: command.user_id,
-            assignment_role: command.assignment_role,
-            status: "active".to_string(),
-            assigned_at: "2026-06-10 10:30".to_string(),
-        };
-        self.events
-            .push(format!("insert_assignment:{}", assignment.assignment_id));
-        self.assignments.push(assignment.clone());
-        Ok(assignment)
-    }
-
-    async fn release_assignment(&mut self, assignment_id: &str) -> Result<(), NotaryServiceError> {
-        let assignment = self
-            .assignments
-            .iter_mut()
-            .find(|assignment| assignment.assignment_id == assignment_id)
-            .ok_or_else(|| NotaryServiceError::not_found("notary case assignment not found"))?;
-        assignment.status = "released".to_string();
-        self.events
-            .push(format!("release_assignment:{assignment_id}"));
-        Ok(())
-    }
-
-    async fn list_cases(
-        &mut self,
-        query: NotaryCaseListQuery,
-    ) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
-        self.events.push(format!(
-            "list_cases:{}:{}:{}:{}:{}:{}",
-            query.organization_id,
-            query.status.clone().unwrap_or_default(),
-            query.sku_id.clone().unwrap_or_default(),
-            query.search_term.clone().unwrap_or_default(),
-            query.page_size,
-            query.cursor.clone().unwrap_or_default()
-        ));
-        Ok(self
-            .cases
-            .iter()
-            .filter(|record| record.organization_id == query.organization_id)
-            .filter(|record| {
-                query
-                    .status
-                    .as_ref()
-                    .is_none_or(|status| record.status.as_storage_value() == status)
-            })
-            .filter(|record| {
-                query
-                    .sku_id
-                    .as_ref()
-                    .is_none_or(|sku_id| &record.sku_id == sku_id)
-            })
-            .filter(|record| {
-                query.search_term.as_ref().is_none_or(|search_term| {
-                    record
-                        .title
-                        .to_ascii_lowercase()
-                        .contains(&search_term.to_ascii_lowercase())
-                        || record
-                            .applicant_name
-                            .to_ascii_lowercase()
-                            .contains(&search_term.to_ascii_lowercase())
-                })
-            })
-            .filter(|record| {
-                query
-                    .cursor
-                    .as_ref()
-                    .is_none_or(|cursor| record.case_id.as_str() < cursor.as_str())
-            })
-            .take(query.page_size as usize)
-            .cloned()
-            .collect())
-    }
-
-    async fn list_parties(
-        &mut self,
-        case_id: &str,
-    ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
-        Ok(self
-            .parties
-            .iter()
-            .filter(|record| record.case_id == case_id)
-            .cloned()
-            .collect())
-    }
-
-    async fn list_events(
-        &mut self,
-        query: NotaryCaseEventListQuery,
-    ) -> Result<Vec<NotaryCaseEventRecord>, NotaryServiceError> {
-        self.events.push(format!(
-            "list_events:{}:{}:{}",
-            query.case_id,
-            query.page_size,
-            query.cursor.clone().unwrap_or_default()
-        ));
-        Ok(self
-            .case_events
-            .iter()
-            .filter(|record| record.case_id == query.case_id)
-            .filter(|record| {
-                query
-                    .cursor
-                    .as_ref()
-                    .is_none_or(|cursor| record.event_id.as_str() > cursor.as_str())
-            })
-            .take(query.page_size as usize)
-            .cloned()
-            .collect())
-    }
 }
 
 fn runtime_context() -> NotaryRuntimeContext {
@@ -1947,7 +1519,7 @@ fn runtime_context() -> NotaryRuntimeContext {
         user_id: "user-1".to_string(),
         membership_id: Some("member-notary-1".to_string()),
         session_id: "session-1".to_string(),
-        app_id: "sdkwork-chat-pc".to_string(),
+        app_id: "sdkwork-im-pc".to_string(),
     }
 }
 
@@ -1959,7 +1531,7 @@ fn sample_case_record(case_id: &str) -> NotaryCaseRecord {
         title: "Electronic contract preservation".to_string(),
         applicant_name: "Zhang San Network".to_string(),
         primary_notary_membership_id: Some("member-notary-1".to_string()),
-        primary_notary_user_id: Some("user-notary-1".to_string()),
+        primary_notary_user_id: Some("user-1".to_string()),
         primary_notary_name: Some("Li Ming".to_string()),
         status: NotaryCaseStatus::Processing,
         order_id: "order-1".to_string(),
@@ -1978,37 +1550,4 @@ fn sample_case_record(case_id: &str) -> NotaryCaseRecord {
         created_at: "2026-06-10 10:00".to_string(),
         updated_at: "2026-06-10 10:00".to_string(),
     }
-}
-
-fn sample_matter_record(sku_id: &str, title: &str) -> CommerceMatterRecord {
-    CommerceMatterRecord {
-        sku_id: sku_id.to_string(),
-        spu_id: format!("spu-{sku_id}"),
-        sku_no: format!("SKU-{}", slug(title).to_ascii_uppercase()),
-        title: title.to_string(),
-        description: Some(format!("{title} service")),
-        price_amount: "500.00".to_string(),
-        original_price_amount: None,
-        currency_code: "CNY".to_string(),
-        status: "active".to_string(),
-        spec: json!({
-            "productType": "notary",
-            "skuPolicy": "one_spu_one_sku"
-        }),
-    }
-}
-
-fn slug(value: &str) -> String {
-    let mut result = String::new();
-    let mut previous_dash = false;
-    for character in value.chars() {
-        if character.is_ascii_alphanumeric() {
-            result.push(character.to_ascii_lowercase());
-            previous_dash = false;
-        } else if !previous_dash && !result.is_empty() {
-            result.push('-');
-            previous_dash = true;
-        }
-    }
-    result.trim_end_matches('-').to_string()
 }

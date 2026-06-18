@@ -9,9 +9,14 @@
     "protocol": "http",
     "packageName": "sdkwork-notary-backend-sdk-generated-typescript"
   },
-  "changeFingerprint": "5067aafac36fa44c8b2e465c945bffdb0eececc3452b5af21556a89060343f70",
+  "changeFingerprint": "6e893383b2141b9c5f8d3e58527668fdf155a4f5ed85cc71a8d151458c70f286",
   "changes": {
-    "createdGeneratedFiles": [
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [
+      "README.md",
+      "src/http/client.ts"
+    ],
+    "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
       "bin/publish.sh",
@@ -20,14 +25,12 @@
       "CHANGELOG.md",
       "LICENSE",
       "package.json",
-      "README.md",
       "sdkwork-sdk.json",
       "src/api/base.ts",
       "src/api/index.ts",
       "src/api/notary.ts",
       "src/api/paths.ts",
       "src/auth/index.ts",
-      "src/http/client.ts",
       "src/http/index.ts",
       "src/index.ts",
       "src/sdk.ts",
@@ -53,127 +56,56 @@
       "src/types/update-notary-organization-profile-request.ts",
       "tsconfig.json"
     ],
-    "updatedGeneratedFiles": [],
-    "unchangedGeneratedFiles": [],
     "deletedGeneratedFiles": [],
-    "scaffoldedFiles": [
+    "scaffoldedFiles": [],
+    "preservedScaffoldFiles": [
       "custom/build-runtime.mjs",
       "custom/README.md"
     ],
-    "preservedScaffoldFiles": [],
-    "backedUpFiles": []
+    "backedUpFiles": [
+      "src/http/client.ts"
+    ]
   },
   "impact": {
     "schemaVersion": 1,
     "areas": [
       "api-surface",
-      "models",
       "runtime",
-      "build-metadata",
-      "publish-workflow",
-      "documentation",
-      "custom-scaffold",
-      "unknown"
+      "documentation"
     ],
     "details": [
       {
         "area": "api-surface",
         "paths": [
-          "src/api/base.ts",
-          "src/api/index.ts",
-          "src/api/notary.ts",
-          "src/api/paths.ts",
-          "src/http/client.ts",
-          "src/sdk.ts"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/types/common.ts",
-          "src/types/create-case-assignment-request.ts",
-          "src/types/create-notary-matter-request.ts",
-          "src/types/create-notary-organization-profile-request.ts",
-          "src/types/index.ts",
-          "src/types/notary-case-assignment.ts",
-          "src/types/notary-case-page.ts",
-          "src/types/notary-case-status.ts",
-          "src/types/notary-case-summary.ts",
-          "src/types/notary-case.ts",
-          "src/types/notary-matter-page.ts",
-          "src/types/notary-matter.ts",
-          "src/types/notary-organization-profile-page.ts",
-          "src/types/notary-organization-profile.ts",
-          "src/types/notary-staff-member-page.ts",
-          "src/types/notary-staff-member.ts",
-          "src/types/page-info.ts",
-          "src/types/problem-detail.ts",
-          "src/types/update-notary-matter-request.ts",
-          "src/types/update-notary-organization-profile-request.ts"
+          "src/http/client.ts"
         ]
       },
       {
         "area": "runtime",
         "paths": [
-          "src/auth/index.ts",
-          "src/http/client.ts",
-          "src/http/index.ts"
-        ]
-      },
-      {
-        "area": "build-metadata",
-        "paths": [
-          "package.json",
-          "sdkwork-sdk.json",
-          "tsconfig.json"
-        ]
-      },
-      {
-        "area": "publish-workflow",
-        "paths": [
-          "bin/publish-core.mjs",
-          "bin/publish.ps1",
-          "bin/publish.sh",
-          "bin/sdk-gen.bat",
-          "bin/sdk-gen.sh"
+          "src/http/client.ts"
         ]
       },
       {
         "area": "documentation",
         "paths": [
-          "CHANGELOG.md",
-          "custom/README.md",
           "README.md"
-        ]
-      },
-      {
-        "area": "custom-scaffold",
-        "paths": [
-          "custom/build-runtime.mjs",
-          "custom/README.md"
-        ]
-      },
-      {
-        "area": "unknown",
-        "paths": [
-          "LICENSE",
-          "src/index.ts"
         ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required."
+    "summary": "Detected impact areas: api-surface, runtime, documentation. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, runtime, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, runtime, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-notary\\sdks\\sdkwork-notary-backend-sdk\\sdkwork-notary-backend-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -191,7 +123,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, runtime, build-metadata, publish-workflow, documentation, custom-scaffold, unknown.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, runtime, documentation.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-notary\\sdks\\sdkwork-notary-backend-sdk\\sdkwork-notary-backend-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -215,11 +147,10 @@
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
+      "backed-up-generated-files",
       "manual-review-required",
-      "preserved-legacy-files",
-      "unknown-impact",
       "verification-required"
     ]
   },
-  "preservedLegacyFiles": true
+  "preservedLegacyFiles": false
 }

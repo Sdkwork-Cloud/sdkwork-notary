@@ -1,10 +1,11 @@
 [package]
-name = "sdkwork-notary-core-rust"
+name = "sdkwork-notary-case-contract"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "sdkwork_notary_core"
+name = "sdkwork_notary_case_contract"
 
 [dependencies]
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }

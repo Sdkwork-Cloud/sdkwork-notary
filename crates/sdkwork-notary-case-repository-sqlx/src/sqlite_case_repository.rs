@@ -1,16 +1,18 @@
 use async_trait::async_trait;
-use sdkwork_notary_core::{
-    NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand, NotaryServiceError,
+use sdkwork_notary_case_contract::{
+    now_iso8601, NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand, NotaryServiceError,
 };
-use sdkwork_notary_runtime::{
-    NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListQuery,
-    NotaryCaseListQuery, NotaryCaseRepositoryPort, NotaryCaseUpdateCommand,
-    NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand, NotaryPartyUpdateCommand,
+use sdkwork_notary_case_service::{
+    NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListPage,
+    NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
+    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand,
+    NotaryPartyUpdateCommand,
 };
-pub use sdkwork_notary_runtime::{NotaryCaseEventRecord, NotaryPartyRecord};
+pub use sdkwork_notary_case_service::{NotaryCaseEventRecord, NotaryPartyRecord};
 use sqlx::{Row, SqlitePool};
 
-const DEFAULT_NOW: &str = "2026-06-10T00:00:00Z";
+use crate::pii_vault::{identity_fingerprint, PiiVault};
+use crate::repository_support::*;
 
 pub fn notary_foundation_migration_sql() -> &'static str {
     include_str!("../migrations/0001_notary_foundation.sql")
@@ -78,7 +80,7 @@ impl SqliteNotaryCaseRepository {
         .bind(organization_id)
         .bind(drive_space_id)
         .bind(drive_space_type)
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to upsert notary organization profile"))?;
@@ -174,7 +176,7 @@ impl SqliteNotaryCaseRepository {
         .bind(&command.organization_id)
         .bind(command.status.as_deref())
         .bind(settings_json.as_deref())
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to update notary organization profile"))?;
@@ -273,6 +275,34 @@ impl SqliteNotaryCaseRepository {
         Ok(record)
     }
 
+    pub async fn delete_case(&self, case_id: &str) -> Result<(), NotaryServiceError> {
+        sqlx::query("DELETE FROM notary_case_event WHERE tenant_id = ?1 AND case_id = ?2")
+            .bind(&self.tenant_id)
+            .bind(case_id)
+            .execute(&self.pool)
+            .await
+            .map_err(store_error("failed to delete notary case events"))?;
+        sqlx::query("DELETE FROM notary_case_assignment WHERE tenant_id = ?1 AND case_id = ?2")
+            .bind(&self.tenant_id)
+            .bind(case_id)
+            .execute(&self.pool)
+            .await
+            .map_err(store_error("failed to delete notary case assignments"))?;
+        sqlx::query("DELETE FROM notary_party WHERE tenant_id = ?1 AND case_id = ?2")
+            .bind(&self.tenant_id)
+            .bind(case_id)
+            .execute(&self.pool)
+            .await
+            .map_err(store_error("failed to delete notary case parties"))?;
+        sqlx::query("DELETE FROM notary_case WHERE tenant_id = ?1 AND id = ?2")
+            .bind(&self.tenant_id)
+            .bind(case_id)
+            .execute(&self.pool)
+            .await
+            .map_err(store_error("failed to delete notary case"))?;
+        Ok(())
+    }
+
     pub async fn insert_party(
         &self,
         case_id: &str,
@@ -286,8 +316,14 @@ impl SqliteNotaryCaseRepository {
             .await?
             .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
         let next_order = next_party_sort_order(&self.pool, &self.tenant_id, case_id).await?;
-        let identity_hash = stable_hash(&party.identity_no);
+        let vault = PiiVault::for_tenant(&self.tenant_id)?;
+        let identity_hash = identity_fingerprint(&party.identity_no);
+        let identity_no_encrypted = vault.encrypt(&party.identity_no)?;
         let identity_no_last4 = last4(&party.identity_no);
+        let phone_encrypted = match party.phone.as_deref() {
+            Some(phone) => Some(vault.encrypt(phone)?),
+            None => None,
+        };
 
         sqlx::query(
             r#"
@@ -326,17 +362,12 @@ impl SqliteNotaryCaseRepository {
         .bind(&party.party_role)
         .bind(&party.name)
         .bind(&identity_hash)
-        .bind(format!("notary-local-vault:v1:{identity_hash}"))
+        .bind(&identity_no_encrypted)
         .bind(&identity_no_last4)
-        .bind(
-            party
-                .phone
-                .as_ref()
-                .map(|phone| format!("notary-local-vault:v1:{}", stable_hash(phone))),
-        )
+        .bind(phone_encrypted.as_deref())
         .bind(party.phone.as_deref().map(mask_phone))
         .bind(next_order)
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to insert notary party"))?;
@@ -378,7 +409,7 @@ impl SqliteNotaryCaseRepository {
         .bind(event_type)
         .bind(event_title(event_type))
         .bind(&self.actor_user_id)
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to append notary case event"))?;
@@ -432,6 +463,52 @@ impl SqliteNotaryCaseRepository {
         row.as_ref().map(case_from_row).transpose()
     }
 
+    pub async fn get_case_by_idempotency_key(
+        &self,
+        idempotency_key: &str,
+    ) -> Result<Option<NotaryCaseRecord>, NotaryServiceError> {
+        let row = sqlx::query(
+            r#"
+            SELECT
+                id,
+                case_no,
+                organization_id,
+                title,
+                remarks,
+                status,
+                applicant_name_snapshot,
+                primary_notary_membership_id,
+                primary_notary_user_id,
+                primary_notary_name_snapshot,
+                order_id,
+                order_item_id,
+                sku_id,
+                matter_title_snapshot,
+                fee_amount_snapshot,
+                currency_code,
+                drive_space_id,
+                drive_space_type,
+                drive_folder_node_id,
+                chain_hash,
+                request_no,
+                idempotency_key,
+                created_at,
+                updated_at
+            FROM notary_case
+            WHERE tenant_id = ?1
+              AND idempotency_key = ?2
+            LIMIT 1
+            "#,
+        )
+        .bind(&self.tenant_id)
+        .bind(idempotency_key)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(store_error("failed to get notary case by idempotency key"))?;
+
+        row.as_ref().map(case_from_row).transpose()
+    }
+
     pub async fn update_case(
         &self,
         command: NotaryCaseUpdateCommand,
@@ -453,7 +530,7 @@ impl SqliteNotaryCaseRepository {
         if let Some(chain_hash) = command.chain_hash {
             record.chain_hash = Some(chain_hash);
         }
-        record.updated_at = DEFAULT_NOW.to_string();
+        record.updated_at = now_iso8601();
 
         sqlx::query(
             r#"
@@ -526,15 +603,22 @@ impl SqliteNotaryCaseRepository {
         &self,
         command: NotaryPartyUpdateCommand,
     ) -> Result<NotaryPartyRecord, NotaryServiceError> {
-        let identity_hash = command.identity_no.as_ref().map(|value| stable_hash(value));
-        let identity_no_encrypted = identity_hash
+        let vault = PiiVault::for_tenant(&self.tenant_id)?;
+        let identity_hash = command
+            .identity_no
             .as_ref()
-            .map(|hash| format!("notary-local-vault:v1:{hash}"));
+            .map(|value| identity_fingerprint(value));
+        let identity_no_encrypted = command
+            .identity_no
+            .as_ref()
+            .map(|value| vault.encrypt(value))
+            .transpose()?;
         let identity_no_last4 = command.identity_no.as_deref().map(last4);
         let phone_encrypted = command
             .phone
             .as_ref()
-            .map(|phone| format!("notary-local-vault:v1:{}", stable_hash(phone)));
+            .map(|phone| vault.encrypt(phone))
+            .transpose()?;
         let phone_masked = command.phone.as_deref().map(mask_phone);
 
         let result = sqlx::query(
@@ -568,7 +652,7 @@ impl SqliteNotaryCaseRepository {
         .bind(phone_encrypted.as_deref())
         .bind(phone_masked.as_deref())
         .bind(command.signature_node_id.as_deref())
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to update notary party"))?;
@@ -603,7 +687,7 @@ impl SqliteNotaryCaseRepository {
         .bind(&self.tenant_id)
         .bind(case_id)
         .bind(party_id)
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to remove notary party"))?;
@@ -660,7 +744,7 @@ impl SqliteNotaryCaseRepository {
         .bind(&command.user_id)
         .bind(&command.assignment_role)
         .bind(command.assigned_by_membership_id.as_deref())
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to insert notary case assignment"))?;
@@ -672,7 +756,7 @@ impl SqliteNotaryCaseRepository {
             user_id: command.user_id,
             assignment_role: command.assignment_role,
             status: "active".to_string(),
-            assigned_at: DEFAULT_NOW.to_string(),
+            assigned_at: now_iso8601(),
         })
     }
 
@@ -691,7 +775,7 @@ impl SqliteNotaryCaseRepository {
         )
         .bind(&self.tenant_id)
         .bind(assignment_id)
-        .bind(DEFAULT_NOW)
+        .bind(now_iso8601())
         .execute(&self.pool)
         .await
         .map_err(store_error("failed to release notary case assignment"))?;
@@ -707,7 +791,9 @@ impl SqliteNotaryCaseRepository {
     pub async fn list_cases(
         &self,
         query: NotaryCaseListQuery,
-    ) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
+    ) -> Result<NotaryCaseListPage, NotaryServiceError> {
+        let page_size = query.page_size.max(1);
+        let fetch_limit = page_size + 1;
         let search_pattern = query
             .search_term
             .as_ref()
@@ -762,12 +848,20 @@ impl SqliteNotaryCaseRepository {
         .bind(search_pattern.as_deref())
         .bind(query.sku_id.as_deref())
         .bind(query.cursor.as_deref())
-        .bind(query.page_size)
+        .bind(fetch_limit)
         .fetch_all(&self.pool)
         .await
         .map_err(store_error("failed to list notary cases"))?;
 
-        rows.iter().map(case_from_row).collect()
+        let mut items = rows
+            .iter()
+            .map(case_from_row)
+            .collect::<Result<Vec<_>, _>>()?;
+        let has_more = items.len() as i64 > page_size;
+        if has_more {
+            items.truncate(page_size as usize);
+        }
+        Ok(NotaryCaseListPage { items, has_more })
     }
 
     pub async fn list_parties(
@@ -807,7 +901,9 @@ impl SqliteNotaryCaseRepository {
     pub async fn list_events(
         &self,
         query: NotaryCaseEventListQuery,
-    ) -> Result<Vec<NotaryCaseEventRecord>, NotaryServiceError> {
+    ) -> Result<NotaryCaseEventListPage, NotaryServiceError> {
+        let page_size = query.page_size.max(1);
+        let fetch_limit = page_size + 1;
         let rows = sqlx::query(
             r#"
             SELECT
@@ -828,19 +924,24 @@ impl SqliteNotaryCaseRepository {
         .bind(&self.tenant_id)
         .bind(&query.case_id)
         .bind(query.cursor.as_deref())
-        .bind(query.page_size)
+        .bind(fetch_limit)
         .fetch_all(&self.pool)
         .await
         .map_err(store_error("failed to list notary case events"))?;
 
-        Ok(rows.iter().map(event_from_row).collect())
+        let mut items = rows.iter().map(event_from_row).collect::<Vec<_>>();
+        let has_more = items.len() as i64 > page_size;
+        if has_more {
+            items.truncate(page_size as usize);
+        }
+        Ok(NotaryCaseEventListPage { items, has_more })
     }
 }
 
 #[async_trait]
 impl NotaryCaseRepositoryPort for SqliteNotaryCaseRepository {
     async fn upsert_organization_profile(
-        &mut self,
+        &self,
         organization_id: &str,
         drive_space_id: &str,
         drive_space_type: &str,
@@ -855,14 +956,14 @@ impl NotaryCaseRepositoryPort for SqliteNotaryCaseRepository {
     }
 
     async fn get_organization_profile(
-        &mut self,
+        &self,
         organization_id: &str,
     ) -> Result<Option<NotaryOrganizationProfile>, NotaryServiceError> {
         SqliteNotaryCaseRepository::get_organization_profile(self, organization_id).await
     }
 
     async fn list_organization_profiles(
-        &mut self,
+        &self,
         organization_id: Option<&str>,
         page_size: i64,
     ) -> Result<Vec<NotaryOrganizationProfile>, NotaryServiceError> {
@@ -871,21 +972,25 @@ impl NotaryCaseRepositoryPort for SqliteNotaryCaseRepository {
     }
 
     async fn update_organization_profile(
-        &mut self,
+        &self,
         command: NotaryOrganizationProfileUpdateCommand,
     ) -> Result<NotaryOrganizationProfile, NotaryServiceError> {
         SqliteNotaryCaseRepository::update_organization_profile(self, command).await
     }
 
     async fn insert_case(
-        &mut self,
+        &self,
         record: NotaryCaseRecord,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
         SqliteNotaryCaseRepository::insert_case(self, record).await
     }
 
+    async fn delete_case(&self, case_id: &str) -> Result<(), NotaryServiceError> {
+        SqliteNotaryCaseRepository::delete_case(self, case_id).await
+    }
+
     async fn insert_party(
-        &mut self,
+        &self,
         case_id: &str,
         party: &NotaryPartyCommand,
         order_id: &str,
@@ -904,7 +1009,7 @@ impl NotaryCaseRepositoryPort for SqliteNotaryCaseRepository {
     }
 
     async fn append_event(
-        &mut self,
+        &self,
         case_id: &str,
         event_type: &str,
     ) -> Result<(), NotaryServiceError> {
@@ -912,65 +1017,100 @@ impl NotaryCaseRepositoryPort for SqliteNotaryCaseRepository {
     }
 
     async fn get_case(
-        &mut self,
+        &self,
         case_id: &str,
     ) -> Result<Option<NotaryCaseRecord>, NotaryServiceError> {
         SqliteNotaryCaseRepository::get_case(self, case_id).await
     }
 
+    async fn get_case_by_idempotency_key(
+        &self,
+        idempotency_key: &str,
+    ) -> Result<Option<NotaryCaseRecord>, NotaryServiceError> {
+        SqliteNotaryCaseRepository::get_case_by_idempotency_key(self, idempotency_key).await
+    }
+
     async fn update_case(
-        &mut self,
+        &self,
         command: NotaryCaseUpdateCommand,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
         SqliteNotaryCaseRepository::update_case(self, command).await
     }
 
     async fn update_party(
-        &mut self,
+        &self,
         command: NotaryPartyUpdateCommand,
     ) -> Result<NotaryPartyRecord, NotaryServiceError> {
         SqliteNotaryCaseRepository::update_party(self, command).await
     }
 
-    async fn remove_party(
-        &mut self,
-        case_id: &str,
-        party_id: &str,
-    ) -> Result<(), NotaryServiceError> {
+    async fn remove_party(&self, case_id: &str, party_id: &str) -> Result<(), NotaryServiceError> {
         SqliteNotaryCaseRepository::remove_party(self, case_id, party_id).await
     }
 
     async fn insert_assignment(
-        &mut self,
+        &self,
         command: NotaryCaseAssignmentCommand,
     ) -> Result<NotaryCaseAssignmentRecord, NotaryServiceError> {
         SqliteNotaryCaseRepository::insert_assignment(self, command).await
     }
 
-    async fn release_assignment(&mut self, assignment_id: &str) -> Result<(), NotaryServiceError> {
+    async fn release_assignment(&self, assignment_id: &str) -> Result<(), NotaryServiceError> {
         SqliteNotaryCaseRepository::release_assignment(self, assignment_id).await
     }
 
     async fn list_cases(
-        &mut self,
+        &self,
         query: NotaryCaseListQuery,
-    ) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
+    ) -> Result<NotaryCaseListPage, NotaryServiceError> {
         SqliteNotaryCaseRepository::list_cases(self, query).await
     }
 
     async fn list_parties(
-        &mut self,
+        &self,
         case_id: &str,
     ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
         SqliteNotaryCaseRepository::list_parties(self, case_id).await
     }
 
     async fn list_events(
-        &mut self,
+        &self,
         query: NotaryCaseEventListQuery,
-    ) -> Result<Vec<NotaryCaseEventRecord>, NotaryServiceError> {
+    ) -> Result<NotaryCaseEventListPage, NotaryServiceError> {
         SqliteNotaryCaseRepository::list_events(self, query).await
     }
+}
+
+async fn next_party_sort_order(
+    pool: &SqlitePool,
+    tenant_id: &str,
+    case_id: &str,
+) -> Result<i64, NotaryServiceError> {
+    let count: i64 = sqlx::query_scalar(
+        "SELECT COUNT(1) FROM notary_party WHERE tenant_id = ?1 AND case_id = ?2",
+    )
+    .bind(tenant_id)
+    .bind(case_id)
+    .fetch_one(pool)
+    .await
+    .map_err(store_error("failed to count notary parties"))?;
+    Ok(count + 1)
+}
+
+async fn next_event_order(
+    pool: &SqlitePool,
+    tenant_id: &str,
+    case_id: &str,
+) -> Result<i64, NotaryServiceError> {
+    let count: i64 = sqlx::query_scalar(
+        "SELECT COUNT(1) FROM notary_case_event WHERE tenant_id = ?1 AND case_id = ?2",
+    )
+    .bind(tenant_id)
+    .bind(case_id)
+    .fetch_one(pool)
+    .await
+    .map_err(store_error("failed to count notary case events"))?;
+    Ok(count + 1)
 }
 
 fn profile_from_row(row: &sqlx::sqlite::SqliteRow) -> NotaryOrganizationProfile {
@@ -1043,113 +1183,10 @@ fn event_from_row(row: &sqlx::sqlite::SqliteRow) -> NotaryCaseEventRecord {
     }
 }
 
-async fn next_party_sort_order(
-    pool: &SqlitePool,
-    tenant_id: &str,
-    case_id: &str,
-) -> Result<i64, NotaryServiceError> {
-    let count: i64 = sqlx::query_scalar(
-        "SELECT COUNT(1) FROM notary_party WHERE tenant_id = ?1 AND case_id = ?2",
-    )
-    .bind(tenant_id)
-    .bind(case_id)
-    .fetch_one(pool)
-    .await
-    .map_err(store_error("failed to count notary parties"))?;
-    Ok(count + 1)
-}
-
-async fn next_event_order(
-    pool: &SqlitePool,
-    tenant_id: &str,
-    case_id: &str,
-) -> Result<i64, NotaryServiceError> {
-    let count: i64 = sqlx::query_scalar(
-        "SELECT COUNT(1) FROM notary_case_event WHERE tenant_id = ?1 AND case_id = ?2",
-    )
-    .bind(tenant_id)
-    .bind(case_id)
-    .fetch_one(pool)
-    .await
-    .map_err(store_error("failed to count notary case events"))?;
-    Ok(count + 1)
-}
-
 fn optional_string_cell(row: &sqlx::sqlite::SqliteRow, column: &str) -> Option<String> {
     row.try_get::<Option<String>, _>(column).ok().flatten()
 }
 
 fn string_cell(row: &sqlx::sqlite::SqliteRow, column: &str) -> String {
     optional_string_cell(row, column).unwrap_or_default()
-}
-
-fn last4(value: &str) -> String {
-    let mut chars = value.chars().rev().take(4).collect::<Vec<_>>();
-    chars.reverse();
-    chars.into_iter().collect()
-}
-
-fn mask_phone(value: &str) -> String {
-    let trimmed = value.trim();
-    if trimmed.chars().count() <= 7 {
-        return "****".to_string();
-    }
-    let prefix = trimmed.chars().take(3).collect::<String>();
-    let suffix = trimmed
-        .chars()
-        .rev()
-        .take(4)
-        .collect::<Vec<_>>()
-        .into_iter()
-        .rev()
-        .collect::<String>();
-    format!("{prefix}****{suffix}")
-}
-
-fn stable_hash(value: &str) -> String {
-    let mut hash = 0xcbf29ce484222325u64;
-    for byte in value.as_bytes() {
-        hash ^= u64::from(*byte);
-        hash = hash.wrapping_mul(0x100000001b3);
-    }
-    format!("notary-fnv64:{hash:016x}")
-}
-
-fn event_title(event_type: &str) -> &'static str {
-    match event_type {
-        "notary.case.submitted" => "Case submitted",
-        "notary.case.accepted" => "Case accepted",
-        "notary.case.rejected" => "Case rejected",
-        "notary.case.completed" => "Case completed",
-        "notary.party.video_invite.created" => "Party video verification invite created",
-        "notary.party.signature_invite.created" => "Party mobile signature invite created",
-        _ => "Notary case event",
-    }
-}
-
-fn validate_profile_status(status: &str) -> Result<(), NotaryServiceError> {
-    if matches!(status, "active" | "suspended" | "closed") {
-        Ok(())
-    } else {
-        Err(NotaryServiceError::validation(format!(
-            "unsupported notary organization profile status: {status}"
-        )))
-    }
-}
-
-fn validate_assignment_role(role: &str) -> Result<(), NotaryServiceError> {
-    if matches!(
-        role,
-        "primary_notary" | "assistant" | "reviewer" | "approver"
-    ) {
-        Ok(())
-    } else {
-        Err(NotaryServiceError::validation(format!(
-            "unsupported notary case assignment role: {role}"
-        )))
-    }
-}
-
-fn store_error(context: &'static str) -> impl FnOnce(sqlx::Error) -> NotaryServiceError {
-    move |error| NotaryServiceError::storage(format!("{context}: {error}"))
 }

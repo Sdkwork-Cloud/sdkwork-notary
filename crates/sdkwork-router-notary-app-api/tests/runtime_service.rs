@@ -1,13 +1,14 @@
 use std::collections::BTreeMap;
+use std::sync::{Arc, Mutex as StdMutex};
 
 use async_trait::async_trait;
-use sdkwork_notary_core::{NotaryCaseRecord, NotaryPartyCommand, NotaryServiceError};
-use sdkwork_notary_runtime::{
+use sdkwork_notary_case_contract::{NotaryCaseRecord, NotaryPartyCommand, NotaryServiceError};
+use sdkwork_notary_case_service::{
     AppbaseOrganizationMember, AppbasePort, CommerceCreateOrderCommand, CommerceOrderReference,
     CommercePort, DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveFolderReference,
-    DriveListNodesQuery, DriveNodeReference, DrivePort, NotaryCaseEventListQuery,
-    NotaryCaseEventRecord, NotaryCaseListQuery, NotaryCaseRepositoryPort, NotaryCaseUpdateCommand,
-    NotaryOrganizationProfile, NotaryPartyRecord,
+    DriveListNodesQuery, DriveNodeReference, DrivePort, NotaryCaseEventListPage,
+    NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
+    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryPartyRecord,
 };
 use sdkwork_router_notary_app_api::{
     NotaryAppApiServicePort, NotaryAppRuntimeService, NotaryRequestContext,
@@ -56,7 +57,7 @@ fn request_context() -> NotaryRequestContext {
         user_id: "user-1".to_string(),
         membership_id: Some("member-notary-1".to_string()),
         session_id: "session-1".to_string(),
-        app_id: "sdkwork-chat-pc".to_string(),
+        app_id: "sdkwork-im-pc".to_string(),
     }
 }
 
@@ -72,6 +73,7 @@ impl RecordingAppbase {
                 membership_id: "member-notary-1".to_string(),
                 user_id: "user-1".to_string(),
                 organization_id: "org-1".to_string(),
+                display_name: "李明".to_string(),
                 enterprise_verified: true,
                 notary_enabled: true,
                 roles: vec!["notary".to_string()],
@@ -85,7 +87,7 @@ impl RecordingAppbase {
 #[async_trait]
 impl AppbasePort for RecordingAppbase {
     async fn get_organization_member(
-        &mut self,
+        &self,
         organization_id: &str,
         membership_id: &str,
     ) -> Result<Option<AppbaseOrganizationMember>, NotaryServiceError> {
@@ -99,7 +101,7 @@ impl AppbasePort for RecordingAppbase {
     }
 
     async fn list_organization_members(
-        &mut self,
+        &self,
         organization_id: &str,
     ) -> Result<Vec<AppbaseOrganizationMember>, NotaryServiceError> {
         Ok(self
@@ -118,7 +120,7 @@ struct RecordingCommerce;
 #[async_trait]
 impl CommercePort for RecordingCommerce {
     async fn create_notary_order(
-        &mut self,
+        &self,
         command: CommerceCreateOrderCommand,
     ) -> Result<CommerceOrderReference, NotaryServiceError> {
         Ok(CommerceOrderReference {
@@ -138,14 +140,14 @@ struct RecordingDrive;
 #[async_trait]
 impl DrivePort for RecordingDrive {
     async fn create_notary_space(
-        &mut self,
+        &self,
         command: DriveCreateSpaceCommand,
     ) -> Result<String, NotaryServiceError> {
         Ok(format!("space-notary-{}", command.owner_subject_id))
     }
 
     async fn create_case_folder(
-        &mut self,
+        &self,
         command: DriveCreateFolderCommand,
     ) -> Result<DriveFolderReference, NotaryServiceError> {
         Ok(DriveFolderReference {
@@ -156,15 +158,20 @@ impl DrivePort for RecordingDrive {
     }
 
     async fn list_nodes(
-        &mut self,
+        &self,
         _query: DriveListNodesQuery,
     ) -> Result<Vec<DriveNodeReference>, NotaryServiceError> {
         Ok(Vec::new())
     }
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 struct RecordingNotaryRepository {
+    inner: Arc<StdMutex<RecordingNotaryRepositoryState>>,
+}
+
+#[derive(Default)]
+struct RecordingNotaryRepositoryState {
     profile: Option<NotaryOrganizationProfile>,
     cases: Vec<NotaryCaseRecord>,
 }
@@ -172,13 +179,15 @@ struct RecordingNotaryRepository {
 impl RecordingNotaryRepository {
     fn with_profile() -> Self {
         Self {
-            profile: Some(NotaryOrganizationProfile {
-                organization_id: "org-1".to_string(),
-                drive_space_id: "space-notary-org-1".to_string(),
-                drive_space_type: "notary".to_string(),
-                status: "active".to_string(),
-            }),
-            cases: Vec::new(),
+            inner: Arc::new(StdMutex::new(RecordingNotaryRepositoryState {
+                profile: Some(NotaryOrganizationProfile {
+                    organization_id: "org-1".to_string(),
+                    drive_space_id: "space-notary-org-1".to_string(),
+                    drive_space_type: "notary".to_string(),
+                    status: "active".to_string(),
+                }),
+                cases: Vec::new(),
+            })),
         }
     }
 }
@@ -186,38 +195,44 @@ impl RecordingNotaryRepository {
 #[async_trait]
 impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
     async fn upsert_organization_profile(
-        &mut self,
+        &self,
         organization_id: &str,
         drive_space_id: &str,
         drive_space_type: &str,
     ) -> Result<NotaryOrganizationProfile, NotaryServiceError> {
+        let mut state = self.inner.lock().unwrap();
         let profile = NotaryOrganizationProfile {
             organization_id: organization_id.to_string(),
             drive_space_id: drive_space_id.to_string(),
             drive_space_type: drive_space_type.to_string(),
             status: "active".to_string(),
         };
-        self.profile = Some(profile.clone());
+        state.profile = Some(profile.clone());
         Ok(profile)
     }
 
     async fn get_organization_profile(
-        &mut self,
+        &self,
         _organization_id: &str,
     ) -> Result<Option<NotaryOrganizationProfile>, NotaryServiceError> {
-        Ok(self.profile.clone())
+        Ok(self.inner.lock().unwrap().profile.clone())
     }
 
     async fn insert_case(
-        &mut self,
+        &self,
         record: NotaryCaseRecord,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
-        self.cases.push(record.clone());
+        let mut state = self.inner.lock().unwrap();
+        state.cases.push(record.clone());
         Ok(record)
     }
 
+    async fn delete_case(&self, _case_id: &str) -> Result<(), NotaryServiceError> {
+        Ok(())
+    }
+
     async fn insert_party(
-        &mut self,
+        &self,
         _case_id: &str,
         _party: &NotaryPartyCommand,
         _order_id: &str,
@@ -228,7 +243,7 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
     }
 
     async fn append_event(
-        &mut self,
+        &self,
         _case_id: &str,
         _event_type: &str,
     ) -> Result<(), NotaryServiceError> {
@@ -236,21 +251,39 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
     }
 
     async fn get_case(
-        &mut self,
+        &self,
         case_id: &str,
     ) -> Result<Option<NotaryCaseRecord>, NotaryServiceError> {
         Ok(self
+            .inner
+            .lock()
+            .unwrap()
             .cases
             .iter()
             .find(|record| record.case_id == case_id)
             .cloned())
     }
 
+    async fn get_case_by_idempotency_key(
+        &self,
+        idempotency_key: &str,
+    ) -> Result<Option<NotaryCaseRecord>, NotaryServiceError> {
+        Ok(self
+            .inner
+            .lock()
+            .unwrap()
+            .cases
+            .iter()
+            .find(|record| record.idempotency_key == idempotency_key)
+            .cloned())
+    }
+
     async fn update_case(
-        &mut self,
+        &self,
         command: NotaryCaseUpdateCommand,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
-        let record = self
+        let mut state = self.inner.lock().unwrap();
+        let record = state
             .cases
             .iter_mut()
             .find(|record| record.case_id == command.case_id)
@@ -273,23 +306,29 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
     }
 
     async fn list_cases(
-        &mut self,
+        &self,
         _query: NotaryCaseListQuery,
-    ) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
-        Ok(self.cases.clone())
+    ) -> Result<NotaryCaseListPage, NotaryServiceError> {
+        Ok(NotaryCaseListPage {
+            items: self.inner.lock().unwrap().cases.clone(),
+            has_more: false,
+        })
     }
 
     async fn list_parties(
-        &mut self,
+        &self,
         _case_id: &str,
     ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
         Ok(Vec::new())
     }
 
     async fn list_events(
-        &mut self,
+        &self,
         _query: NotaryCaseEventListQuery,
-    ) -> Result<Vec<NotaryCaseEventRecord>, NotaryServiceError> {
-        Ok(Vec::new())
+    ) -> Result<NotaryCaseEventListPage, NotaryServiceError> {
+        Ok(NotaryCaseEventListPage {
+            items: Vec::new(),
+            has_more: false,
+        })
     }
 }

@@ -7,7 +7,13 @@ import { fileURLToPath } from "node:url";
 const sdkName = "sdkwork-notary-backend-sdk";
 const sdkType = "backend";
 const apiPrefix = "/backend/v3/api";
-const defaultBaseUrl = "http://127.0.0.1:18080";
+import {
+  DEFAULT_DEV_PROFILE_ID,
+  loadProfile,
+  resolveDefaultBackendSdkBaseUrl,
+} from "../../../scripts/lib/notary-topology.mjs";
+
+const defaultBaseUrl = resolveDefaultBackendSdkBaseUrl(loadProfile(DEFAULT_DEV_PROFILE_ID));
 const fixedSdkVersion = "0.1.0";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const sdkRoot = path.resolve(scriptDir, "..");

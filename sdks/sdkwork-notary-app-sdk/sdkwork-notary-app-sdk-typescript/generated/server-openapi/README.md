@@ -18,7 +18,7 @@ pnpm add sdkwork-notary-app-sdk-generated-typescript
 import { SdkworkAppClient } from 'sdkwork-notary-app-sdk-generated-typescript';
 
 const client = new SdkworkAppClient({
-  baseUrl: 'http://127.0.0.1:18080',
+  baseUrl: 'http://127.0.0.1:18085',
   timeout: 30000,
 });
 
@@ -44,7 +44,7 @@ Access-Token: <accessToken>
 import { SdkworkAppClient } from 'sdkwork-notary-app-sdk-generated-typescript';
 
 const client = new SdkworkAppClient({
-  baseUrl: 'http://127.0.0.1:18080',
+  baseUrl: 'http://127.0.0.1:18085',
   timeout: 30000, // Request timeout in ms
   headers: {      // Custom headers
     'X-Custom-Header': 'value',

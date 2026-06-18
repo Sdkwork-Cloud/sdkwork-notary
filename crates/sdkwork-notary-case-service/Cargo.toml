@@ -1,16 +1,17 @@
 [package]
-name = "sdkwork-notary-runtime-rust"
+name = "sdkwork-notary-case-service"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "sdkwork_notary_runtime"
+name = "sdkwork_notary_case_service"
 
 [dependencies]
 async-trait = "0.1.89"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 serde_json = "1.0"
-sdkwork-notary-core-rust = { path = "../sdkwork-notary-core-rust" }
+sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
 
 [dev-dependencies]
 tokio = { version = "1.52", features = ["macros", "rt-multi-thread"] }

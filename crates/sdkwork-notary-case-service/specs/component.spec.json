@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "kind": "sdkwork.component.spec",
   "component": {
-    "name": "sdkwork-notary-runtime-rust",
-    "displayName": "SDKWork Notary Runtime Rust",
+    "name": "sdkwork-notary-case-service",
+    "displayName": "SDKWork Notary Case Service",
     "version": "0.1.0",
     "type": "rust-crate",
-    "root": "sdkwork-notary/crates/sdkwork-notary-runtime-rust",
+    "root": "sdkwork-notary/crates/sdkwork-notary-case-service",
     "domain": "notary",
-    "capability": "notary-runtime",
+    "capability": "notary-case-service",
     "languages": ["rust"],
     "generated": false,
     "manifests": ["Cargo.toml"]
@@ -41,7 +41,7 @@
     }
   ],
   "contracts": {
-    "publicExports": ["sdkwork_notary_runtime::*"],
+    "publicExports": ["sdkwork_notary_case_service::*"],
     "runtimeEntrypoints": [
       "notary_runtime_contract",
       "ensure_notary_business_open",
@@ -59,7 +59,7 @@
   },
   "verification": {
     "commands": [
-      "cargo test -p sdkwork-notary-runtime-rust --target-dir target-codex-test"
+      "cargo test -p sdkwork-notary-case-service --target-dir target-codex-test"
     ]
   }
 }

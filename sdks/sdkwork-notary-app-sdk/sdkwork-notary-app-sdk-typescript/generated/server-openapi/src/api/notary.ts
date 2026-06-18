@@ -1,8 +1,67 @@
 import { appApiPath } from './paths';
 import type { HttpClient } from '../http/client';
 
-import type { CompleteNotaryCaseRequest, CreateCaseAssignmentRequest, CreateNotaryCaseFileRequest, CreateNotaryCaseRequest, CreateNotaryDownloadPackageRequest, CreateNotaryPartyRequest, CreatePartySignatureInviteRequest, CreatePartySignatureRequest, CreatePartyVideoInviteRequest, NotaryAccess, NotaryCase, NotaryCaseAssignment, NotaryCaseCommandRequest, NotaryCasePage, NotaryCaseStatus, NotaryDocument, NotaryDocumentCategory, NotaryDocumentList, NotaryDownloadPackage, NotaryMatterPage, NotaryPartyList, NotaryStaffMemberPage, Party, PartySignatureInvite, PartyVideoInvite, RejectNotaryCaseRequest, TimelineEventList, UpdateNotaryCaseRequest, UpdateNotaryPartyRequest } from '../types';
+import type { CompleteNotaryCaseRequest, CreateCaseAssignmentRequest, CreateNotaryCaseFileRequest, CreateNotaryCaseRequest, CreateNotaryDownloadPackageRequest, CreateNotaryPartyRequest, CreatePartySignatureInviteRequest, CreatePartySignatureRequest, CreatePartyVideoInviteRequest, MonthlyReport, NotaryAccess, NotaryCase, NotaryCaseAssignment, NotaryCaseCommandRequest, NotaryCasePage, NotaryCaseStatus, NotaryDocument, NotaryDocumentCategory, NotaryDocumentList, NotaryDownloadPackage, NotaryMatterPage, NotaryPartyList, NotaryStaffMemberPage, NotaryStatistics, Party, PartySignatureInvite, PartyVideoInvite, RejectNotaryCaseRequest, TimelineEventList, UpdateNotaryCaseRequest, UpdateNotaryPartyRequest } from '../types';
 
+
+export interface NotaryReportsMonthlyRetrieveParams {
+  month?: string;
+  format?: 'pdf' | 'excel' | 'csv';
+}
+
+export class NotaryReportsMonthlyApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** Download monthly business report */
+  async retrieve(params?: NotaryReportsMonthlyRetrieveParams): Promise<MonthlyReport> {
+    const query = buildQueryString([
+      { name: 'month', value: params?.month, style: 'form', explode: true, allowReserved: false },
+      { name: 'format', value: params?.format, style: 'form', explode: true, allowReserved: false },
+    ]);
+    return this.client.get<MonthlyReport>(appendQueryString(appApiPath(`/notary/reports/monthly`), query));
+  }
+}
+
+export class NotaryReportsApi {
+  private client: HttpClient;
+  public readonly monthly: NotaryReportsMonthlyApi;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+    this.monthly = new NotaryReportsMonthlyApi(client);
+  }
+
+}
+
+export class NotaryDashboardStatisticsApi {
+  private client: HttpClient;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+  }
+
+
+/** Retrieve notary dashboard statistics */
+  async retrieve(): Promise<NotaryStatistics> {
+    return this.client.get<NotaryStatistics>(appApiPath(`/notary/dashboard/statistics`));
+  }
+}
+
+export class NotaryDashboardApi {
+  private client: HttpClient;
+  public readonly statistics: NotaryDashboardStatisticsApi;
+
+  constructor(client: HttpClient) {
+    this.client = client;
+    this.statistics = new NotaryDashboardStatisticsApi(client);
+  }
+
+}
 
 export interface NotaryStaffListParams {
   pageSize?: number;
@@ -346,6 +405,8 @@ export class NotaryApi {
   public readonly matters: NotaryMattersApi;
   public readonly cases: NotaryCasesApi;
   public readonly staff: NotaryStaffApi;
+  public readonly dashboard: NotaryDashboardApi;
+  public readonly reports: NotaryReportsApi;
 
   constructor(client: HttpClient) {
     this.client = client;
@@ -353,6 +414,8 @@ export class NotaryApi {
     this.matters = new NotaryMattersApi(client);
     this.cases = new NotaryCasesApi(client);
     this.staff = new NotaryStaffApi(client);
+    this.dashboard = new NotaryDashboardApi(client);
+    this.reports = new NotaryReportsApi(client);
   }
 
 }

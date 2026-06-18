@@ -1,20 +1,22 @@
 use std::collections::BTreeMap;
 
-use sdkwork_notary_core::{
-    NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus, NotaryRuntimeContext,
-    NotaryServiceContract, NotaryServiceError,
+use sdkwork_notary_case_contract::{
+    now_compact_date, now_iso8601, NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus,
+    NotaryRuntimeContext, NotaryServiceContract, NotaryServiceError,
 };
 use serde_json::{json, Value};
 
 use crate::{
     AppbaseOrganizationMember, CommerceCreateOrderCommand, CommerceMatterCommand,
     CommerceMatterListQuery, CommerceMatterRecord, CommerceMatterUpdateCommand,
-    DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveListNodesQuery, DriveNodeReference,
-    NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListQuery,
-    NotaryCaseEventRecord, NotaryCaseListQuery, NotaryCaseUpdateCommand, NotaryOrganizationProfile,
-    NotaryOrganizationProfileUpdateCommand, NotaryPartyRecord, NotaryPartyUpdateCommand,
-    NotaryRuntimePorts, NOTARY_CASE_REPOSITORY_PORT, NOTARY_COMMERCE_PORT, NOTARY_DRIVE_PORT,
-    NOTARY_IAM_PORT,
+    DriveCreateDownloadPackageCommand, DriveCreateFolderCommand, DriveCreateMonthlyReportCommand,
+    DriveCreatePartySignatureInviteCommand, DriveCreatePartyVideoInviteCommand,
+    DriveCreateSpaceCommand, DriveDownloadPackageReference, DriveListNodesQuery,
+    DriveNodeReference, NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord,
+    NotaryCaseEventListQuery, NotaryCaseEventRecord, NotaryCaseListPage, NotaryCaseListQuery,
+    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand,
+    NotaryPartyRecord, NotaryPartyUpdateCommand, NotaryRuntimePorts, NOTARY_CASE_REPOSITORY_PORT,
+    NOTARY_COMMERCE_PORT, NOTARY_DRIVE_PORT, NOTARY_IAM_PORT,
 };
 
 pub fn notary_runtime_contract() -> NotaryServiceContract {
@@ -75,7 +77,7 @@ pub async fn ensure_notary_business_open(
     context: &NotaryRuntimeContext,
     organization_id: &str,
     opened_by_membership_id: &str,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<NotaryOrganizationProfile, NotaryServiceError> {
     validate_context(context)?;
     let member = require_notary_member(
@@ -110,35 +112,58 @@ pub async fn ensure_notary_business_open(
 pub async fn create_notary_case(
     context: &NotaryRuntimeContext,
     command: NotaryCaseCommand,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<NotaryCaseRecord, NotaryServiceError> {
     validate_context(context)?;
     validate_create_case_command(&command)?;
+    ensure_organization_scope(context, &command.organization_id)?;
+
+    let creator_membership_id = context
+        .membership_id
+        .as_deref()
+        .ok_or_else(|| NotaryServiceError::unauthorized("membership_id is required"))?;
+    let creator = require_notary_member(
+        ports.appbase,
+        &command.organization_id,
+        creator_membership_id,
+        false,
+    )
+    .await?;
+    if creator.user_id != context.user_id {
+        return Err(NotaryServiceError::unauthorized(
+            "organization member does not match current user",
+        ));
+    }
+
+    if let Some(existing) = ports
+        .repository
+        .get_case_by_idempotency_key(&command.idempotency_key)
+        .await?
+    {
+        ensure_case_access(context, &existing)?;
+        return Ok(existing);
+    }
 
     let primary_notary_member =
         if let Some(membership_id) = command.primary_notary_membership_id.as_deref() {
-            Some(
+            if membership_id == creator_membership_id {
+                creator.clone()
+            } else {
                 require_notary_member(
                     ports.appbase,
                     &command.organization_id,
                     membership_id,
                     false,
                 )
-                .await?,
-            )
+                .await?
+            }
         } else {
-            None
+            creator.clone()
         };
 
-    let primary_notary_membership_id = primary_notary_member
-        .as_ref()
-        .map(|member| member.membership_id.clone());
-    let primary_notary_user_id = primary_notary_member
-        .as_ref()
-        .map(|member| member.user_id.clone());
-    let primary_notary_name = primary_notary_member
-        .as_ref()
-        .map(|member| member.membership_id.clone());
+    let primary_notary_membership_id = Some(primary_notary_member.membership_id.clone());
+    let primary_notary_user_id = Some(primary_notary_member.user_id.clone());
+    let primary_notary_name = Some(member_display_name(&primary_notary_member));
 
     let profile = ports
         .repository
@@ -165,7 +190,7 @@ pub async fn create_notary_case(
         .await?;
 
     let case_id = format!("case-{}", order.order_item_id);
-    let folder = ports
+    let folder = match ports
         .drive
         .create_case_folder(DriveCreateFolderCommand {
             space_id: profile.drive_space_id.clone(),
@@ -178,9 +203,20 @@ pub async fn create_notary_case(
             order_id: order.order_id.clone(),
             case_id: case_id.clone(),
         })
-        .await?;
+        .await
+    {
+        Ok(folder) => folder,
+        Err(error) => {
+            let _ = ports.commerce.cancel_notary_order(&order.order_id).await;
+            return Err(error);
+        }
+    };
 
-    let now = "2026-06-10 00:00".to_string();
+    let folder_node_id = folder.folder_node_id.clone();
+    let folder_space_id = folder.space_id.clone();
+    let folder_space_type = folder.space_type.clone();
+
+    let now = now_iso8601();
     let record = NotaryCaseRecord {
         case_id: case_id.clone(),
         case_no: build_case_no(&order.order_item_id),
@@ -208,9 +244,19 @@ pub async fn create_notary_case(
         updated_at: now,
     };
 
-    let inserted = ports.repository.insert_case(record).await?;
+    let inserted = match ports.repository.insert_case(record).await {
+        Ok(inserted) => inserted,
+        Err(error) => {
+            let _ = ports
+                .drive
+                .delete_case_folder(&folder_node_id, &folder_space_id, &folder_space_type)
+                .await;
+            let _ = ports.commerce.cancel_notary_order(&order.order_id).await;
+            return Err(error);
+        }
+    };
     for party in &command.parties {
-        ports
+        if let Err(error) = ports
             .repository
             .insert_party(
                 &inserted.case_id,
@@ -219,7 +265,16 @@ pub async fn create_notary_case(
                 &inserted.order_item_id,
                 &inserted.sku_id,
             )
-            .await?;
+            .await
+        {
+            let _ = ports.repository.delete_case(&inserted.case_id).await;
+            let _ = ports
+                .drive
+                .delete_case_folder(&folder_node_id, &folder_space_id, &folder_space_type)
+                .await;
+            let _ = ports.commerce.cancel_notary_order(&order.order_id).await;
+            return Err(error);
+        }
     }
     ports
         .repository
@@ -232,14 +287,10 @@ pub async fn create_notary_case(
 pub async fn list_case_files(
     context: &NotaryRuntimeContext,
     case_id: &str,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Vec<DriveNodeReference>, NotaryServiceError> {
     validate_context(context)?;
-    let record = ports
-        .repository
-        .get_case(case_id)
-        .await?
-        .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+    let record = load_case_for_context(context, ports, case_id).await?;
 
     ports
         .drive
@@ -259,7 +310,7 @@ pub async fn handle_notary_app_operation(
     operation_id: &str,
     path_params: BTreeMap<String, String>,
     body: Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     match operation_id {
         "notary.access.retrieve" => retrieve_notary_access(context, ports).await,
@@ -270,7 +321,7 @@ pub async fn handle_notary_app_operation(
         }
         "notary.reports.monthly.retrieve" => {
             let cases = list_app_cases_for_report(context, &body, ports).await?;
-            Ok(monthly_report_to_value(&cases, &body))
+            monthly_report_to_value(&cases, &body, ports).await
         }
         "notary.cases.create" => {
             let command = create_case_command_from_body(context, &body)?;
@@ -282,7 +333,8 @@ pub async fn handle_notary_app_operation(
             let organization_id = string_field(&body, &["organizationId", "organization_id"])
                 .or_else(|| context.organization_id.clone())
                 .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
-            let cases = ports
+            ensure_organization_scope(context, &organization_id)?;
+            let page = ports
                 .repository
                 .list_cases(NotaryCaseListQuery {
                     organization_id,
@@ -294,31 +346,34 @@ pub async fn handle_notary_app_operation(
                 })
                 .await?;
             Ok(json!({
-                "items": cases
+                "items": page
+                    .items
                     .iter()
                     .map(case_record_to_value)
                     .collect::<Vec<_>>(),
                 "pageInfo": {
-                    "hasMore": false
+                    "hasMore": page.has_more
                 }
             }))
         }
         "notary.cases.retrieve" => {
             let case_id = path_param(&path_params, "caseId")?;
-            let record = ports
-                .repository
-                .get_case(case_id)
-                .await?
-                .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+            let record = load_case_for_context(context, ports, case_id).await?;
             case_detail_to_value(&record, ports).await
         }
         "notary.cases.update" => {
             let case_id = path_param(&path_params, "caseId")?;
-            let record = update_case_from_body(case_id, &body, ports).await?;
+            let record = update_case_from_body(context, case_id, &body, ports).await?;
             case_detail_to_value(&record, ports).await
         }
         "notary.cases.acceptances.create" => {
             let case_id = path_param(&path_params, "caseId")?;
+            let current = load_case_for_context(context, ports, case_id).await?;
+            if !current.status.allows_acceptance() {
+                return Err(NotaryServiceError::invalid_state(
+                    "only pending_review cases can be accepted",
+                ));
+            }
             let record = update_case_status(
                 case_id,
                 NotaryCaseStatus::Processing,
@@ -331,6 +386,12 @@ pub async fn handle_notary_app_operation(
         }
         "notary.cases.rejections.create" => {
             let case_id = path_param(&path_params, "caseId")?;
+            let current = load_case_for_context(context, ports, case_id).await?;
+            if !current.status.allows_rejection() {
+                return Err(NotaryServiceError::invalid_state(
+                    "only pending_review or processing cases can be rejected",
+                ));
+            }
             let record = update_case_status(
                 case_id,
                 NotaryCaseStatus::Rejected,
@@ -343,6 +404,12 @@ pub async fn handle_notary_app_operation(
         }
         "notary.cases.completions.create" => {
             let case_id = path_param(&path_params, "caseId")?;
+            let current = load_case_for_context(context, ports, case_id).await?;
+            if !current.status.allows_completion() {
+                return Err(NotaryServiceError::invalid_state(
+                    "only processing cases can be completed",
+                ));
+            }
             let record = update_case_status(
                 case_id,
                 NotaryCaseStatus::Completed,
@@ -358,6 +425,7 @@ pub async fn handle_notary_app_operation(
         }
         "notary.cases.parties.list" => {
             let case_id = path_param(&path_params, "caseId")?;
+            load_case_for_context(context, ports, case_id).await?;
             let parties = ports.repository.list_parties(case_id).await?;
             Ok(json!({
                 "items": parties
@@ -368,11 +436,7 @@ pub async fn handle_notary_app_operation(
         }
         "notary.cases.parties.create" => {
             let case_id = path_param(&path_params, "caseId")?.to_string();
-            let record = ports
-                .repository
-                .get_case(&case_id)
-                .await?
-                .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+            let record = load_case_for_context(context, ports, &case_id).await?;
             let party = party_command_from_value(&body)?;
             ports
                 .repository
@@ -393,6 +457,7 @@ pub async fn handle_notary_app_operation(
         "notary.cases.parties.update" => {
             let case_id = path_param(&path_params, "caseId")?.to_string();
             let party_id = path_param(&path_params, "partyId")?.to_string();
+            load_case_for_context(context, ports, &case_id).await?;
             let party = ports
                 .repository
                 .update_party(party_update_command_from_body(&case_id, &party_id, &body))
@@ -406,6 +471,7 @@ pub async fn handle_notary_app_operation(
         "notary.cases.parties.delete" => {
             let case_id = path_param(&path_params, "caseId")?;
             let party_id = path_param(&path_params, "partyId")?;
+            load_case_for_context(context, ports, case_id).await?;
             ports.repository.remove_party(case_id, party_id).await?;
             ports
                 .repository
@@ -420,6 +486,7 @@ pub async fn handle_notary_app_operation(
         "notary.cases.parties.signatures.create" => {
             let case_id = path_param(&path_params, "caseId")?.to_string();
             let party_id = path_param(&path_params, "partyId")?.to_string();
+            load_case_for_context(context, ports, &case_id).await?;
             let drive_node_id = string_field(
                 &body,
                 &[
@@ -452,20 +519,16 @@ pub async fn handle_notary_app_operation(
         "notary.cases.parties.videoInvites.create" => {
             let case_id = path_param(&path_params, "caseId")?;
             let party_id = path_param(&path_params, "partyId")?;
-            create_party_video_invite(case_id, party_id, &body, ports).await
+            create_party_video_invite(context, case_id, party_id, &body, ports).await
         }
         "notary.cases.parties.signatureInvites.create" => {
             let case_id = path_param(&path_params, "caseId")?;
             let party_id = path_param(&path_params, "partyId")?;
-            create_party_signature_invite(case_id, party_id, &body, ports).await
+            create_party_signature_invite(context, case_id, party_id, &body, ports).await
         }
         "notary.cases.files.list" => {
             let case_id = path_param(&path_params, "caseId")?;
-            let record = ports
-                .repository
-                .get_case(case_id)
-                .await?
-                .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+            let record = load_case_for_context(context, ports, case_id).await?;
             let files = ports
                 .drive
                 .list_nodes(DriveListNodesQuery {
@@ -489,11 +552,7 @@ pub async fn handle_notary_app_operation(
         }
         "notary.cases.files.create" => {
             let case_id = path_param(&path_params, "caseId")?;
-            let record = ports
-                .repository
-                .get_case(case_id)
-                .await?
-                .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+            let record = load_case_for_context(context, ports, case_id).await?;
             let document = file_create_to_document_value(&body, &record)?;
             ports
                 .repository
@@ -503,28 +562,41 @@ pub async fn handle_notary_app_operation(
         }
         "notary.cases.downloadPackages.create" => {
             let case_id = path_param(&path_params, "caseId")?;
-            let record = ports
-                .repository
-                .get_case(case_id)
-                .await?
-                .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+            let record = load_case_for_context(context, ports, case_id).await?;
+            let package_name = string_field(&body, &["packageName", "package_name"])
+                .unwrap_or_else(|| format!("{}.zip", record.case_no));
+            let node_ids = body
+                .get("nodeIds")
+                .or_else(|| body.get("node_ids"))
+                .and_then(Value::as_array)
+                .map(|values| {
+                    values
+                        .iter()
+                        .filter_map(Value::as_str)
+                        .map(str::to_string)
+                        .collect::<Vec<_>>()
+                })
+                .unwrap_or_default();
+            let package = ports
+                .drive
+                .create_download_package(DriveCreateDownloadPackageCommand {
+                    space_id: record.drive_space_id.clone(),
+                    space_type: record.drive_space_type.clone(),
+                    case_id: record.case_id.clone(),
+                    node_ids,
+                    package_name,
+                })
+                .await?;
             ports
                 .repository
                 .append_event(&record.case_id, "notary.case.download_package_requested")
                 .await?;
-            Ok(json!({
-                "packageId": format!("download-package-{}", record.case_id),
-                "caseId": record.case_id,
-                "driveSpaceId": record.drive_space_id,
-                "driveSpaceType": record.drive_space_type,
-                "status": "preparing",
-                "packageName": string_field(&body, &["packageName", "package_name"])
-                    .unwrap_or_else(|| format!("{}.zip", record.case_no))
-            }))
+            Ok(download_package_to_value(&package))
         }
         "notary.cases.events.list" => {
             let case_id = path_param(&path_params, "caseId")?;
-            let events = ports
+            load_case_for_context(context, ports, case_id).await?;
+            let page = ports
                 .repository
                 .list_events(NotaryCaseEventListQuery {
                     case_id: case_id.to_string(),
@@ -533,12 +605,13 @@ pub async fn handle_notary_app_operation(
                 })
                 .await?;
             Ok(json!({
-                "items": events
+                "items": page
+                    .items
                     .iter()
                     .map(event_record_to_value)
                     .collect::<Vec<_>>(),
                 "pageInfo": {
-                    "hasMore": false
+                    "hasMore": page.has_more
                 }
             }))
         }
@@ -551,12 +624,13 @@ pub async fn handle_notary_app_operation(
 async fn list_app_cases_for_report(
     context: &NotaryRuntimeContext,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
         .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
-    ports
+    ensure_organization_scope(context, &organization_id)?;
+    let page = ports
         .repository
         .list_cases(NotaryCaseListQuery {
             organization_id,
@@ -566,7 +640,8 @@ async fn list_app_cases_for_report(
             page_size: 500,
             cursor: None,
         })
-        .await
+        .await?;
+    Ok(page.items)
 }
 
 pub async fn handle_notary_backend_operation(
@@ -574,7 +649,7 @@ pub async fn handle_notary_backend_operation(
     operation_id: &str,
     path_params: BTreeMap<String, String>,
     body: Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     match operation_id {
         "notary.organizationProfiles.create" => {
@@ -664,21 +739,17 @@ pub async fn handle_notary_backend_operation(
             Ok(matter_record_to_value(&matter))
         }
         "notary.cases.management.list" => {
-            let cases = list_backend_cases(context, &body, ports).await?;
+            let page = list_backend_cases(context, &body, ports).await?;
             Ok(json!({
-                "items": cases.iter().map(case_record_to_value).collect::<Vec<_>>(),
+                "items": page.items.iter().map(case_record_to_value).collect::<Vec<_>>(),
                 "pageInfo": {
-                    "hasMore": false
+                    "hasMore": page.has_more
                 }
             }))
         }
         "notary.cases.management.retrieve" => {
             let case_id = path_param(&path_params, "caseId")?;
-            let record = ports
-                .repository
-                .get_case(case_id)
-                .await?
-                .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+            let record = load_case_for_context(context, ports, case_id).await?;
             case_detail_to_value(&record, ports).await
         }
         "notary.cases.assignments.create" => {
@@ -700,8 +771,8 @@ pub async fn handle_notary_backend_operation(
         }
         "notary.staff.list" => list_notary_staff(context, &body, ports).await,
         "notary.reports.caseSummary.retrieve" => {
-            let cases = list_backend_cases(context, &body, ports).await?;
-            Ok(case_summary_to_value(&cases))
+            let page = list_backend_cases(context, &body, ports).await?;
+            Ok(case_summary_to_value(&page.items))
         }
         _ => Err(NotaryServiceError::provider_unavailable(format!(
             "unsupported notary backend operation: {operation_id}"
@@ -712,11 +783,12 @@ pub async fn handle_notary_backend_operation(
 async fn list_backend_cases(
     context: &NotaryRuntimeContext,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
-) -> Result<Vec<NotaryCaseRecord>, NotaryServiceError> {
+    ports: &NotaryRuntimePorts<'_>,
+) -> Result<NotaryCaseListPage, NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
         .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+    ensure_organization_scope(context, &organization_id)?;
     ports
         .repository
         .list_cases(NotaryCaseListQuery {
@@ -734,14 +806,10 @@ async fn create_case_assignment(
     context: &NotaryRuntimeContext,
     path_params: &BTreeMap<String, String>,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     let case_id = path_param(path_params, "caseId")?.to_string();
-    let record = ports
-        .repository
-        .get_case(&case_id)
-        .await?
-        .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+    let record = load_case_for_context(context, ports, &case_id).await?;
     let organization_membership_id = string_field(
         body,
         &[
@@ -761,6 +829,7 @@ async fn create_case_assignment(
         false,
     )
     .await?;
+    let display_name = member_display_name(&member);
     let assignment = ports
         .repository
         .insert_assignment(NotaryCaseAssignmentCommand {
@@ -776,13 +845,13 @@ async fn create_case_assignment(
         .repository
         .append_event(&case_id, "notary.case.assignment_created")
         .await?;
-    Ok(assignment_record_to_value(&assignment))
+    Ok(assignment_record_to_value(&assignment, Some(display_name)))
 }
 
 async fn list_notary_staff(
     context: &NotaryRuntimeContext,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
@@ -813,7 +882,7 @@ async fn list_notary_staff(
 
 async fn retrieve_notary_access(
     context: &NotaryRuntimeContext,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     validate_context(context)?;
     let organization_id = context.organization_id.clone().unwrap_or_default();
@@ -864,7 +933,7 @@ async fn retrieve_notary_access(
 async fn list_notary_matters(
     context: &NotaryRuntimeContext,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     validate_context(context)?;
     let matters = ports
@@ -939,13 +1008,16 @@ fn matter_record_to_value(record: &CommerceMatterRecord) -> Value {
     })
 }
 
-fn assignment_record_to_value(record: &NotaryCaseAssignmentRecord) -> Value {
+fn assignment_record_to_value(
+    record: &NotaryCaseAssignmentRecord,
+    display_name: Option<String>,
+) -> Value {
     json!({
         "id": record.assignment_id,
         "caseId": record.case_id,
         "organizationMembershipId": record.organization_membership_id,
         "userId": record.user_id,
-        "displayName": record.organization_membership_id,
+        "displayName": display_name.unwrap_or_else(|| record.organization_membership_id.clone()),
         "assignmentRole": record.assignment_role,
         "status": record.status,
         "assignedAt": record.assigned_at
@@ -963,7 +1035,7 @@ fn organization_profile_to_value(
         "status": profile.status,
         "driveSpaceId": profile.drive_space_id,
         "driveSpaceType": profile.drive_space_type,
-        "openedAt": "2026-06-10T00:00:00Z",
+        "openedAt": now_iso8601(),
         "settings": {
             "driveSpaceType": profile.drive_space_type
         },
@@ -975,7 +1047,7 @@ fn staff_member_to_value(member: &AppbaseOrganizationMember) -> Value {
     json!({
         "membershipId": member.membership_id,
         "userId": member.user_id,
-        "displayName": member.membership_id,
+        "displayName": member_display_name(member),
         "status": "active",
         "roles": member.roles,
         "positions": member.positions,
@@ -1076,31 +1148,71 @@ fn notary_statistics_to_value(cases: &[NotaryCaseRecord]) -> Value {
         },
         "monthlyPreservationTotal": {
             "count": cases.len(),
-            "blockchainSyncStatus": "OK"
+            "blockchainSyncStatus": blockchain_sync_status(cases)
         },
-        "timestamp": "2026-06-10T00:00:00Z"
+        "timestamp": now_iso8601()
     })
 }
 
-fn monthly_report_to_value(cases: &[NotaryCaseRecord], body: &Value) -> Value {
-    let month = string_field(body, &["month"]).unwrap_or_else(|| "2026-06".to_string());
+async fn monthly_report_to_value(
+    cases: &[NotaryCaseRecord],
+    body: &Value,
+    ports: &NotaryRuntimePorts<'_>,
+) -> Result<Value, NotaryServiceError> {
+    let month =
+        string_field(body, &["month"]).unwrap_or_else(|| now_compact_date()[..7].to_string());
     let format = string_field(body, &["format"]).unwrap_or_else(|| "pdf".to_string());
-    let report_id = format!("notary-monthly-{month}-{format}");
+    let filtered = filter_cases_for_month(cases, &month);
+    let report = ports
+        .drive
+        .create_monthly_report(DriveCreateMonthlyReportCommand {
+            month: month.clone(),
+            format: format.clone(),
+            case_count: filtered.len() as i64,
+        })
+        .await?;
+    Ok(json!({
+        "downloadUrl": report.download_url,
+        "reportId": report.report_id,
+        "month": report.month,
+        "format": report.format,
+        "generatedAt": now_iso8601(),
+        "expiresAt": expires_after_minutes(7),
+        "fileSize": report.file_size,
+        "caseCount": report.case_count
+    }))
+}
 
-    json!({
-        "downloadUrl": format!("sdkwork://notary/reports/{report_id}.{format}"),
-        "reportId": report_id,
-        "month": month,
-        "format": format,
-        "generatedAt": "2026-06-10T00:00:00Z",
-        "expiresAt": "2026-06-17T00:00:00Z",
-        "fileSize": 0,
-        "caseCount": cases.len()
-    })
+fn filter_cases_for_month(cases: &[NotaryCaseRecord], month: &str) -> Vec<NotaryCaseRecord> {
+    cases
+        .iter()
+        .filter(|record| record.created_at.starts_with(month))
+        .cloned()
+        .collect()
+}
+
+fn blockchain_sync_status(cases: &[NotaryCaseRecord]) -> &'static str {
+    let completed = cases
+        .iter()
+        .filter(|record| record.status == NotaryCaseStatus::Completed)
+        .collect::<Vec<_>>();
+    if completed.is_empty() {
+        return "OK";
+    }
+    if completed.iter().all(|record| {
+        record
+            .chain_hash
+            .as_ref()
+            .is_some_and(|hash| !hash.is_empty())
+    }) {
+        "OK"
+    } else {
+        "PENDING"
+    }
 }
 
 async fn require_notary_member(
-    appbase: &mut dyn crate::AppbasePort,
+    appbase: &dyn crate::AppbasePort,
     organization_id: &str,
     membership_id: &str,
     require_admin: bool,
@@ -1200,16 +1312,78 @@ fn build_case_no(order_item_id: &str) -> String {
         .chars()
         .rev()
         .collect::<String>();
-    format!("NT-20260610-{}", suffix.to_uppercase())
+    format!("NT-{}-{}", now_compact_date(), suffix.to_uppercase())
+}
+
+fn expires_after_minutes(minutes: i64) -> String {
+    use chrono::{Duration, Utc};
+    (Utc::now() + Duration::minutes(minutes))
+        .format("%Y-%m-%dT%H:%M:%SZ")
+        .to_string()
+}
+
+async fn load_case_for_context(
+    context: &NotaryRuntimeContext,
+    ports: &NotaryRuntimePorts<'_>,
+    case_id: &str,
+) -> Result<NotaryCaseRecord, NotaryServiceError> {
+    let record = ports
+        .repository
+        .get_case(case_id)
+        .await?
+        .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+    ensure_case_access(context, &record)?;
+    Ok(record)
+}
+
+fn ensure_organization_scope(
+    context: &NotaryRuntimeContext,
+    organization_id: &str,
+) -> Result<(), NotaryServiceError> {
+    if let Some(context_organization_id) = context.organization_id.as_deref() {
+        if context_organization_id != organization_id {
+            return Err(NotaryServiceError::unauthorized(
+                "organization scope does not match request context",
+            ));
+        }
+    }
+    Ok(())
+}
+
+fn ensure_case_access(
+    context: &NotaryRuntimeContext,
+    record: &NotaryCaseRecord,
+) -> Result<(), NotaryServiceError> {
+    ensure_organization_scope(context, &record.organization_id)
+}
+
+fn member_display_name(member: &AppbaseOrganizationMember) -> String {
+    let display_name = member.display_name.trim();
+    if display_name.is_empty() {
+        member.membership_id.clone()
+    } else {
+        display_name.to_string()
+    }
 }
 
 async fn update_case_from_body(
+    context: &NotaryRuntimeContext,
     case_id: &str,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<NotaryCaseRecord, NotaryServiceError> {
+    let current = load_case_for_context(context, ports, case_id).await?;
     let status = string_field(body, &["status"]).map(|value| case_status_from_api(&value));
     let status = status.transpose()?;
+    if let Some(next_status) = &status {
+        if !current.status.allows_transition_to(next_status) {
+            return Err(NotaryServiceError::invalid_state(format!(
+                "cannot transition notary case from {} to {}",
+                current.status.as_storage_value(),
+                next_status.as_storage_value()
+            )));
+        }
+    }
     let record = ports
         .repository
         .update_case(NotaryCaseUpdateCommand {
@@ -1232,7 +1406,7 @@ async fn update_case_status(
     status: NotaryCaseStatus,
     event_type: &str,
     chain_hash: Option<String>,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<NotaryCaseRecord, NotaryServiceError> {
     let record = ports
         .repository
@@ -1265,12 +1439,7 @@ fn create_case_command_from_body(
     let applicant_name = string_field(body, &["applicantName", "applicant_name", "applicant"])
         .ok_or_else(|| NotaryServiceError::validation("applicantName is required"))?;
     let idempotency_key = string_field(body, &["idempotencyKey", "idempotency_key"])
-        .unwrap_or_else(|| {
-            format!(
-                "notary-case:{}:{}:{}",
-                context.user_id, organization_id, sku_id
-            )
-        });
+        .ok_or_else(|| NotaryServiceError::validation("idempotencyKey is required"))?;
 
     Ok(NotaryCaseCommand {
         organization_id,
@@ -1290,7 +1459,7 @@ fn create_case_command_from_body(
 
 fn party_commands_from_body(
     body: &Value,
-) -> Result<Vec<sdkwork_notary_core::NotaryPartyCommand>, NotaryServiceError> {
+) -> Result<Vec<sdkwork_notary_case_contract::NotaryPartyCommand>, NotaryServiceError> {
     let Some(parties) = body.get("parties") else {
         return Ok(Vec::new());
     };
@@ -1303,14 +1472,14 @@ fn party_commands_from_body(
 
 fn party_command_from_value(
     party: &Value,
-) -> Result<sdkwork_notary_core::NotaryPartyCommand, NotaryServiceError> {
+) -> Result<sdkwork_notary_case_contract::NotaryPartyCommand, NotaryServiceError> {
     let name = string_field(party, &["name"])
         .ok_or_else(|| NotaryServiceError::validation("party.name is required"))?;
     let party_role = string_field(party, &["role", "partyRole", "party_role"])
         .ok_or_else(|| NotaryServiceError::validation("party.role is required"))?;
     let identity_no = string_field(party, &["identityNo", "identity_no", "identityId"])
         .ok_or_else(|| NotaryServiceError::validation("party.identityNo is required"))?;
-    Ok(sdkwork_notary_core::NotaryPartyCommand {
+    Ok(sdkwork_notary_case_contract::NotaryPartyCommand {
         name,
         party_role,
         identity_no,
@@ -1450,33 +1619,6 @@ fn uuid_seed(value: &Value) -> String {
     format!("{hash:016x}")
 }
 
-fn slug_segment(value: &str) -> String {
-    let mut result = String::new();
-    let mut previous_dash = false;
-    for character in value.chars() {
-        if character.is_ascii_alphanumeric() {
-            result.push(character.to_ascii_lowercase());
-            previous_dash = false;
-        } else if !previous_dash && !result.is_empty() {
-            result.push('-');
-            previous_dash = true;
-        }
-    }
-    result.trim_end_matches('-').to_string()
-}
-
-fn url_component(value: &str) -> String {
-    value
-        .bytes()
-        .map(|byte| match byte {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
-                (byte as char).to_string()
-            }
-            _ => format!("%{byte:02X}"),
-        })
-        .collect()
-}
-
 fn case_record_to_value(record: &NotaryCaseRecord) -> Value {
     json!({
         "id": record.case_id,
@@ -1515,7 +1657,7 @@ fn case_record_to_value(record: &NotaryCaseRecord) -> Value {
 
 async fn case_detail_to_value(
     record: &NotaryCaseRecord,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     let parties = ports.repository.list_parties(&record.case_id).await?;
     let events = ports
@@ -1554,7 +1696,7 @@ async fn case_detail_to_value(
         );
         object.insert(
             "timeline".to_string(),
-            Value::Array(events.iter().map(event_record_to_value).collect()),
+            Value::Array(events.items.iter().map(event_record_to_value).collect()),
         );
     }
     Ok(value)
@@ -1599,6 +1741,21 @@ fn event_record_to_value(event: &NotaryCaseEventRecord) -> Value {
         "actor": event.actor_user_id.clone().unwrap_or_else(|| "System".to_string()),
         "actorUserId": event.actor_user_id
     })
+}
+
+fn download_package_to_value(package: &DriveDownloadPackageReference) -> Value {
+    let mut value = json!({
+        "packageId": package.package_id,
+        "caseId": package.case_id,
+        "driveSpaceId": package.drive_space_id,
+        "driveSpaceType": package.drive_space_type,
+        "status": package.status,
+        "packageName": package.package_name
+    });
+    if let Some(download_url) = &package.download_url {
+        value["downloadUrl"] = json!(download_url);
+    }
+    value
 }
 
 fn drive_node_to_document_value(node: &DriveNodeReference, record: &NotaryCaseRecord) -> Value {
@@ -1648,16 +1805,13 @@ fn file_create_to_document_value(
 }
 
 async fn create_party_video_invite(
+    context: &NotaryRuntimeContext,
     case_id: &str,
     party_id: &str,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
-    let record = ports
-        .repository
-        .get_case(case_id)
-        .await?
-        .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+    let record = load_case_for_context(context, ports, case_id).await?;
     let parties = ports.repository.list_parties(case_id).await?;
     let party = parties
         .iter()
@@ -1667,23 +1821,18 @@ async fn create_party_video_invite(
         string_field(body, &["purpose"]).unwrap_or_else(|| "identity_verification".to_string());
     validate_video_invite_purpose(&purpose)?;
 
-    let conversation_id = format!(
-        "notary-{}-{}-video",
-        slug_segment(&record.case_id),
-        slug_segment(&party.party_id)
-    );
-    let invite_id = format!(
-        "video-invite-{}-{}",
-        slug_segment(&record.case_id),
-        slug_segment(&party.party_id)
-    );
-    let invite_url = format!(
-        "sdkwork://notary/video?inviteId={}&caseId={}&partyId={}&conversationId={}",
-        url_component(&invite_id),
-        url_component(&record.case_id),
-        url_component(&party.party_id),
-        url_component(&conversation_id)
-    );
+    let invite = ports
+        .drive
+        .create_party_video_invite(DriveCreatePartyVideoInviteCommand {
+            case_id: record.case_id.clone(),
+            party_id: party.party_id.clone(),
+            party_name: party.name.clone(),
+            purpose,
+            drive_space_id: record.drive_space_id.clone(),
+            drive_space_type: record.drive_space_type.clone(),
+            drive_folder_node_id: record.drive_folder_node_id.clone(),
+        })
+        .await?;
 
     ports
         .repository
@@ -1691,31 +1840,28 @@ async fn create_party_video_invite(
         .await?;
 
     Ok(json!({
-        "inviteId": invite_id,
-        "caseId": record.case_id,
-        "partyId": party.party_id,
-        "partyName": party.name,
-        "purpose": purpose,
-        "conversationId": conversation_id,
-        "inviteUrl": invite_url,
-        "expiresAt": "2026-06-10T00:10:00Z",
-        "driveSpaceId": record.drive_space_id,
-        "driveSpaceType": record.drive_space_type,
-        "driveFolderNodeId": record.drive_folder_node_id
+        "inviteId": invite.invite_id,
+        "caseId": invite.case_id,
+        "partyId": invite.party_id,
+        "partyName": invite.party_name,
+        "purpose": invite.purpose,
+        "conversationId": invite.conversation_id,
+        "inviteUrl": invite.invite_url,
+        "expiresAt": expires_after_minutes(10),
+        "driveSpaceId": invite.drive_space_id,
+        "driveSpaceType": invite.drive_space_type,
+        "driveFolderNodeId": invite.drive_folder_node_id
     }))
 }
 
 async fn create_party_signature_invite(
+    context: &NotaryRuntimeContext,
     case_id: &str,
     party_id: &str,
     body: &Value,
-    ports: &mut NotaryRuntimePorts<'_>,
+    ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
-    let record = ports
-        .repository
-        .get_case(case_id)
-        .await?
-        .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+    let record = load_case_for_context(context, ports, case_id).await?;
     let parties = ports.repository.list_parties(case_id).await?;
     let party = parties
         .iter()
@@ -1725,18 +1871,18 @@ async fn create_party_signature_invite(
         string_field(body, &["purpose"]).unwrap_or_else(|| "remote_signature".to_string());
     validate_signature_invite_purpose(&purpose)?;
 
-    let invite_id = format!(
-        "signature-invite-{}-{}",
-        slug_segment(&record.case_id),
-        slug_segment(&party.party_id)
-    );
-    let invite_url = format!(
-        "sdkwork://notary/signature?inviteId={}&caseId={}&partyId={}&driveFolderNodeId={}",
-        url_component(&invite_id),
-        url_component(&record.case_id),
-        url_component(&party.party_id),
-        url_component(&record.drive_folder_node_id)
-    );
+    let invite = ports
+        .drive
+        .create_party_signature_invite(DriveCreatePartySignatureInviteCommand {
+            case_id: record.case_id.clone(),
+            party_id: party.party_id.clone(),
+            party_name: party.name.clone(),
+            purpose,
+            drive_space_id: record.drive_space_id.clone(),
+            drive_space_type: record.drive_space_type.clone(),
+            drive_folder_node_id: record.drive_folder_node_id.clone(),
+        })
+        .await?;
 
     ports
         .repository
@@ -1744,17 +1890,17 @@ async fn create_party_signature_invite(
         .await?;
 
     Ok(json!({
-        "inviteId": invite_id,
-        "caseId": record.case_id,
-        "partyId": party.party_id,
-        "partyName": party.name,
-        "purpose": purpose,
-        "inviteUrl": invite_url,
-        "signingUrl": invite_url,
-        "expiresAt": "2026-06-10T00:10:00Z",
-        "driveSpaceId": record.drive_space_id,
-        "driveSpaceType": record.drive_space_type,
-        "driveFolderNodeId": record.drive_folder_node_id
+        "inviteId": invite.invite_id,
+        "caseId": invite.case_id,
+        "partyId": invite.party_id,
+        "partyName": invite.party_name,
+        "purpose": invite.purpose,
+        "inviteUrl": invite.invite_url,
+        "signingUrl": invite.invite_url,
+        "expiresAt": expires_after_minutes(10),
+        "driveSpaceId": invite.drive_space_id,
+        "driveSpaceType": invite.drive_space_type,
+        "driveFolderNodeId": invite.drive_folder_node_id
     }))
 }
 

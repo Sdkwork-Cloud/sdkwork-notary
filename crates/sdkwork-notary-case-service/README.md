@@ -1,4 +1,4 @@
-# sdkwork-notary-runtime-rust
+# sdkwork-notary-case-service
 
 Runtime orchestration for SDKWork Notary.
 
@@ -15,5 +15,5 @@ The crate uses ports for Appbase, Commerce, Drive, and Notary storage. It does n
 ## Verification
 
 ```powershell
-cargo test -p sdkwork-notary-runtime-rust --target-dir target-codex-test
+cargo test -p sdkwork-notary-case-service --target-dir target-codex-test
 ```

@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/sdkwork-notary-core-rust",
-  "crates/sdkwork-notary-runtime-rust",
-  "crates/sdkwork-notary-storage-sqlx-rust",
+  "crates/sdkwork-notary-case-contract",
+  "crates/sdkwork-notary-case-service",
+  "crates/sdkwork-notary-case-repository-sqlx",
   "crates/sdkwork-router-notary-app-api",
   "crates/sdkwork-router-notary-backend-api",
 ]

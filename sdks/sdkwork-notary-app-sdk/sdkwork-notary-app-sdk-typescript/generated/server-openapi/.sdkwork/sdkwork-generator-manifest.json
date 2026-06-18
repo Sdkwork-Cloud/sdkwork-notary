@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "199cd690bca1db8500b59a084a8e97c3b3d6c1216da625fc6bc35abf59be8b92"
+      "sha256": "569f698dac1d0a9d7675d264edb9f965d28330678fd0e377924d447563c1f4d2"
     },
     {
       "path": "sdkwork-sdk.json",
@@ -60,7 +60,7 @@
     },
     {
       "path": "src/api/notary.ts",
-      "sha256": "12ced35a4ef68445aebc8b3f8de26e774a570e6379caedec95eb916953cb3994"
+      "sha256": "df7243a130c077809307578c524cc9347a62514767f6224b5352cba0a62fff95"
     },
     {
       "path": "src/api/paths.ts",
@@ -132,7 +132,11 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "7f2e636083d2b7897d34f487a3e0042e09628a345f5652ffd1c14132dd3aa19e"
+      "sha256": "11675bcb0cc73bcb11f3adc13096e3aa23efea95608eaba8a77d442a35beb639"
+    },
+    {
+      "path": "src/types/monthly-report.ts",
+      "sha256": "78b847ed2511cd23e7dd2673a2b8ceaca6e0de89f668f9e560f3afe2147d2a92"
     },
     {
       "path": "src/types/notary-access.ts",
@@ -193,6 +197,10 @@
     {
       "path": "src/types/notary-staff-member.ts",
       "sha256": "3362af7ae22e38958ff9dfebd0846bd8ed26b4c6e54230822a3bb8921282bbf1"
+    },
+    {
+      "path": "src/types/notary-statistics.ts",
+      "sha256": "f391ebc1f6c657deb62ec5cbc655080b2c7b12002b678a12c5048af79793090d"
     },
     {
       "path": "src/types/page-info.ts",

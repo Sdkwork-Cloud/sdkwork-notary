@@ -101,4 +101,40 @@ impl NotaryCaseStatus {
             _ => None,
         }
     }
+
+    pub fn allows_transition_to(&self, next: &Self) -> bool {
+        use NotaryCaseStatus::*;
+        if self == next {
+            return true;
+        }
+        matches!(
+            (self, next),
+            (PendingReview, Processing)
+                | (PendingReview, Rejected)
+                | (PendingReview, Cancelled)
+                | (PendingReview, CreateFailed)
+                | (Processing, Completed)
+                | (Processing, Rejected)
+                | (Processing, Cancelled)
+        )
+    }
+
+    pub fn allows_acceptance(&self) -> bool {
+        matches!(self, Self::PendingReview)
+    }
+
+    pub fn allows_rejection(&self) -> bool {
+        matches!(self, Self::PendingReview | Self::Processing)
+    }
+
+    pub fn allows_completion(&self) -> bool {
+        matches!(self, Self::Processing)
+    }
+
+    pub fn is_terminal(&self) -> bool {
+        matches!(
+            self,
+            Self::Completed | Self::Rejected | Self::Cancelled | Self::CreateFailed
+        )
+    }
 }

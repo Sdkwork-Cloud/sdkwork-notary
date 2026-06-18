@@ -6,9 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(testDir, "..", "..");
-const chatPcRoot = process.env.SDKWORK_CHAT_PC_ROOT
-  ? path.resolve(process.env.SDKWORK_CHAT_PC_ROOT)
-  : path.resolve(workspaceRoot, "..", "sdkwork-im", "apps", "sdkwork-chat-pc");
+import { chatPcRoot, chatPcTest } from "./helpers/chat-pc-root.mjs";
 
 function readText(relativePath) {
   return readFileSync(path.join(workspaceRoot, relativePath), "utf8");
@@ -232,8 +230,8 @@ test("app composed assignCase delegates to app notary assignment resource", asyn
   assert.equal(result.assignmentRole, "primary_notary");
 });
 
-test("real chat-pc notary service consumes the composed workflow facade instead of raw resources", () => {
-  const source = readChatPcText("packages/sdkwork-clawchat-pc-notary/src/services/NotaryService.ts");
+chatPcTest("real chat-pc notary service consumes the composed workflow facade instead of raw resources", () => {
+  const source = readChatPcText("packages/sdkwork-im-pc-notary/src/services/NotaryService.ts");
 
   for (const method of [
     "notaryApi.acceptCase",
@@ -368,14 +366,13 @@ test("app composed deleteCaseFile delegates to Drive node deletion and refreshes
 
   const result = await api.deleteCaseFile("case-1", {
     nodeId: "node-delete",
-    tenantId: "tenant-1",
   });
 
   assert.deepEqual(calls, [
     {
       method: "drive.nodes.delete",
       nodeId: "node-delete",
-      params: { tenantId: "tenant-1" },
+      params: {},
     },
     {
       method: "notary.files.list",
@@ -439,7 +436,7 @@ test("app composed attachPartySignature uploads signature image through Drive an
 
   const result = await api.attachPartySignature("case-1", "party-1", {
     signatureUrl: "data:image/png;base64,AAAA",
-    source: "sdkwork-chat-pc",
+    source: "sdkwork-im-pc",
   });
 
   assert.equal(calls[0].method, "drive.uploader.upload");
@@ -655,7 +652,7 @@ test("app composed uploadCaseFile keeps party identity files scoped to notary ca
     file: { name: "id-front.png" },
     category: "identity",
     materialCode: "identity_front",
-    source: "sdkwork-chat-pc",
+    source: "sdkwork-im-pc",
   });
 
   assert.equal(calls[0].method, "drive.uploader.upload");
@@ -739,7 +736,6 @@ test("app composed createCaseFileDownloadUrl delegates to Drive node download UR
 
   const result = await api.createCaseFileDownloadUrl("case-1", {
     nodeId: "node-1",
-    tenantId: "tenant-1",
     requestedTtlSeconds: 300,
   });
 
@@ -748,7 +744,6 @@ test("app composed createCaseFileDownloadUrl delegates to Drive node download UR
       method: "drive.nodes.downloadUrls.create",
       nodeId: "node-1",
       params: {
-        tenantId: "tenant-1",
         requestedTtlSeconds: 300,
       },
     },

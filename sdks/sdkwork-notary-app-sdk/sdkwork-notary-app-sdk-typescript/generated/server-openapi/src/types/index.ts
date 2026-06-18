@@ -34,3 +34,5 @@ export type { CreateCaseAssignmentRequest } from './create-case-assignment-reque
 export type { NotaryCaseAssignment } from './notary-case-assignment';
 export type { NotaryStaffMember } from './notary-staff-member';
 export type { NotaryStaffMemberPage } from './notary-staff-member-page';
+export type { NotaryStatistics } from './notary-statistics';
+export type { MonthlyReport } from './monthly-report';

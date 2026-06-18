@@ -1,9 +1,11 @@
-use sdkwork_notary_core::{NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand};
-use sdkwork_notary_runtime::{
+use sdkwork_notary_case_contract::{NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand};
+use sdkwork_notary_case_repository_sqlx::{
+    notary_foundation_migration_sql, SqliteNotaryCaseRepository,
+};
+use sdkwork_notary_case_service::{
     NotaryCaseAssignmentCommand, NotaryCaseEventListQuery, NotaryCaseListQuery,
     NotaryCaseUpdateCommand, NotaryOrganizationProfileUpdateCommand, NotaryPartyUpdateCommand,
 };
-use sdkwork_notary_storage_sqlx::{notary_foundation_migration_sql, SqliteNotaryCaseRepository};
 use sqlx::SqlitePool;
 
 #[tokio::test]
@@ -119,14 +121,14 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
         })
         .await
         .unwrap();
-    assert_eq!(listed.len(), 1);
-    assert_eq!(listed[0].case_id, "case-1");
-    assert_eq!(listed[0].sku_id, "sku-notary-contract");
+    assert_eq!(listed.items.len(), 1);
+    assert_eq!(listed.items[0].case_id, "case-1");
+    assert_eq!(listed.items[0].sku_id, "sku-notary-contract");
     assert_eq!(
-        listed[0].primary_notary_membership_id,
+        listed.items[0].primary_notary_membership_id,
         Some("member-notary-1".to_string())
     );
-    assert_eq!(listed[0].drive_space_type, "notary");
+    assert_eq!(listed.items[0].drive_space_type, "notary");
 
     let parties = repository.list_parties("case-1").await.unwrap();
     assert_eq!(parties.len(), 1);
@@ -198,8 +200,8 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
         })
         .await
         .unwrap();
-    assert_eq!(events.len(), 1);
-    assert_eq!(events[0].event_type, "notary.case.submitted");
+    assert_eq!(events.items.len(), 1);
+    assert_eq!(events.items[0].event_type, "notary.case.submitted");
 
     let dependency_table_count: i64 = sqlx::query_scalar(
         r#"

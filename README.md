@@ -25,6 +25,8 @@ Notary tables keep performance-critical logical references, but dependency-owned
 
 ## API Contracts
 
+- App authored contract: `apis/app-api/notary/notary-app-api.openapi.json`
+- Backend authored contract: `apis/backend-api/notary/notary-backend-api.openapi.json`
 - App API authority: `generated/openapi/notary-app-api.openapi.json`
 - Backend API authority: `generated/openapi/notary-backend-api.openapi.json`
 - App prefix: `/app/v3/api/notary`
@@ -53,9 +55,9 @@ These package roots export generated clients, generated types, and approved comp
 
 ## Runtime Crates
 
-- `crates/sdkwork-notary-core-rust`: shared domain records, commands, status values, typed service errors, runtime context, and service contract metadata.
-- `crates/sdkwork-notary-runtime-rust`: orchestration service over explicit Appbase, Commerce, Drive, and Notary repository ports.
-- `crates/sdkwork-notary-storage-sqlx-rust`: SQLx-backed Notary repository implementation and executable migration contract for local/private deployments.
+- `crates/sdkwork-notary-case-contract`: shared domain records, commands, status values, typed service errors, runtime context, and service contract metadata.
+- `crates/sdkwork-notary-case-service`: orchestration service over explicit Appbase, Commerce, Drive, and Notary repository ports.
+- `crates/sdkwork-notary-case-repository-sqlx`: SQLx-backed Notary repository implementations (`SqliteNotaryCaseRepository`, `PostgresNotaryCaseRepository`) and executable migration contract for local/private deployments.
 
 The runtime layer implements the main notary workflow without owning dependency facts:
 
@@ -67,37 +69,51 @@ The runtime layer implements the main notary workflow without owning dependency 
 - backend organization profile update, case management list/retrieve, staff list, assignment create/release, and case summary operations are exposed through the backend runtime dispatcher;
 - listing case files loads the case and calls Drive by denormalized `drive_space_type`, `drive_space_id`, and `drive_folder_node_id`, avoiding cross-domain online joins.
 
-Route runtime services are implemented for both app and backend route crates, so the generated route layers can dispatch directly to `sdkwork-notary-runtime-rust` ports:
+Route runtime services are implemented for both app and backend route crates, so the generated route layers can dispatch directly to `sdkwork-notary-case-service` ports:
 
 - `crates/sdkwork-router-notary-app-api`
 - `crates/sdkwork-router-notary-backend-api`
 
 ## Chat PC Integration
 
-The frontend notary package is integrated directly in the real Craw Chat PC application root:
+The frontend notary package is integrated directly in the real SDKWork IM PC application root:
 
-- `E:\sdkwork-space\sdkwork-im\apps\sdkwork-chat-pc`
-- `packages/sdkwork-clawchat-pc-core/src/sdk/notaryAppSdkClient.ts`
-- `packages/sdkwork-clawchat-pc-notary/src/services/NotaryService.ts`
+- `../sdkwork-im/apps/sdkwork-im-pc`
+- `packages/sdkwork-im-pc-core/src/sdk/notaryAppSdkClient.ts`
+- `packages/sdkwork-im-pc-notary/src/services/NotaryService.ts`
 
-The app root includes `@sdkwork/notary-app-sdk` as a workspace dependency and aliases it through `vite.config.ts` and `tsconfig.json` to `E:\sdkwork-space\sdkwork-notary\sdks\sdkwork-notary-app-sdk\sdkwork-notary-app-sdk-typescript`. The core bootstrap constructs the generated Notary App SDK client with the same app SDK base URL, request-context interceptors, and global TokenManager used by the other authenticated app SDK clients.
+The app root includes `@sdkwork/notary-app-sdk` as a workspace dependency and aliases it through `vite.config.ts` and `tsconfig.json` to `../sdkwork-notary/sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript`. The core bootstrap constructs the generated Notary App SDK client with the same app SDK base URL, request-context interceptors, and global TokenManager used by the other authenticated app SDK clients.
 
-`sdkwork-clawchat-pc-notary` now uses a real service facade over the approved `createNotaryApi` composed facade. It maps generated Notary App SDK case models to the existing `NotaryTask`, `Party`, `NotaryDocument`, and timeline view models, keeps Drive references as task/document metadata, and contains no raw HTTP, manual auth headers, mock tasks, or local success branches.
+`sdkwork-im-pc-notary` uses a real service facade over the approved `createNotaryApi` composed facade. It maps generated Notary App SDK case models to the existing `NotaryTask`, `Party`, `NotaryDocument`, and timeline view models, keeps Drive references as task/document metadata, and contains no raw HTTP, manual auth headers, mock tasks, or local success branches.
 
-The obsolete `integrations/sdkwork-chat-pc/` fork was removed. The contract test `sdks/test/notary-chat-pc-real-app-integration.test.mjs` verifies the real app root wiring, notary UI service closure, notary access gating, and the absence of the deleted integration fork.
+The obsolete `integrations/sdkwork-chat-pc/` fork was removed. The contract test `sdks/test/notary-chat-pc-real-app-integration.test.mjs` verifies the real IM PC app root wiring, notary UI service closure, notary access gating, and the absence of the deleted integration fork.
+
+## Topology
+
+Runtime topology follows SDKWork v2 (`application-http-gateway`):
+
+- Spec: `specs/topology.spec.json`
+- Profiles: `configs/topology/*.env`
+- Adapter: `scripts/lib/notary-topology.mjs`
+- Dev entry: `pnpm notary:dev`
+
+See `docs/topology-standard.md` and `../sdkwork-specs/APP_RUNTIME_TOPOLOGY_ADOPTION.md`.
 
 ## Verification
 
 Run from this repository root:
 
 ```powershell
-pnpm.cmd test:contracts
-cargo fmt --all -- --check
-cargo test --workspace --target-dir target-codex-test --offline
+pnpm notary:dev
+pnpm verify
+pnpm sdk:generate
 ```
 
-Generate TypeScript transport SDKs from the owner-only OpenAPI contracts:
+Or run the individual gates:
 
 ```powershell
-pnpm sdk:generate
+pnpm test:topology-validate
+pnpm test:contracts
+cargo fmt --all --check
+pnpm test:rust
 ```

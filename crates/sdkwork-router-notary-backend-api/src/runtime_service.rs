@@ -2,13 +2,12 @@ use std::collections::BTreeMap;
 
 use async_trait::async_trait;
 use axum::http::StatusCode;
-use sdkwork_notary_core::{NotaryRuntimeContext, NotaryServiceError};
-use sdkwork_notary_runtime::{
+use sdkwork_notary_case_contract::{NotaryRuntimeContext, NotaryServiceError};
+use sdkwork_notary_case_service::{
     handle_notary_backend_operation, AppbasePort, CommercePort, DrivePort,
     NotaryCaseRepositoryPort, NotaryRuntimePorts,
 };
 use serde_json::Value;
-use tokio::sync::Mutex;
 
 use crate::service_port::{NotaryBackendApiServicePort, NotaryRequestContext, NotaryRouteError};
 
@@ -19,10 +18,10 @@ where
     Drive: DrivePort,
     Repository: NotaryCaseRepositoryPort,
 {
-    appbase: Mutex<Appbase>,
-    commerce: Mutex<Commerce>,
-    drive: Mutex<Drive>,
-    repository: Mutex<Repository>,
+    appbase: Appbase,
+    commerce: Commerce,
+    drive: Drive,
+    repository: Repository,
 }
 
 impl<Appbase, Commerce, Drive, Repository>
@@ -35,10 +34,10 @@ where
 {
     pub fn new(appbase: Appbase, commerce: Commerce, drive: Drive, repository: Repository) -> Self {
         Self {
-            appbase: Mutex::new(appbase),
-            commerce: Mutex::new(commerce),
-            drive: Mutex::new(drive),
-            repository: Mutex::new(repository),
+            appbase,
+            commerce,
+            drive,
+            repository,
         }
     }
 }
@@ -60,21 +59,17 @@ where
         body: Value,
     ) -> Result<Value, NotaryRouteError> {
         let runtime_context = runtime_context_from_route(context);
-        let mut appbase = self.appbase.lock().await;
-        let mut commerce = self.commerce.lock().await;
-        let mut drive = self.drive.lock().await;
-        let mut repository = self.repository.lock().await;
 
         handle_notary_backend_operation(
             &runtime_context,
             operation_id,
             path_params,
             body,
-            &mut NotaryRuntimePorts {
-                appbase: &mut *appbase,
-                commerce: &mut *commerce,
-                drive: &mut *drive,
-                repository: &mut *repository,
+            &NotaryRuntimePorts {
+                appbase: &self.appbase,
+                commerce: &self.commerce,
+                drive: &self.drive,
+                repository: &self.repository,
             },
         )
         .await

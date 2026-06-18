@@ -1,20 +1,23 @@
 [package]
-name = "sdkwork-notary-storage-sqlx-rust"
+name = "sdkwork-notary-case-repository-sqlx"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 
 [lib]
-name = "sdkwork_notary_storage_sqlx"
+name = "sdkwork_notary_case_repository_sqlx"
 
 [dependencies]
 sdkwork-database-config = { path = "../../../sdkwork-database/crates/sdkwork-database-config" }
 sdkwork-database-sqlx = { path = "../../../sdkwork-database/crates/sdkwork-database-sqlx" }
 async-trait = "0.1.89"
-sdkwork-notary-core-rust = { path = "../sdkwork-notary-core-rust" }
-sdkwork-notary-runtime-rust = { path = "../sdkwork-notary-runtime-rust" }
+sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
+sdkwork-notary-case-service = { path = "../sdkwork-notary-case-service" }
 serde_json = "1.0"
-sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio", "sqlite"] }
+sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio", "sqlite", "postgres"] }
+aes-gcm = "0.10"
+base64 = "0.22"
+sha2 = "0.10"
 
 [dev-dependencies]
 tokio = { version = "1.52", features = ["macros", "rt-multi-thread"] }
