@@ -8,21 +8,23 @@ use axum::{
 };
 use serde_json::{json, Value};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct NotaryRequestContext {
-    pub tenant_id: String,
-    pub organization_id: Option<String>,
-    pub user_id: String,
-    pub membership_id: Option<String>,
-    pub session_id: String,
-    pub app_id: String,
-}
+pub use sdkwork_router_notary_http_auth::{NotaryAuthError, NotaryRequestContext};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NotaryRouteError {
     pub status: StatusCode,
     pub code: &'static str,
     pub message: String,
+}
+
+impl From<NotaryAuthError> for NotaryRouteError {
+    fn from(error: NotaryAuthError) -> Self {
+        Self {
+            status: error.status,
+            code: error.code,
+            message: error.message,
+        }
+    }
 }
 
 #[async_trait]
@@ -39,26 +41,15 @@ pub trait NotaryBackendApiServicePort: Send + Sync {
 #[derive(Clone)]
 pub struct NotaryBackendApiState {
     service: Arc<dyn NotaryBackendApiServicePort>,
-    default_context: NotaryRequestContext,
 }
 
 impl NotaryBackendApiState {
-    pub fn new(
-        service: Arc<dyn NotaryBackendApiServicePort>,
-        default_context: NotaryRequestContext,
-    ) -> Self {
-        Self {
-            service,
-            default_context,
-        }
+    pub fn new(service: Arc<dyn NotaryBackendApiServicePort>) -> Self {
+        Self { service }
     }
 
     pub fn service(&self) -> Arc<dyn NotaryBackendApiServicePort> {
         Arc::clone(&self.service)
-    }
-
-    pub fn request_context(&self) -> NotaryRequestContext {
-        self.default_context.clone()
     }
 }
 

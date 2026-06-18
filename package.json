@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "pnpm.cmd test:contracts",
-    "test:contracts": "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs",
+    "test:contracts": "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs",
     "test:topology-baggage": "node --test scripts/dev/sdkwork-notary-topology-baggage.test.mjs",
     "test:topology-validate": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs validate --root . --spec specs/topology.spec.json",
     "test:rust": "cargo test --workspace --target-dir target-codex-test",
@@ -18,6 +18,9 @@
     "sdk:generate:app": "node sdks/sdkwork-notary-app-sdk/bin/generate-sdk.mjs",
     "sdk:generate:backend": "node sdks/sdkwork-notary-backend-sdk/bin/generate-sdk.mjs",
     "sdk:generate": "pnpm sdk:generate:app && pnpm sdk:generate:backend",
-    "verify": "pnpm.cmd test:topology-validate && pnpm.cmd test:contracts && cargo fmt --all --check && pnpm.cmd test:rust"
+    "openapi:materialize": "node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs",
+    "manifest:generate": "node scripts/generate-notary-route-manifests.mjs",
+    "manifest:sync": "node scripts/generate-notary-route-manifests.mjs && node scripts/sync-notary-api-framework-metadata.mjs",
+    "verify": "pnpm.cmd test:topology-validate && pnpm.cmd test:topology-baggage && pnpm.cmd test:contracts && cargo fmt --all --check && pnpm.cmd test:rust"
   }
 }

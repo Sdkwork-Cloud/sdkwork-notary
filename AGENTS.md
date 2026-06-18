@@ -27,12 +27,16 @@ Do not copy root standard text into this repository. If these relative paths do 
 - `AGENTS.md`: local agent entrypoint and relative SDKWORK spec index.
 - `.sdkwork/`: local skills, plugins, manifests, and workspace metadata.
 - `apis/`: API authority index and authored OpenAPI contracts for notary app/backend surfaces.
+- `apps/`: pointer dictionary for host application roots (domain library has no local app).
 - `configs/topology/`: v2 runtime topology profile env files.
+- `deployments/`, `jobs/`, `tools/`, `plugins/`, `examples/`, `tests/`: standard workspace directories (see `docs/root-layout.md`).
 - `docs/topology-standard.md`: human topology summary and dev commands.
+- `docs/root-layout.md`: workspace directory dictionary and framework integration summary.
 - `generated/openapi/`: owner OpenAPI authority documents.
-- `sdks/`: SDK families, composed facades, and contract tests.
+- `sdks/`: SDK families, route manifests, composed facades, and contract tests.
 - `crates/`: Rust contract, service, repository, and route crates.
 - `sdkwork.app.config.json`: SDKWork application identity manifest.
+- `sdkwork.workflow.json`: release and packaging workflow for domain library verification.
 - `package.json` / `Cargo.toml`: workspace manifests.
 
 ## Spec Resolution Order
@@ -47,6 +51,7 @@ Do not copy root standard text into this repository. If these relative paths do 
 - Agent/workflow changes: `../sdkwork-specs/SOUL.md`, `../sdkwork-specs/AGENTS_SPEC.md`, `../sdkwork-specs/SDKWORK_WORKSPACE_SPEC.md`.
 - Any code change: `../sdkwork-specs/CODE_STYLE_SPEC.md`, `../sdkwork-specs/NAMING_SPEC.md`, plus only the touched language/framework spec.
 - Rust code: `../sdkwork-specs/RUST_CODE_SPEC.md`.
+- HTTP route crates and web integration: `../sdkwork-specs/WEB_FRAMEWORK_SPEC.md`, `../sdkwork-specs/WEB_BACKEND_SPEC.md`.
 - TypeScript SDK and contract tests: `../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md`.
 - API, SDK, database, runtime, security, and deployment changes must follow the task matrix in `../sdkwork-specs/README.md`.
 
@@ -62,11 +67,13 @@ Run commands from this directory unless a command explicitly targets another pat
 
 - `pnpm notary:dev`: load the default self-hosted split-services development topology profile.
 - `pnpm test:topology-validate`: validate `specs/topology.spec.json` against `@sdkwork/app-topology`.
-- `pnpm test:contracts`: contract tests for OpenAPI, SDK packages, runtime standards, topology baggage, and optional Chat PC integration.
+- `pnpm test:contracts`: contract tests for OpenAPI, SDK packages, runtime standards, standard architecture, topology baggage, and optional Chat PC integration.
 - `pnpm test:rust` or `cargo test --workspace --target-dir target-codex-test`: Rust workspace tests.
 - `cargo fmt --all --check`: verify Rust formatting.
 - `pnpm test:topology-baggage`: scan active paths for retired topology vocabulary.
-- `pnpm verify`: run topology validation, contract tests, Rust formatting, and Rust tests.
+- `pnpm openapi:materialize`: copy authored `apis/` OpenAPI into `generated/openapi/` and sync framework metadata.
+- `pnpm manifest:sync`: regenerate `sdks/_route-manifests` and sync framework metadata after route/OpenAPI changes.
+- `pnpm verify`: run topology validation, topology baggage scan, contract tests, Rust formatting, and Rust tests.
 
 Chat PC integration contract tests skip automatically when the real app root is absent. Set `SDKWORK_IM_PC_ROOT` (or legacy `SDKWORK_CHAT_PC_ROOT`) to point at `sdkwork-im/apps/sdkwork-im-pc` when validating cross-repo wiring.
 

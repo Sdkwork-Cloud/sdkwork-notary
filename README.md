@@ -106,6 +106,8 @@ Run from this repository root:
 ```powershell
 pnpm notary:dev
 pnpm verify
+pnpm openapi:materialize
+pnpm manifest:sync
 pnpm sdk:generate
 ```
 
@@ -113,6 +115,7 @@ Or run the individual gates:
 
 ```powershell
 pnpm test:topology-validate
+pnpm test:topology-baggage
 pnpm test:contracts
 cargo fmt --all --check
 pnpm test:rust

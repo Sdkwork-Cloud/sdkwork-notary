@@ -107,9 +107,7 @@ test("notary Rust route crates are workspace members with standard component spe
     assert.equal(spec.kind, "sdkwork.component.spec");
     assert.equal(spec.component.name, routeCrate.packageName);
     assert.equal(spec.component.type, "rust-route-crate");
-    assert.equal(spec.contracts.routeManifest.surface, routeCrate.surface);
-    assert.equal(spec.contracts.routeManifest.apiAuthority, routeCrate.authority);
-    assert.equal(spec.contracts.routeManifest.sdkFamily, routeCrate.sdkFamily);
+    assert.equal(spec.contracts.routeManifest, `../../../sdks/_route-manifests/${routeCrate.surface}/sdkwork-router-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`);
     assert(spec.contracts.runtimeEntrypoints.includes(routeCrate.builder));
   }
 });
@@ -157,6 +155,29 @@ test("notary route crates expose executable routers and deterministic route mani
   }
 });
 
+test("notary canonical route manifests stay aligned with embedded crate manifests", () => {
+  for (const routeCrate of routeCrates) {
+    const manifestFile = readJson(
+      `sdks/_route-manifests/${routeCrate.surface}/sdkwork-router-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`,
+    );
+    const embedded = JSON.parse(
+      readText(path.join(routeCrate.root, "src/manifest.rs")).match(
+        /pub fn sdkwork_notary_[a-z_]+_route_manifest\(\) -> &'static str \{\s*r#"([\s\S]*?)"#/,
+      )[1],
+    );
+
+    const fileRoutes = manifestFile.routes
+      .map((route) => `${route.method} ${route.path} ${route.operationId}`)
+      .sort();
+    const embeddedRoutes = embedded.routes
+      .map((route) => `${route.method} ${route.path} ${route.operationId}`)
+      .sort();
+
+    assert.deepEqual(embeddedRoutes, fileRoutes, `${routeCrate.packageName} embedded manifest drift`);
+    assert.equal(manifestFile.routes.length, openApiOperations(routeCrate.openapi).length);
+  }
+});
+
 test("notary route handlers use injected service ports and do not bypass SDKWork boundaries", () => {
   for (const routeCrate of routeCrates) {
     const source = [
@@ -168,7 +189,9 @@ test("notary route handlers use injected service ports and do not bypass SDKWork
       .map((relativePath) => readText(path.join(routeCrate.root, relativePath)))
       .join("\n");
 
-    assert(source.includes("NotaryRequestContext"));
+    assert(source.includes("WebRequestContext"));
+    assert(source.includes("notary_request_context_from_web"));
+    assert(source.includes("with_dual_token_request_context"));
     assert(source.includes("State(state)"));
     assert(source.includes(".service()."));
     assert(!source.includes("fetch("));

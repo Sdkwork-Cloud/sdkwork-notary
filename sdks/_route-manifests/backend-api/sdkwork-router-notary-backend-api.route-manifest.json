@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.route.manifest",
+  "packageName": "sdkwork-router-notary-backend-api",
+  "surface": "backend-api",
+  "owner": "sdkwork-notary",
+  "domain": "notary",
+  "capability": "notary",
+  "apiAuthority": "sdkwork-notary-backend-api",
+  "sdkFamily": "sdkwork-notary-backend-sdk",
+  "prefix": "/backend/v3/api",
+  "source": {
+    "crateRoot": "crates/sdkwork-router-notary-backend-api",
+    "crateImport": "sdkwork_router_notary_backend_api"
+  },
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/backend/v3/api/notary/cases/{caseId}/assignments",
+      "operationId": "notary.cases.assignments.create",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.cases.assignments.create",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "create_assignment"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "DELETE",
+      "path": "/backend/v3/api/notary/cases/{caseId}/assignments/{assignmentId}",
+      "operationId": "notary.cases.assignments.delete",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.cases.assignments.delete",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "delete_assignment"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/notary/cases",
+      "operationId": "notary.cases.management.list",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.cases.management.read",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "list_cases"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/notary/cases/{caseId}",
+      "operationId": "notary.cases.management.retrieve",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.cases.management.read",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "retrieve_case"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "POST",
+      "path": "/backend/v3/api/notary/matters",
+      "operationId": "notary.matters.create",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.matters.create",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "create_matter"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/notary/matters",
+      "operationId": "notary.matters.management.list",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.matters.management.read",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "list_matters"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/backend/v3/api/notary/matters/{skuId}",
+      "operationId": "notary.matters.update",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.matters.update",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "update_matter"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "POST",
+      "path": "/backend/v3/api/notary/organization_profiles",
+      "operationId": "notary.organizationProfiles.create",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.organization_profiles.create",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "create_organization_profile"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/notary/organization_profiles",
+      "operationId": "notary.organizationProfiles.list",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.organization_profiles.read",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "list_organization_profiles"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/notary/organization_profiles/{organizationProfileId}",
+      "operationId": "notary.organizationProfiles.retrieve",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.organization_profiles.read",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "retrieve_organization_profile"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "PATCH",
+      "path": "/backend/v3/api/notary/organization_profiles/{organizationProfileId}",
+      "operationId": "notary.organizationProfiles.update",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.organization_profiles.update",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "update_organization_profile"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/notary/reports/case_summary",
+      "operationId": "notary.reports.caseSummary.retrieve",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.reports.case_summary.read",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "retrieve_case_summary"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    },
+    {
+      "method": "GET",
+      "path": "/backend/v3/api/notary/staff",
+      "operationId": "notary.staff.list",
+      "tags": [
+        "notary"
+      ],
+      "auth": {
+        "mode": "dual-token",
+        "required": true,
+        "permission": "notary.staff.read",
+        "tenantScope": "tenant",
+        "dataScope": "organization"
+      },
+      "handler": {
+        "module": "sdkwork_router_notary_backend_api::handlers",
+        "name": "list_staff"
+      },
+      "schemas": {
+        "request": null,
+        "response": null,
+        "problem": "ProblemDetail"
+      },
+      "ownership": {
+        "owner": "sdkwork-notary",
+        "apiAuthority": "sdkwork-notary-backend-api"
+      },
+      "source": {
+        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+      },
+      "requestContext": "WebRequestContext",
+      "apiSurface": "backend-api"
+    }
+  ]
+}

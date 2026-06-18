@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "2026-06-06.sdkwork.workflow.v1",
+  "app": {
+    "id": "sdkwork-notary",
+    "name": "SDKWork Notary",
+    "repository": "Sdkwork-Cloud/sdkwork-notary",
+    "sourcePath": ".",
+    "configPath": "sdkwork.app.config.json"
+  },
+  "release": {
+    "artifactPrefix": "sdkwork-notary",
+    "defaultVersion": "0.1.0",
+    "changelog": {
+      "source": "auto",
+      "maxCommitSubjects": 50
+    }
+  },
+  "dependencies": [
+    {
+      "id": "sdkwork-appbase",
+      "repository": "Sdkwork-Cloud/sdkwork-appbase",
+      "ref": "main",
+      "refInput": "SDKWORK_APPBASE_REF",
+      "tokenSecret": "SDKWORK_RELEASE_TOKEN"
+    },
+    {
+      "id": "sdkwork-sdk-commons",
+      "repository": "Sdkwork-Cloud/sdkwork-sdk-commons",
+      "ref": "main",
+      "refInput": "SDKWORK_SDK_COMMONS_REF",
+      "tokenSecret": "SDKWORK_RELEASE_TOKEN"
+    },
+    {
+      "id": "sdkwork-sdk-generator",
+      "repository": "Sdkwork-Cloud/sdkwork-sdk-generator",
+      "ref": "main",
+      "refInput": "SDKWORK_SDK_GENERATOR_REF",
+      "tokenSecret": "SDKWORK_RELEASE_TOKEN"
+    },
+    {
+      "id": "sdkwork-database",
+      "repository": "Sdkwork-Cloud/sdkwork-database",
+      "ref": "main",
+      "refInput": "SDKWORK_DATABASE_REF",
+      "tokenSecret": "SDKWORK_RELEASE_TOKEN"
+    },
+    {
+      "id": "sdkwork-web-framework",
+      "repository": "Sdkwork-Cloud/sdkwork-web-framework",
+      "ref": "main",
+      "refInput": "SDKWORK_WEB_FRAMEWORK_REF",
+      "tokenSecret": "SDKWORK_RELEASE_TOKEN"
+    }
+  ],
+  "toolchains": {
+    "node": "22",
+    "pnpm": "10.33.0",
+    "rust": "stable"
+  },
+  "lifecycle": {
+    "install": [
+      {
+        "name": "Install workspace dependencies",
+        "shell": "pwsh",
+        "run": "pnpm install --no-frozen-lockfile"
+      }
+    ],
+    "build": [
+      {
+        "name": "Run SDKWork Notary contract checks",
+        "shell": "pwsh",
+        "run": "pnpm run verify"
+      }
+    ],
+    "package": [
+      {
+        "name": "Write package evidence manifest",
+        "shell": "pwsh",
+        "run": "$ErrorActionPreference = \"Stop\"\nNew-Item -ItemType Directory -Force -Path \"artifacts/release\" | Out-Null\n$manifest = [ordered]@{\n  appId = $env:SDKWORK_APP_ID\n  packageId = $env:SDKWORK_PACKAGE_ID\n  packageVersion = $env:SDKWORK_PACKAGE_VERSION\n  targetId = $env:SDKWORK_PACKAGE_TARGET_ID\n  dependencyWorkspace = \"..\"\n  kind = \"domain-library\"\n}\n$manifest | ConvertTo-Json -Depth 5 | Set-Content -Path \"artifacts/release/sdkwork-notary-$env:SDKWORK_PACKAGE_ID.json\" -Encoding utf8"
+      }
+    ],
+    "validate": [
+      {
+        "name": "Validate package evidence",
+        "shell": "pwsh",
+        "run": "$ErrorActionPreference = \"Stop\"\nif (-not (Test-Path \"artifacts/release/sdkwork-notary-$env:SDKWORK_PACKAGE_ID.json\")) {\n  throw \"Missing package evidence manifest for $env:SDKWORK_PACKAGE_ID\"\n}"
+      }
+    ]
+  },
+  "targets": [
+    {
+      "id": "library-contracts",
+      "profile": "library",
+      "platform": "all",
+      "architecture": "all",
+      "formats": ["tar.gz"],
+      "runner": "ubuntu-24.04",
+      "outputGlobs": ["artifacts/release/**/*"]
+    }
+  ],
+  "security": {
+    "artifactAttestations": false,
+    "sbomRequired": false,
+    "signingRequired": false
+  },
+  "publish": {
+    "workflowArtifact": true,
+    "githubRelease": false,
+    "retentionDays": 30
+  }
+}

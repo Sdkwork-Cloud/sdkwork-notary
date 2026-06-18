@@ -135,7 +135,7 @@
     "storeUrl": "https://sdkwork.com/apps/sdkwork-notary",
     "stores": [],
     "config": {
-      "workspaceRoot": "apps/sdkwork-notary",
+      "workspaceRoot": ".",
       "framework": "node-service",
       "managedBy": "apps/scripts/initialize-sdkwork-app-standard-v3.mjs"
     }
@@ -221,7 +221,7 @@
         }
       ],
       "metadata": {
-        "workspaceRoot": "apps/sdkwork-notary",
+        "workspaceRoot": ".",
         "framework": "node-service",
         "packageManager": "pnpm",
         "migratedFromLegacyConfig": false
@@ -269,7 +269,7 @@
     "build": {
       "targets": []
     },
-    "sourceRoot": "apps/sdkwork-notary"
+    "sourceRoot": "."
   },
   "metadata": {
     "standardOwner": "sdkwork-platform",

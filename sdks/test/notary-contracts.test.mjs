@@ -192,7 +192,7 @@ function requireOperation(openapi, expectedOperations, pathKey) {
   return operation;
 }
 
-function assertDualTokenOperation(operation, pathKey) {
+function assertDualTokenOperation(operation, pathKey, apiSurface) {
   assert.deepEqual(
     operation.security,
     [{ AuthToken: [], AccessToken: [] }],
@@ -205,6 +205,43 @@ function assertDualTokenOperation(operation, pathKey) {
   assert(operation["x-sdkwork-audit-event"], `${pathKey} must declare audit metadata`);
   assert.equal(operation["x-sdkwork-tenant-scope"], "tenant");
   assert.equal(operation["x-sdkwork-data-scope"], "organization");
+  assert.equal(
+    operation["x-sdkwork-request-context"],
+    "WebRequestContext",
+    `${pathKey} must declare x-sdkwork-request-context`,
+  );
+  assert.equal(
+    operation["x-sdkwork-api-surface"],
+    apiSurface,
+    `${pathKey} must declare x-sdkwork-api-surface`,
+  );
+  assert.equal(
+    operation["x-sdkwork-auth-mode"],
+    "dual-token",
+    `${pathKey} must declare x-sdkwork-auth-mode`,
+  );
+  assert.equal(
+    operation["x-sdkwork-source-route-crate"],
+    apiSurface === "app-api"
+      ? "sdkwork-router-notary-app-api"
+      : "sdkwork-router-notary-backend-api",
+    `${pathKey} must declare x-sdkwork-source-route-crate`,
+  );
+  assert(
+    typeof operation["x-sdkwork-source"] === "string"
+      && operation["x-sdkwork-source"].includes("/src/handlers.rs"),
+    `${pathKey} must declare x-sdkwork-source handlers path`,
+  );
+}
+
+function apiSurfaceForPath(pathKey) {
+  if (pathKey.startsWith("/app/v3/")) {
+    return "app-api";
+  }
+  if (pathKey.startsWith("/backend/v3/")) {
+    return "backend-api";
+  }
+  throw new Error(`Unable to infer api surface for ${pathKey}`);
 }
 
 function enumValues(openapi, schemaOrRef) {
@@ -277,7 +314,11 @@ test("notary app OpenAPI is owner-only, dual-token protected, and aligned to fro
   assert.equal(openapi.components.securitySchemes.AccessToken.name, "Access-Token");
 
   for (const pathKey of appExpectedOperations.keys()) {
-    assertDualTokenOperation(requireOperation(openapi, appExpectedOperations, pathKey), pathKey);
+    assertDualTokenOperation(
+      requireOperation(openapi, appExpectedOperations, pathKey),
+      pathKey,
+      "app-api",
+    );
   }
 
   const createCase = openapi.paths["/app/v3/api/notary/cases"].post;
@@ -398,7 +439,11 @@ test("notary backend OpenAPI manages profiles, SKU-backed matters, IAM staff vie
   assert.equal(openapi["x-sdkwork-api-authority"], "sdkwork-notary.backend");
 
   for (const pathKey of backendExpectedOperations.keys()) {
-    assertDualTokenOperation(requireOperation(openapi, backendExpectedOperations, pathKey), pathKey);
+    assertDualTokenOperation(
+      requireOperation(openapi, backendExpectedOperations, pathKey),
+      pathKey,
+      "backend-api",
+    );
   }
 
   const matter = openapi.components.schemas.NotaryMatter;
@@ -406,6 +451,60 @@ test("notary backend OpenAPI manages profiles, SKU-backed matters, IAM staff vie
   assert(matter.required.includes("spuId"));
   assert(matter.required.includes("priceAmount"));
   assert(!openapi.paths["/backend/v3/api/auth"], "backend API must not expose auth namespace");
+});
+
+test("authored apis contracts materialize to generated openapi authorities", () => {
+  const pairs = [
+    [
+      "apis/app-api/notary/notary-app-api.openapi.json",
+      "generated/openapi/notary-app-api.openapi.json",
+    ],
+    [
+      "apis/backend-api/notary/notary-backend-api.openapi.json",
+      "generated/openapi/notary-backend-api.openapi.json",
+    ],
+  ];
+
+  for (const [source, target] of pairs) {
+    assert.deepEqual(readJson(source), readJson(target), `${target} must match ${source}`);
+  }
+});
+
+test("every notary OpenAPI operation declares web-framework contract extensions", () => {
+  const expectations = [
+    { file: "generated/openapi/notary-app-api.openapi.json", apiSurface: "app-api" },
+    { file: "generated/openapi/notary-backend-api.openapi.json", apiSurface: "backend-api" },
+  ];
+
+  for (const { file, apiSurface } of expectations) {
+    const openapi = readJson(file);
+    for (const { pathKey, operation } of operationEntries(openapi)) {
+      assert.equal(
+        operation["x-sdkwork-request-context"],
+        "WebRequestContext",
+        `${file} ${pathKey} missing x-sdkwork-request-context`,
+      );
+      assert.equal(
+        operation["x-sdkwork-api-surface"],
+        apiSurface,
+        `${file} ${pathKey} missing x-sdkwork-api-surface`,
+      );
+      assert.equal(
+        operation["x-sdkwork-auth-mode"],
+        "dual-token",
+        `${file} ${pathKey} missing x-sdkwork-auth-mode`,
+      );
+      assert.ok(
+        operation["x-sdkwork-source-route-crate"],
+        `${file} ${pathKey} missing x-sdkwork-source-route-crate`,
+      );
+      assert.ok(
+        operation["x-sdkwork-source"],
+        `${file} ${pathKey} missing x-sdkwork-source`,
+      );
+      assert.equal(apiSurfaceForPath(pathKey), apiSurface, `${pathKey} api surface mismatch`);
+    }
+  }
 });
 
 test("notary SDK family manifests declare dependency SDKs without copying dependency operations", () => {

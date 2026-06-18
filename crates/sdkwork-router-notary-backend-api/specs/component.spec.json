@@ -26,6 +26,11 @@
       "purpose": "Handler, service, repository, and route layering."
     },
     {
+      "file": "WEB_FRAMEWORK_SPEC.md",
+      "path": "../../../../sdkwork-specs/WEB_FRAMEWORK_SPEC.md",
+      "purpose": "Mandatory sdkwork-web-framework integration for backend-api routes."
+    },
+    {
       "file": "API_SPEC.md",
       "path": "../../../../sdkwork-specs/API_SPEC.md",
       "purpose": "Backend API prefix and route manifest contract."
@@ -34,13 +39,7 @@
   "contracts": {
     "publicExports": ["sdkwork_router_notary_backend_api::*"],
     "runtimeEntrypoints": ["build_sdkwork_notary_backend_api_router"],
-    "routeManifest": {
-      "surface": "backend-api",
-      "apiAuthority": "sdkwork-notary-backend-api",
-      "sdkFamily": "sdkwork-notary-backend-sdk",
-      "prefix": "/backend/v3/api",
-      "entrypoint": "sdkwork_notary_backend_api_route_manifest"
-    },
+    "routeManifest": "../../../sdks/_route-manifests/backend-api/sdkwork-router-notary-backend-api.route-manifest.json",
     "sdkClients": [],
     "dependencyApiSurfaces": []
   },

@@ -34,6 +34,9 @@ jobs:
       - name: Topology validate
         run: pnpm test:topology-validate
 
+      - name: Topology baggage
+        run: pnpm test:topology-baggage
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 

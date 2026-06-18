@@ -10,15 +10,18 @@ use sdkwork_router_notary_backend_api::{
     service_port::{NotaryBackendApiState, NotaryRouteError},
     NotaryBackendApiServicePort, NotaryRequestContext,
 };
+use sdkwork_router_notary_http_auth::test_support::test_backend_web_request_context;
 use serde_json::Value;
 
 #[tokio::test]
 async fn backend_list_handlers_forward_query_filters_to_service_body() {
     let service = Arc::new(RecordingService::default());
-    let state = NotaryBackendApiState::new(service.clone(), request_context());
+    let state = NotaryBackendApiState::new(service.clone());
+    let app_ctx = test_backend_web_request_context();
 
     let _ = handlers::list_cases(
         State(state.clone()),
+        app_ctx.clone(),
         Query(BTreeMap::from([
             ("organization_id".to_string(), "org-1".to_string()),
             ("status".to_string(), "PROCESSING".to_string()),
@@ -31,6 +34,7 @@ async fn backend_list_handlers_forward_query_filters_to_service_body() {
 
     let _ = handlers::list_staff(
         State(state.clone()),
+        app_ctx.clone(),
         Query(BTreeMap::from([
             ("organization_id".to_string(), "org-1".to_string()),
             ("staff_role".to_string(), "notary".to_string()),
@@ -41,6 +45,7 @@ async fn backend_list_handlers_forward_query_filters_to_service_body() {
 
     let _ = handlers::retrieve_case_summary(
         State(state),
+        app_ctx,
         Query(BTreeMap::from([
             ("organization_id".to_string(), "org-1".to_string()),
             (
@@ -76,10 +81,12 @@ async fn backend_list_handlers_forward_query_filters_to_service_body() {
 #[tokio::test]
 async fn backend_profile_and_matter_list_handlers_forward_query_filters_to_service_body() {
     let service = Arc::new(RecordingService::default());
-    let state = NotaryBackendApiState::new(service.clone(), request_context());
+    let state = NotaryBackendApiState::new(service.clone());
+    let app_ctx = test_backend_web_request_context();
 
     let _ = handlers::list_organization_profiles(
         State(state.clone()),
+        app_ctx.clone(),
         Query(BTreeMap::from([
             ("organization_id".to_string(), "org-1".to_string()),
             ("page_size".to_string(), "10".to_string()),
@@ -90,6 +97,7 @@ async fn backend_profile_and_matter_list_handlers_forward_query_filters_to_servi
 
     let _ = handlers::list_matters(
         State(state),
+        app_ctx,
         Query(BTreeMap::from([
             ("organization_id".to_string(), "org-1".to_string()),
             ("q".to_string(), "contract".to_string()),
@@ -139,16 +147,5 @@ impl NotaryBackendApiServicePort for RecordingService {
                 "hasMore": false
             }
         }))
-    }
-}
-
-fn request_context() -> NotaryRequestContext {
-    NotaryRequestContext {
-        tenant_id: "tenant-1".to_string(),
-        organization_id: Some("org-1".to_string()),
-        user_id: "user-1".to_string(),
-        membership_id: Some("member-admin-1".to_string()),
-        session_id: "session-1".to_string(),
-        app_id: "sdkwork-admin".to_string(),
     }
 }

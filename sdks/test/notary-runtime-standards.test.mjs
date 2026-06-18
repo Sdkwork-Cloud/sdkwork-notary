@@ -154,7 +154,7 @@ test("workspace verification includes contract tests and Rust runtime tests", ()
   const packageManifest = readJson("package.json");
   assert.equal(
     packageManifest.scripts["test:contracts"],
-    "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs",
+    "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs",
   );
   assert.equal(
     packageManifest.scripts["test:topology-baggage"],
@@ -165,15 +165,26 @@ test("workspace verification includes contract tests and Rust runtime tests", ()
     "cargo test --workspace --target-dir target-codex-test",
   );
   assert(packageManifest.scripts.verify.includes("test:topology-validate"));
+  assert(packageManifest.scripts.verify.includes("test:topology-baggage"));
   assert(packageManifest.scripts.verify.includes("test:contracts"));
   assert(packageManifest.scripts.verify.includes("test:rust"));
   assert(packageManifest.scripts.verify.includes("cargo fmt --all --check"));
+  assert.equal(
+    packageManifest.scripts["openapi:materialize"],
+    "node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs",
+  );
+  assert.equal(
+    packageManifest.scripts["manifest:sync"],
+    "node scripts/generate-notary-route-manifests.mjs && node scripts/sync-notary-api-framework-metadata.mjs",
+  );
 
   const readme = readText("README.md");
   assert(readme.includes("sdkwork-notary-case-service"));
   assert(readme.includes("packages/sdkwork-im-pc-notary/src/services/NotaryService.ts"));
   assert(readme.includes("pnpm verify"));
   assert(readme.includes("pnpm test:rust"));
+  assert(readme.includes("pnpm openapi:materialize"));
+  assert(readme.includes("pnpm manifest:sync"));
 });
 
 test("notary workspace uses RUST_CODE_SPEC compliant crate names", () => {

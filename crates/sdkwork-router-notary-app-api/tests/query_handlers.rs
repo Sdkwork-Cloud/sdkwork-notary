@@ -10,15 +10,17 @@ use sdkwork_router_notary_app_api::{
     service_port::{NotaryAppApiState, NotaryRouteError},
     NotaryAppApiServicePort, NotaryRequestContext,
 };
+use sdkwork_router_notary_http_auth::test_support::test_web_request_context;
 use serde_json::Value;
 
 #[tokio::test]
 async fn list_cases_handler_forwards_query_filters_to_service_body() {
     let service = Arc::new(RecordingService::default());
-    let state = NotaryAppApiState::new(service.clone(), request_context());
+    let state = NotaryAppApiState::new(service.clone());
 
     let _ = handlers::list_cases(
         State(state),
+        test_web_request_context(),
         Query(BTreeMap::from([
             ("status".to_string(), "PROCESSING".to_string()),
             ("q".to_string(), "contract".to_string()),
@@ -38,10 +40,12 @@ async fn list_cases_handler_forwards_query_filters_to_service_body() {
 #[tokio::test]
 async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
     let service = Arc::new(RecordingService::default());
-    let state = NotaryAppApiState::new(service.clone(), request_context());
+    let state = NotaryAppApiState::new(service.clone());
+    let app_ctx = test_web_request_context();
 
     let _ = handlers::list_matters(
         State(state.clone()),
+        app_ctx.clone(),
         Query(BTreeMap::from([
             ("q".to_string(), "contract".to_string()),
             ("page_size".to_string(), "20".to_string()),
@@ -53,6 +57,7 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
 
     let _ = handlers::list_staff(
         State(state.clone()),
+        app_ctx.clone(),
         Query(BTreeMap::from([
             ("q".to_string(), "Li".to_string()),
             ("staff_role".to_string(), "notary".to_string()),
@@ -65,6 +70,7 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
 
     let _ = handlers::list_case_files(
         State(state.clone()),
+        app_ctx.clone(),
         Path("case-1".to_string()),
         Query(BTreeMap::from([
             ("category".to_string(), "identity".to_string()),
@@ -77,6 +83,7 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
 
     let _ = handlers::list_case_events(
         State(state),
+        app_ctx,
         Path("case-1".to_string()),
         Query(BTreeMap::from([
             ("page_size".to_string(), "50".to_string()),
@@ -111,14 +118,16 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
 #[tokio::test]
 async fn dashboard_and_report_handlers_forward_app_operations_to_service() {
     let service = Arc::new(RecordingService::default());
-    let state = NotaryAppApiState::new(service.clone(), request_context());
+    let state = NotaryAppApiState::new(service.clone());
+    let app_ctx = test_web_request_context();
 
-    let _ = handlers::retrieve_dashboard_statistics(State(state.clone()))
+    let _ = handlers::retrieve_dashboard_statistics(State(state.clone()), app_ctx.clone())
         .await
         .unwrap();
 
     let _ = handlers::retrieve_monthly_report(
         State(state),
+        app_ctx,
         Query(BTreeMap::from([
             ("month".to_string(), "2026-06".to_string()),
             ("format".to_string(), "csv".to_string()),
@@ -168,16 +177,5 @@ impl NotaryAppApiServicePort for RecordingService {
                 "hasMore": false
             }
         }))
-    }
-}
-
-fn request_context() -> NotaryRequestContext {
-    NotaryRequestContext {
-        tenant_id: "tenant-1".to_string(),
-        organization_id: Some("org-1".to_string()),
-        user_id: "user-1".to_string(),
-        membership_id: Some("member-notary-1".to_string()),
-        session_id: "session-1".to_string(),
-        app_id: "sdkwork-im-pc".to_string(),
     }
 }

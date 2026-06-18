@@ -6,13 +6,18 @@ use axum::{
 };
 use serde_json::{Map, Value};
 
-use crate::service_port::{NotaryAppApiState, NotaryRouteError};
+use sdkwork_router_notary_http_auth::notary_request_context_from_web;
+use sdkwork_web_core::WebRequestContext;
+
+use crate::service_port::{NotaryAppApiState, NotaryRequestContext, NotaryRouteError};
 
 pub async fn retrieve_access(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_operation(
         state,
+        app_ctx,
         "notary.access.retrieve",
         BTreeMap::new(),
         Value::Null,
@@ -22,9 +27,11 @@ pub async fn retrieve_access(
 
 pub async fn retrieve_dashboard_statistics(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_operation(
         state,
+        app_ctx,
         "notary.dashboard.statistics.retrieve",
         BTreeMap::new(),
         Value::Null,
@@ -34,10 +41,12 @@ pub async fn retrieve_dashboard_statistics(
 
 pub async fn list_matters(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_operation(
         state,
+        app_ctx,
         "notary.matters.list",
         BTreeMap::new(),
         query_body(query),
@@ -47,10 +56,12 @@ pub async fn list_matters(
 
 pub async fn retrieve_monthly_report(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_operation(
         state,
+        app_ctx,
         "notary.reports.monthly.retrieve",
         BTreeMap::new(),
         query_body(query),
@@ -60,10 +71,12 @@ pub async fn retrieve_monthly_report(
 
 pub async fn list_staff(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_operation(
         state,
+        app_ctx,
         "notary.staff.list",
         BTreeMap::new(),
         Value::Object(
@@ -78,10 +91,12 @@ pub async fn list_staff(
 
 pub async fn list_cases(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_operation(
         state,
+        app_ctx,
         "notary.cases.list",
         BTreeMap::new(),
         Value::Object(
@@ -96,33 +111,45 @@ pub async fn list_cases(
 
 pub async fn create_case(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_operation(state, "notary.cases.create", BTreeMap::new(), body).await
+    call_operation(state, app_ctx, "notary.cases.create", BTreeMap::new(), body).await
 }
 
 pub async fn retrieve_case(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.retrieve", case_id, Value::Null).await
+    call_case_operation(
+        state,
+        app_ctx,
+        "notary.cases.retrieve",
+        case_id,
+        Value::Null,
+    )
+    .await
 }
 
 pub async fn update_case(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.update", case_id, body).await
+    call_case_operation(state, app_ctx, "notary.cases.update", case_id, body).await
 }
 
 pub async fn accept_case(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     body: Option<Json<Value>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_case_operation(
         state,
+        app_ctx,
         "notary.cases.acceptances.create",
         case_id,
         optional_body(body),
@@ -132,50 +159,85 @@ pub async fn accept_case(
 
 pub async fn reject_case(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.rejections.create", case_id, body).await
+    call_case_operation(
+        state,
+        app_ctx,
+        "notary.cases.rejections.create",
+        case_id,
+        body,
+    )
+    .await
 }
 
 pub async fn complete_case(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.completions.create", case_id, body).await
+    call_case_operation(
+        state,
+        app_ctx,
+        "notary.cases.completions.create",
+        case_id,
+        body,
+    )
+    .await
 }
 
 pub async fn create_assignment(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.assignments.create", case_id, body).await
+    call_case_operation(
+        state,
+        app_ctx,
+        "notary.cases.assignments.create",
+        case_id,
+        body,
+    )
+    .await
 }
 
 pub async fn list_parties(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.parties.list", case_id, Value::Null).await
+    call_case_operation(
+        state,
+        app_ctx,
+        "notary.cases.parties.list",
+        case_id,
+        Value::Null,
+    )
+    .await
 }
 
 pub async fn create_party(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.parties.create", case_id, body).await
+    call_case_operation(state, app_ctx, "notary.cases.parties.create", case_id, body).await
 }
 
 pub async fn update_party(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path((case_id, party_id)): Path<(String, String)>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_party_operation(
         state,
+        app_ctx,
         "notary.cases.parties.update",
         case_id,
         party_id,
@@ -186,10 +248,12 @@ pub async fn update_party(
 
 pub async fn delete_party(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path((case_id, party_id)): Path<(String, String)>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_party_operation(
         state,
+        app_ctx,
         "notary.cases.parties.delete",
         case_id,
         party_id,
@@ -200,11 +264,13 @@ pub async fn delete_party(
 
 pub async fn attach_party_signature(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path((case_id, party_id)): Path<(String, String)>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_party_operation(
         state,
+        app_ctx,
         "notary.cases.parties.signatures.create",
         case_id,
         party_id,
@@ -215,11 +281,13 @@ pub async fn attach_party_signature(
 
 pub async fn create_party_video_invite(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path((case_id, party_id)): Path<(String, String)>,
     body: Option<Json<Value>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_party_operation(
         state,
+        app_ctx,
         "notary.cases.parties.videoInvites.create",
         case_id,
         party_id,
@@ -230,11 +298,13 @@ pub async fn create_party_video_invite(
 
 pub async fn create_party_signature_invite(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path((case_id, party_id)): Path<(String, String)>,
     body: Option<Json<Value>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_party_operation(
         state,
+        app_ctx,
         "notary.cases.parties.signatureInvites.create",
         case_id,
         party_id,
@@ -245,27 +315,38 @@ pub async fn create_party_signature_invite(
 
 pub async fn list_case_files(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.files.list", case_id, query_body(query)).await
+    call_case_operation(
+        state,
+        app_ctx,
+        "notary.cases.files.list",
+        case_id,
+        query_body(query),
+    )
+    .await
 }
 
 pub async fn create_case_file(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Json(body): Json<Value>,
 ) -> Result<Json<Value>, NotaryRouteError> {
-    call_case_operation(state, "notary.cases.files.create", case_id, body).await
+    call_case_operation(state, app_ctx, "notary.cases.files.create", case_id, body).await
 }
 
 pub async fn create_download_package(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     body: Option<Json<Value>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_case_operation(
         state,
+        app_ctx,
         "notary.cases.downloadPackages.create",
         case_id,
         optional_body(body),
@@ -275,11 +356,13 @@ pub async fn create_download_package(
 
 pub async fn list_case_events(
     State(state): State<NotaryAppApiState>,
+    app_ctx: WebRequestContext,
     Path(case_id): Path<String>,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Result<Json<Value>, NotaryRouteError> {
     call_case_operation(
         state,
+        app_ctx,
         "notary.cases.events.list",
         case_id,
         query_body(query),
@@ -289,17 +372,19 @@ pub async fn list_case_events(
 
 async fn call_case_operation(
     state: NotaryAppApiState,
+    app_ctx: WebRequestContext,
     operation_id: &'static str,
     case_id: String,
     body: Value,
 ) -> Result<Json<Value>, NotaryRouteError> {
     let mut path_params = BTreeMap::new();
     path_params.insert("caseId".to_string(), case_id);
-    call_operation(state, operation_id, path_params, body).await
+    call_operation(state, app_ctx, operation_id, path_params, body).await
 }
 
 async fn call_party_operation(
     state: NotaryAppApiState,
+    app_ctx: WebRequestContext,
     operation_id: &'static str,
     case_id: String,
     party_id: String,
@@ -308,18 +393,20 @@ async fn call_party_operation(
     let mut path_params = BTreeMap::new();
     path_params.insert("caseId".to_string(), case_id);
     path_params.insert("partyId".to_string(), party_id);
-    call_operation(state, operation_id, path_params, body).await
+    call_operation(state, app_ctx, operation_id, path_params, body).await
 }
 
 async fn call_operation(
     state: NotaryAppApiState,
+    app_ctx: WebRequestContext,
     operation_id: &'static str,
     path_params: BTreeMap<String, String>,
     body: Value,
 ) -> Result<Json<Value>, NotaryRouteError> {
+    let request_context: NotaryRequestContext = notary_request_context_from_web(&app_ctx)?;
     let service = state.service().clone();
     let response = service
-        .handle(state.request_context(), operation_id, path_params, body)
+        .handle(request_context, operation_id, path_params, body)
         .await?;
     Ok(Json(response))
 }

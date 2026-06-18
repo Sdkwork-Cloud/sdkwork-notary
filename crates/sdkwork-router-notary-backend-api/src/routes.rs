@@ -7,14 +7,15 @@ use axum::{
 
 use crate::{
     handlers,
-    service_port::{NotaryBackendApiServicePort, NotaryBackendApiState, NotaryRequestContext},
+    manifest::notary_backend_api_http_route_manifest,
+    service_port::{NotaryBackendApiServicePort, NotaryBackendApiState},
 };
+use sdkwork_router_notary_http_auth::layer::with_dual_token_request_context;
 
 pub fn build_sdkwork_notary_backend_api_router(
     service: Arc<dyn NotaryBackendApiServicePort>,
-    default_context: NotaryRequestContext,
 ) -> Router {
-    Router::new()
+    let router = Router::new()
         .route(
             "/backend/v3/api/notary/organization_profiles",
             get(handlers::list_organization_profiles).post(handlers::create_organization_profile),
@@ -50,5 +51,6 @@ pub fn build_sdkwork_notary_backend_api_router(
             "/backend/v3/api/notary/reports/case_summary",
             get(handlers::retrieve_case_summary),
         )
-        .with_state(NotaryBackendApiState::new(service, default_context))
+        .with_state(NotaryBackendApiState::new(service));
+    with_dual_token_request_context(router, notary_backend_api_http_route_manifest())
 }

@@ -64,7 +64,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/matters": {
@@ -123,7 +128,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases": {
@@ -188,7 +198,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -270,7 +285,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}": {
@@ -333,7 +353,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       },
       "patch": {
         "tags": [
@@ -424,7 +449,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/acceptances": {
@@ -490,7 +520,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/rejections": {
@@ -573,7 +608,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/completions": {
@@ -656,7 +696,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties": {
@@ -719,7 +764,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -800,7 +850,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}": {
@@ -886,7 +941,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       },
       "delete": {
         "tags": [
@@ -950,7 +1010,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/signatures": {
@@ -1036,7 +1101,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/video_invites": {
@@ -1122,7 +1192,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/signature_invites": {
@@ -1208,7 +1283,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/files": {
@@ -1280,7 +1360,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -1361,7 +1446,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/download_packages": {
@@ -1444,7 +1534,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/events": {
@@ -1513,7 +1608,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/staff": {
@@ -1575,7 +1675,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/assignments": {
@@ -1658,7 +1763,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/dashboard/statistics": {
@@ -1707,7 +1817,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/reports/monthly": {
@@ -1784,7 +1899,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-router-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
       }
     }
   },
