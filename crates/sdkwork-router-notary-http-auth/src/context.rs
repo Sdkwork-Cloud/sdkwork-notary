@@ -148,4 +148,30 @@ mod tests {
 
         assert_eq!(resolve_membership_id(&principal), None);
     }
+
+    #[test]
+    fn maps_web_request_context_into_notary_context() {
+        let app_ctx = crate::test_support::test_web_request_context();
+        let context = notary_request_context_from_web(&app_ctx).expect("context");
+        assert_eq!(context.tenant_id, crate::test_support::TEST_TENANT_ID);
+        assert_eq!(
+            context.organization_id.as_deref(),
+            Some(crate::test_support::TEST_ORGANIZATION_ID),
+        );
+        assert_eq!(context.user_id, crate::test_support::TEST_USER_ID);
+        assert_eq!(context.session_id, crate::test_support::TEST_SESSION_ID);
+        assert_eq!(context.app_id, crate::test_support::TEST_APP_ID);
+        assert_eq!(
+            context.membership_id,
+            Some("orgmem_org_1_user_1".to_owned()),
+        );
+    }
+
+    #[test]
+    fn rejects_missing_principal() {
+        let mut app_ctx = crate::test_support::test_web_request_context();
+        app_ctx.principal = None;
+        let error = notary_request_context_from_web(&app_ctx).expect_err("missing principal");
+        assert_eq!(error.code, "unauthenticated");
+    }
 }

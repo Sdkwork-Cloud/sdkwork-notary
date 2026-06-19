@@ -178,6 +178,36 @@ test("notary canonical route manifests stay aligned with embedded crate manifest
   }
 });
 
+test("notary route manifests mirror OpenAPI auth and permission metadata", () => {
+  for (const routeCrate of routeCrates) {
+    const manifestFile = readJson(
+      `sdks/_route-manifests/${routeCrate.surface}/sdkwork-router-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`,
+    );
+    const openapi = readJson(routeCrate.openapi);
+    const operationsById = new Map(
+      openApiOperations(routeCrate.openapi).map((operation) => [operation.operationId, operation]),
+    );
+
+    for (const route of manifestFile.routes) {
+      const operation = operationsById.get(route.operationId);
+      assert(operation, `${route.operationId} must exist in ${routeCrate.openapi}`);
+      const openapiOperation = openapi.paths[operation.pathKey]?.[operation.method.toLowerCase()];
+      assert(openapiOperation, `${route.operationId} OpenAPI operation must exist`);
+      assert.equal(route.auth?.mode, "dual-token", `${route.operationId} auth.mode`);
+      assert.equal(
+        route.auth?.permission,
+        openapiOperation["x-sdkwork-permission"],
+        `${route.operationId} permission drift`,
+      );
+      assert.equal(
+        route.ownership?.apiAuthority,
+        manifestFile.apiAuthority,
+        `${route.operationId} ownership.apiAuthority`,
+      );
+    }
+  }
+});
+
 test("notary route handlers use injected service ports and do not bypass SDKWork boundaries", () => {
   for (const routeCrate of routeCrates) {
     const source = [

@@ -31,6 +31,7 @@ const REQUIRED_WORKSPACE_FILES = [
   'sdkwork.workflow.json',
   '.github/workflows/package.yml',
   '.sdkwork/README.md',
+  '.sdkwork/.gitignore',
   '.sdkwork/skills/README.md',
   '.sdkwork/plugins/README.md',
   'docs/root-layout.md',
@@ -186,9 +187,12 @@ test('OpenAPI authorities declare x-sdkwork-request-context and x-sdkwork-api-su
 
 test('declares topology profiles for host application wiring', () => {
   assert.equal(exists('specs/topology.spec.json'), true);
-  assert.equal(exists('configs/topology/self-hosted.split-services.development.env'), true);
 
   const topology = readJson('specs/topology.spec.json');
+  for (const profileFile of Object.values(topology.profileFiles ?? {})) {
+    assert.equal(exists(profileFile), true, `${profileFile} should exist`);
+  }
+
   assert.equal(topology.database?.appPrefix, 'SDKWORK_NOTARY');
   assert.deepEqual(topology.surfaces?.['application.public-ingress']?.protocols, ['http']);
 });
@@ -241,6 +245,7 @@ test('declares contract maintenance scripts and schema registry', () => {
   );
 
   assert.equal(exists('specs/README.md'), true);
+  assert.equal(exists('generated/README.md'), true);
   assert.equal(exists('generated/openapi/README.md'), true);
   assert.equal(exists('docs/schema-registry/README.md'), true);
   assert.equal(exists('docs/schema-registry/tables/001-notary-core.yaml'), true);

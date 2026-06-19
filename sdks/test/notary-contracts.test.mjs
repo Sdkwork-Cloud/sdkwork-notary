@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
@@ -467,6 +467,53 @@ test("authored apis contracts materialize to generated openapi authorities", () 
 
   for (const [source, target] of pairs) {
     assert.deepEqual(readJson(source), readJson(target), `${target} must match ${source}`);
+  }
+});
+
+test("notary OpenAPI and generated SDKs do not expose client-writable tenant context", () => {
+  const forbiddenParameterNames = new Set(["tenantid", "tenant_id"]);
+  const openapiFiles = [
+    "apis/app-api/notary/notary-app-api.openapi.json",
+    "apis/backend-api/notary/notary-backend-api.openapi.json",
+    "generated/openapi/notary-app-api.openapi.json",
+    "generated/openapi/notary-backend-api.openapi.json",
+  ];
+
+  for (const file of openapiFiles) {
+    const openapi = readJson(file);
+    for (const { pathKey, method, operation } of operationEntries(openapi)) {
+      for (const parameter of operation.parameters ?? []) {
+        const name = String(parameter.name ?? parameter.$ref ?? "").toLowerCase();
+        assert.equal(
+          forbiddenParameterNames.has(name),
+          false,
+          `${file} ${method.toUpperCase()} ${pathKey} must not accept client-writable ${parameter.name}`,
+        );
+      }
+    }
+  }
+
+  for (const generatedApiDir of [
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/generated/server-openapi/src/api",
+    "sdks/sdkwork-notary-backend-sdk/sdkwork-notary-backend-sdk-typescript/generated/server-openapi/src/api",
+  ]) {
+    const apiDir = path.join(workspaceRoot, generatedApiDir);
+    if (!existsSync(apiDir)) {
+      continue;
+    }
+    for (const fileName of readdirSync(apiDir).filter((name) => name.endsWith(".ts"))) {
+      const source = readText(path.join(generatedApiDir, fileName));
+      assert.doesNotMatch(
+        source,
+        /name:\s*['"]tenantId['"]/,
+        `${generatedApiDir}/${fileName} must not expose tenantId params`,
+      );
+      assert.doesNotMatch(
+        source,
+        /name:\s*['"]tenant_id['"]/,
+        `${generatedApiDir}/${fileName} must not expose tenant_id params`,
+      );
+    }
   }
 });
 

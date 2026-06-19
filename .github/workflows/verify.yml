@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Contracts and Rust Tests
+    name: SDKWork Verify
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -31,20 +31,8 @@ jobs:
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile=false
 
-      - name: Topology validate
-        run: pnpm test:topology-validate
-
-      - name: Topology baggage
-        run: pnpm test:topology-baggage
-
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Rust format
-        run: cargo fmt --all --check
-
-      - name: Rust tests
-        run: cargo test --workspace --target-dir target-ci
-
-      - name: Contract tests
-        run: pnpm test:contracts
+      - name: Verify
+        run: pnpm verify

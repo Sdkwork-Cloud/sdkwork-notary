@@ -11,8 +11,10 @@ This repository is a **contract-first domain library** governed by `sdkwork-spec
 | `crates/` | Active | Rust contract, service, repository, and route crates |
 | `configs/` | Active | Topology profiles for host application wiring |
 | `deployments/` | Reserved | Deployment manifests for host-packaged releases |
+| `.sdkwork/` | Active | Repository-local skills, plugins, and ignored local state |
 | `docs/` | Active | Topology summary, schema notes, root layout |
 | `examples/` | Reserved | Runnable host wiring examples |
+| `generated/` | Active | Materialized OpenAPI authorities (`generated/openapi/`) |
 | `jobs/` | Reserved | Background workers |
 | `plugins/` | Reserved | Repository-local plugins |
 | `scripts/` | Active | Dev, manifest sync, contract verification |

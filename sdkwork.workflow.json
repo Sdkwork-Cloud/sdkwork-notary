@@ -89,13 +89,20 @@
   },
   "targets": [
     {
-      "id": "library-contracts",
+      "id": "test-noarch-standalone-library-contracts-tar-gz",
       "profile": "library",
-      "platform": "all",
-      "architecture": "all",
-      "formats": ["tar.gz"],
+      "platform": "test",
+      "architecture": "noarch",
+      "formats": [
+        "tar.gz"
+      ],
       "runner": "ubuntu-24.04",
-      "outputGlobs": ["artifacts/release/**/*"]
+      "outputGlobs": [
+        "artifacts/release/**/*"
+      ],
+      "deploymentProfile": "standalone",
+      "runtimeTarget": "test-runner",
+      "variant": "contracts"
     }
   ],
   "security": {

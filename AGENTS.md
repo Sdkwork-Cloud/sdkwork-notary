@@ -25,7 +25,7 @@ Do not copy root standard text into this repository. If these relative paths do 
 ## Local Dictionary Structure
 
 - `AGENTS.md`: local agent entrypoint and relative SDKWORK spec index.
-- `.sdkwork/`: local skills, plugins, manifests, and workspace metadata.
+- `.sdkwork/`: local skills, plugins, manifests, and workspace metadata (see `.sdkwork/README.md` and `.sdkwork/.gitignore`).
 - `apis/`: API authority index and authored OpenAPI contracts for notary app/backend surfaces.
 - `apps/`: pointer dictionary for host application roots (domain library has no local app).
 - `configs/topology/`: v2 runtime topology profile env files.
