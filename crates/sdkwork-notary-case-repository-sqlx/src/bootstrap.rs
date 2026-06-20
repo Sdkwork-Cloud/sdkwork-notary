@@ -14,7 +14,8 @@ pub async fn connect_notary_database_pool_from_env() -> Result<NotaryDatabasePoo
     create_pool_from_config(config).await
 }
 
-pub async fn connect_and_bootstrap_notary_database_from_env() -> Result<NotaryDatabaseHost, String> {
+pub async fn connect_and_bootstrap_notary_database_from_env() -> Result<NotaryDatabaseHost, String>
+{
     let pool = connect_notary_database_pool_from_env()
         .await
         .map_err(|error| error.to_string())?;

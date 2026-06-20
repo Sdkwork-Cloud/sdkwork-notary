@@ -4,6 +4,7 @@ use sdkwork_notary_case_contract::{
     now_compact_date, now_iso8601, NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus,
     NotaryRuntimeContext, NotaryServiceContract, NotaryServiceError,
 };
+use sdkwork_utils_rust::is_blank;
 use serde_json::{json, Value};
 
 use crate::{
@@ -887,7 +888,7 @@ async fn retrieve_notary_access(
     validate_context(context)?;
     let organization_id = context.organization_id.clone().unwrap_or_default();
     let membership_id = context.membership_id.clone().unwrap_or_default();
-    if organization_id.is_empty() || membership_id.is_empty() {
+    if is_blank(Some(organization_id.as_str())) || is_blank(Some(membership_id.as_str())) {
         return Ok(notary_access_value(
             context,
             None,
@@ -1260,18 +1261,18 @@ async fn require_notary_member(
 }
 
 fn validate_context(context: &NotaryRuntimeContext) -> Result<(), NotaryServiceError> {
-    if context.tenant_id.trim().is_empty() {
+    if is_blank(Some(context.tenant_id.as_str())) {
         return Err(NotaryServiceError::unauthenticated("tenant_id is required"));
     }
-    if context.user_id.trim().is_empty() {
+    if is_blank(Some(context.user_id.as_str())) {
         return Err(NotaryServiceError::unauthenticated("user_id is required"));
     }
-    if context.session_id.trim().is_empty() {
+    if is_blank(Some(context.session_id.as_str())) {
         return Err(NotaryServiceError::unauthenticated(
             "session_id is required",
         ));
     }
-    if context.app_id.trim().is_empty() {
+    if is_blank(Some(context.app_id.as_str())) {
         return Err(NotaryServiceError::unauthenticated("app_id is required"));
     }
 
@@ -1279,21 +1280,21 @@ fn validate_context(context: &NotaryRuntimeContext) -> Result<(), NotaryServiceE
 }
 
 fn validate_create_case_command(command: &NotaryCaseCommand) -> Result<(), NotaryServiceError> {
-    if command.organization_id.trim().is_empty() {
+    if is_blank(Some(command.organization_id.as_str())) {
         return Err(NotaryServiceError::validation(
             "organization_id is required",
         ));
     }
-    if command.sku_id.trim().is_empty() {
+    if is_blank(Some(command.sku_id.as_str())) {
         return Err(NotaryServiceError::validation("sku_id is required"));
     }
-    if command.title.trim().is_empty() {
+    if is_blank(Some(command.title.as_str())) {
         return Err(NotaryServiceError::validation("title is required"));
     }
-    if command.applicant_name.trim().is_empty() {
+    if is_blank(Some(command.applicant_name.as_str())) {
         return Err(NotaryServiceError::validation("applicant_name is required"));
     }
-    if command.idempotency_key.trim().is_empty() {
+    if is_blank(Some(command.idempotency_key.as_str())) {
         return Err(NotaryServiceError::validation(
             "idempotency_key is required",
         ));
@@ -1316,10 +1317,8 @@ fn build_case_no(order_item_id: &str) -> String {
 }
 
 fn expires_after_minutes(minutes: i64) -> String {
-    use chrono::{Duration, Utc};
-    (Utc::now() + Duration::minutes(minutes))
-        .format("%Y-%m-%dT%H:%M:%SZ")
-        .to_string()
+    use sdkwork_utils_rust::{add_minutes, format_datetime, now};
+    format_datetime(add_minutes(now(), minutes), Some("%Y-%m-%dT%H:%M:%SZ"))
 }
 
 async fn load_case_for_context(
@@ -1358,11 +1357,10 @@ fn ensure_case_access(
 }
 
 fn member_display_name(member: &AppbaseOrganizationMember) -> String {
-    let display_name = member.display_name.trim();
-    if display_name.is_empty() {
+    if is_blank(Some(member.display_name.as_str())) {
         member.membership_id.clone()
     } else {
-        display_name.to_string()
+        member.display_name.trim().to_string()
     }
 }
 

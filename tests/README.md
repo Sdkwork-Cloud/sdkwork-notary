@@ -1,10 +1,10 @@
-# Tests
+# Cross-cutting verification
 
-Cross-cutting verification entrypoints for the notary domain library workspace.
+Contract and integration tests live under:
 
-- Contract tests: `sdks/test/*.test.mjs`
-- Standard architecture: `scripts/verify-notary-standard-architecture.test.mjs`
-- Topology baggage: `scripts/dev/sdkwork-notary-topology-baggage.test.mjs`
-- Rust workspace: `cargo test --workspace --target-dir target-codex-test`
+- `sdks/test/` — OpenAPI, SDK, runtime, database framework, and storage contract tests
+- `scripts/verify-notary-standard-architecture.test.mjs` — workspace dictionary and framework alignment
+- `scripts/verify-notary-utils-standard.test.mjs` — sdkwork-utils integration checks
+- `scripts/dev/` — topology baggage and dev helper tests
 
-Run the full gate with `pnpm verify`.
+Run the aggregate gate with `pnpm verify`.

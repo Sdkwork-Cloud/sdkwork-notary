@@ -2,8 +2,8 @@ use aes_gcm::{
     aead::{Aead, KeyInit, OsRng},
     Aes256Gcm, Nonce,
 };
-use base64::{engine::general_purpose::STANDARD, Engine};
 use sdkwork_notary_case_contract::NotaryServiceError;
+use sdkwork_utils_rust::{base64_decode, base64_encode, sha256_hash};
 
 const VAULT_PREFIX: &str = "notary-vault:v1:";
 
@@ -33,16 +33,15 @@ impl PiiVault {
             .map_err(|error| NotaryServiceError::storage(error.to_string()))?;
         let mut payload = nonce_bytes.to_vec();
         payload.extend(ciphertext);
-        Ok(format!("{VAULT_PREFIX}{}", STANDARD.encode(payload)))
+        Ok(format!("{VAULT_PREFIX}{}", base64_encode(&payload)))
     }
 
     pub fn decrypt(&self, encoded: &str) -> Result<String, NotaryServiceError> {
         let encoded_body = encoded
             .strip_prefix(VAULT_PREFIX)
             .ok_or_else(|| NotaryServiceError::storage("unsupported pii vault payload"))?;
-        let payload = STANDARD
-            .decode(encoded_body)
-            .map_err(|error| NotaryServiceError::storage(error.to_string()))?;
+        let payload = base64_decode(encoded_body)
+            .ok_or_else(|| NotaryServiceError::storage("invalid pii vault payload"))?;
         if payload.len() < 12 {
             return Err(NotaryServiceError::storage("invalid pii vault payload"));
         }
@@ -64,9 +63,7 @@ fn random_nonce() -> [u8; 12] {
 }
 
 pub fn identity_fingerprint(value: &str) -> String {
-    use sha2::{Digest, Sha256};
-    let digest = Sha256::digest(value.as_bytes());
-    format!("notary-sha256:{digest:064x}")
+    format!("notary-sha256:{}", sha256_hash(value.as_bytes()))
 }
 
 #[cfg(test)]

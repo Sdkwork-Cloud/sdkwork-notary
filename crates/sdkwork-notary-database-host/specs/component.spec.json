@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-database-host",
+    "displayName": "SDKWork Notary Database Host",
+    "version": "0.1.0",
+    "type": "rust-crate",
+    "root": "sdkwork-notary/crates/sdkwork-notary-database-host",
+    "domain": "notary",
+    "capability": "notary-database-host",
+    "surface": "database-host",
+    "languages": ["rust"],
+    "generated": false,
+    "manifests": ["Cargo.toml"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component-local contract and discovery rules."
+    },
+    {
+      "file": "DATABASE_SPEC.md",
+      "path": "../../../../sdkwork-specs/DATABASE_SPEC.md",
+      "purpose": "Notary-owned schema and persistence expectations."
+    },
+    {
+      "file": "DATABASE_FRAMEWORK_SPEC.md",
+      "path": "../../../../sdkwork-specs/DATABASE_FRAMEWORK_SPEC.md",
+      "purpose": "Database lifecycle SPI and asset dictionary rules."
+    },
+    {
+      "file": "RUST_CODE_SPEC.md",
+      "path": "../../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "purpose": "Rust crate structure and verification rules."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["sdkwork_notary_database_host::*"],
+    "runtimeEntrypoints": [
+      "bootstrap_notary_database_from_env",
+      "bootstrap_notary_database"
+    ],
+    "routeManifest": null,
+    "sdkClients": [],
+    "sdkDependencies": [{ "workspace": "sdkwork-database" }],
+    "events": [],
+    "configKeys": ["SDKWORK_NOTARY_DATABASE_URL", "SDKWORK_NOTARY_APP_ROOT"]
+  },
+  "verification": {
+    "commands": [
+      "pnpm db:validate",
+      "cargo test -p sdkwork-notary-database-host --target-dir target-codex-test"
+    ]
+  }
+}

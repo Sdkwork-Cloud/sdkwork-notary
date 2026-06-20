@@ -1,4 +1,12 @@
--- Consolidated baseline aligned with database/migrations/postgres/0001_notary_foundation.up.sql
+-- sdkwork:migration
+-- id: 0001_notary_foundation
+-- engine: sqlite
+-- module: notary
+-- purpose: Create notary foundation tables and indexes
+-- reversible: true
+-- transactional: true
+-- lock: lightweight
+-- contract_version: 1.0.0
 
 -- SDKWork Notary foundation schema.
 --

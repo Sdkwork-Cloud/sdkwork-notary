@@ -57,7 +57,8 @@ These package roots export generated clients, generated types, and approved comp
 
 - `crates/sdkwork-notary-case-contract`: shared domain records, commands, status values, typed service errors, runtime context, and service contract metadata.
 - `crates/sdkwork-notary-case-service`: orchestration service over explicit Appbase, Commerce, Drive, and Notary repository ports.
-- `crates/sdkwork-notary-case-repository-sqlx`: SQLx-backed Notary repository implementations (`SqliteNotaryCaseRepository`, `PostgresNotaryCaseRepository`) and executable migration contract for local/private deployments.
+- `crates/sdkwork-notary-case-repository-sqlx`: SQLx-backed Notary repository implementations (`SqliteNotaryCaseRepository`, `PostgresNotaryCaseRepository`) with schema sourced from `database/migrations/`.
+- `crates/sdkwork-notary-database-host`: database lifecycle bootstrap via `sdkwork-database-lifecycle` SPI.
 
 The runtime layer implements the main notary workflow without owning dependency facts:
 
@@ -104,9 +105,9 @@ See `docs/topology-standard.md` and `../sdkwork-specs/APP_RUNTIME_TOPOLOGY_ADOPT
 Run from this repository root:
 
 ```powershell
-pnpm notary:dev
+pnpm dev
 pnpm verify
-pnpm openapi:materialize
+pnpm api:materialize
 pnpm manifest:sync
 pnpm sdk:generate
 ```
@@ -116,7 +117,8 @@ Or run the individual gates:
 ```powershell
 pnpm test:topology-validate
 pnpm test:topology-baggage
+pnpm db:validate
 pnpm test:contracts
-cargo fmt --all --check
+pnpm format:check
 pnpm test:rust
 ```

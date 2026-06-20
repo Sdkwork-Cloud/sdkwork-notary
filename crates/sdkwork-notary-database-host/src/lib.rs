@@ -30,8 +30,8 @@ pub async fn bootstrap_notary_database(pool: DatabasePool) -> Result<NotaryDatab
     let manifest = DatabaseManifest::from_file(module.manifest_path())
         .map_err(|error| format!("read notary database manifest failed: {error}"))?;
     let options = lifecycle_options_from_env("NOTARY", &manifest);
-    let orchestrator = LifecycleOrchestrator::new(pool.clone(), module.clone())
-        .with_applied_by("sdkwork-notary");
+    let orchestrator =
+        LifecycleOrchestrator::new(pool.clone(), module.clone()).with_applied_by("sdkwork-notary");
 
     orchestrator
         .init()

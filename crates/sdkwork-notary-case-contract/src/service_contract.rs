@@ -1,4 +1,5 @@
 use crate::NotaryServiceError;
+use sdkwork_utils_rust::is_blank;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NotaryServiceContract {
@@ -30,7 +31,7 @@ impl NotaryServiceContract {
     }
 
     pub fn validate(&self) -> Result<(), NotaryServiceError> {
-        if self.domain.trim().is_empty() {
+        if is_blank(Some(self.domain)) {
             return Err(NotaryServiceError::validation("service domain is required"));
         }
         if !self.service_name.starts_with("notary.") {

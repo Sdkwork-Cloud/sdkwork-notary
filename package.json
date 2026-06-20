@@ -8,20 +8,26 @@
     "@sdkwork/app-topology": "file:../sdkwork-app-topology"
   },
   "scripts": {
+    "dev": "node scripts/notary-dev.mjs --hosting self-hosted",
+    "dev:cloud": "node scripts/notary-dev.mjs --hosting cloud-hosted",
+    "build": "cargo build --workspace",
+    "check": "pnpm test:topology-validate && pnpm db:validate && pnpm fmt:check",
+    "clean": "cargo clean --target-dir target-codex-test",
     "test": "pnpm.cmd test:contracts",
-    "test:contracts": "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs",
+    "test:contracts": "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs scripts/verify-notary-utils-standard.test.mjs",
     "test:topology-baggage": "node --test scripts/dev/sdkwork-notary-topology-baggage.test.mjs",
     "test:topology-validate": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs validate --root . --spec specs/topology.spec.json",
+    "topology:validate": "pnpm test:topology-validate",
     "test:rust": "cargo test --workspace --target-dir target-codex-test",
-    "notary:dev": "node scripts/notary-dev.mjs --hosting self-hosted",
-    "notary:dev:cloud": "node scripts/notary-dev.mjs --hosting cloud-hosted",
+    "api:materialize": "pnpm openapi:materialize",
+    "format:check": "pnpm fmt:check",
     "sdk:generate:app": "node sdks/sdkwork-notary-app-sdk/bin/generate-sdk.mjs",
     "sdk:generate:backend": "node sdks/sdkwork-notary-backend-sdk/bin/generate-sdk.mjs",
     "sdk:generate": "pnpm sdk:generate:app && pnpm sdk:generate:backend",
     "openapi:materialize": "node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs",
     "manifest:generate": "node scripts/generate-notary-route-manifests.mjs",
     "manifest:sync": "node scripts/generate-notary-route-manifests.mjs && node scripts/sync-notary-api-framework-metadata.mjs",
-    "verify": "pnpm.cmd test:topology-validate && pnpm.cmd test:topology-baggage && pnpm.cmd test:contracts && cargo fmt --all --check && pnpm.cmd test:rust",
+    "verify": "pnpm.cmd test:topology-validate && pnpm.cmd test:topology-baggage && pnpm.cmd db:validate && pnpm.cmd test:contracts && pnpm.cmd fmt:check && pnpm.cmd test:rust",
     "db:materialize:contract": "node tools/materialize_notary_database_contract.mjs",
     "db:validate": "node ../sdkwork-specs/tools/check-database-framework-standard.mjs --root .",
     "db:plan": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . plan",
@@ -32,6 +38,7 @@
     "db:drift": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . drift",
     "db:drift:check": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . drift-check",
     "db:bootstrap": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . bootstrap",
+    "fmt:check": "cargo fmt -p sdkwork-notary-case-contract -p sdkwork-notary-case-service -p sdkwork-notary-case-repository-sqlx -p sdkwork-notary-database-host -p sdkwork-router-notary-http-auth -p sdkwork-router-notary-app-api -p sdkwork-router-notary-backend-api -- --check",
     "test:contract:database": "node ../sdkwork-specs/tools/check-database-framework-standard.mjs --root ."
   }
 }

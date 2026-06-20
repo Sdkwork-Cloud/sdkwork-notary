@@ -14,11 +14,10 @@ sdkwork-notary-database-host.workspace = true
 async-trait = "0.1.89"
 sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
 sdkwork-notary-case-service = { path = "../sdkwork-notary-case-service" }
+sdkwork-utils-rust.workspace = true
 serde_json = "1.0"
 sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio", "sqlite", "postgres"] }
 aes-gcm = "0.10"
-base64 = "0.22"
-sha2 = "0.10"
 
 [dev-dependencies]
 tokio = { version = "1.52", features = ["macros", "rt-multi-thread"] }

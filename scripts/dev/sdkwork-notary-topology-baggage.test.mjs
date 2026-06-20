@@ -122,8 +122,8 @@ assert.match(
 );
 assert.match(
   JSON.stringify(packageJson.scripts ?? {}),
-  /notary:dev/u,
-  'package.json must expose notary:dev',
+  /"dev":/u,
+  'package.json must expose dev',
 );
 
 assert.ok(fs.existsSync(path.join(repoRoot, 'scripts/notary-dev.mjs')), 'notary-dev orchestrator required');

@@ -39,10 +39,15 @@ test("notary SQLx storage keeps ownership local and does not join dependency tab
   const source = readText(
     "crates/sdkwork-notary-case-repository-sqlx/src/sqlite_case_repository.rs",
   );
+  const schemaSource = readText(
+    "crates/sdkwork-notary-case-repository-sqlx/src/schema_migration.rs",
+  );
+
+  assert(schemaSource.includes("notary_foundation_migration_sql"));
+  assert(schemaSource.includes("database/migrations/sqlite/0001_notary_foundation.up.sql"));
 
   for (const api of [
     "SqliteNotaryCaseRepository",
-    "notary_foundation_migration_sql",
     "upsert_organization_profile",
     "list_organization_profiles",
     "insert_case",

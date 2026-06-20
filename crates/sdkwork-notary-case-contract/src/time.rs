@@ -1,9 +1,9 @@
-use chrono::Utc;
+use sdkwork_utils_rust::{format_datetime, now};
 
 pub fn now_iso8601() -> String {
-    Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
+    format_datetime(now(), Some("%Y-%m-%dT%H:%M:%SZ"))
 }
 
 pub fn now_compact_date() -> String {
-    Utc::now().format("%Y%m%d").to_string()
+    format_datetime(now(), Some("%Y%m%d"))
 }

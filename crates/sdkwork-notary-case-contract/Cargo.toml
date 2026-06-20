@@ -8,4 +8,4 @@ license.workspace = true
 name = "sdkwork_notary_case_contract"
 
 [dependencies]
-chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+sdkwork-utils-rust.workspace = true

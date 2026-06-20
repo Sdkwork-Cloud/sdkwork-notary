@@ -9,9 +9,9 @@ name = "sdkwork_notary_case_service"
 
 [dependencies]
 async-trait = "0.1.89"
-chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 serde_json = "1.0"
 sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
+sdkwork-utils-rust.workspace = true
 
 [dev-dependencies]
 tokio = { version = "1.52", features = ["macros", "rt-multi-thread"] }

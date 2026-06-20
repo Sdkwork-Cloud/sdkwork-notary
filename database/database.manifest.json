@@ -6,7 +6,8 @@
   "displayName": "NOTARY Database",
   "owner": "notary-platform",
   "engines": [
-    "postgres"
+    "postgres",
+    "sqlite"
   ],
   "defaultEngine": "postgres",
   "tablePrefix": "notary_",

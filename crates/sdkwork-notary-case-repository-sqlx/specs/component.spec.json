@@ -37,7 +37,7 @@
   ],
   "contracts": {
     "publicExports": ["sdkwork_notary_case_repository_sqlx::*"],
-    "runtimeEntrypoints": ["notary_foundation_migration_sql", "SqliteNotaryCaseRepository"],
+    "runtimeEntrypoints": ["SqliteNotaryCaseRepository", "PostgresNotaryCaseRepository"],
     "routeManifest": null,
     "sdkClients": [],
     "events": [],

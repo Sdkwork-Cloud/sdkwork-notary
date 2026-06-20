@@ -14,10 +14,6 @@ use sqlx::{PgPool, Row};
 use crate::pii_vault::{identity_fingerprint, PiiVault};
 use crate::repository_support::*;
 
-pub fn notary_foundation_migration_sql() -> &'static str {
-    include_str!("../migrations/0001_notary_foundation.sql")
-}
-
 #[derive(Clone, Debug)]
 pub struct PostgresNotaryCaseRepository {
     pool: PgPool,

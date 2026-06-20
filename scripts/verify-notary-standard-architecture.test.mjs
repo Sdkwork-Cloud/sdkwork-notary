@@ -9,6 +9,7 @@ const STANDARD_ROOT_DIRECTORIES = [
   'apis',
   'apps',
   'crates',
+  'database',
   'sdks',
   'jobs',
   'tools',
@@ -116,6 +117,56 @@ test('integrates sdkwork-database in notary SQLx repository crate', () => {
   const repositoryCargo = read('crates/sdkwork-notary-case-repository-sqlx/Cargo.toml');
   assert.match(repositoryCargo, /sdkwork-database-config/);
   assert.match(repositoryCargo, /sdkwork-database-sqlx/);
+  assert.match(repositoryCargo, /sdkwork-utils-rust/);
+
+  const databaseHostCargo = read('crates/sdkwork-notary-database-host/Cargo.toml');
+  assert.match(databaseHostCargo, /sdkwork-database-lifecycle/);
+  assert.match(databaseHostCargo, /sdkwork-database-spi/);
+
+  assert.equal(exists('database/database.manifest.json'), true);
+  assert.equal(exists('database/contract/schema.yaml'), true);
+  assert.equal(exists('database/migrations/postgres/0001_notary_foundation.up.sql'), true);
+  assert.equal(exists('database/migrations/postgres/0001_notary_foundation.down.sql'), true);
+  assert.equal(exists('database/migrations/sqlite/0001_notary_foundation.up.sql'), true);
+  assert.equal(exists('database/migrations/sqlite/0001_notary_foundation.down.sql'), true);
+  assert.equal(
+    exists('crates/sdkwork-notary-case-repository-sqlx/migrations/0001_notary_foundation.sql'),
+    false,
+    'legacy crate migration must be removed',
+  );
+});
+
+test('integrates sdkwork-utils-rust for shared datetime and crypto helpers', () => {
+  const rootCargo = read('Cargo.toml');
+  assert.match(rootCargo, /sdkwork-utils-rust/);
+
+  const workflow = readJson('sdkwork.workflow.json');
+  const dependencyIds = new Set((workflow.dependencies ?? []).map((dependency) => dependency.id));
+  assert.equal(dependencyIds.has('sdkwork-utils'), true);
+
+  const contractCargo = read('crates/sdkwork-notary-case-contract/Cargo.toml');
+  assert.match(contractCargo, /sdkwork-utils-rust/);
+
+  const serviceCargo = read('crates/sdkwork-notary-case-service/Cargo.toml');
+  assert.match(serviceCargo, /sdkwork-utils-rust/);
+
+  const timeSource = read('crates/sdkwork-notary-case-contract/src/time.rs');
+  assert.match(timeSource, /sdkwork_utils_rust/);
+
+  const serviceSource = read('crates/sdkwork-notary-case-service/src/service.rs');
+  assert.match(serviceSource, /sdkwork_utils_rust::is_blank/);
+  assert.doesNotMatch(serviceSource, /\.trim\(\)\.is_empty\(\)/);
+
+  const piiVaultSource = read('crates/sdkwork-notary-case-repository-sqlx/src/pii_vault.rs');
+  assert.match(piiVaultSource, /sha256_hash/);
+  assert.match(piiVaultSource, /base64_encode/);
+});
+
+test('declares PNPM_SCRIPT_SPEC required root commands', () => {
+  const packageManifest = readJson('package.json');
+  for (const script of ['dev', 'build', 'test', 'check', 'verify', 'clean']) {
+    assert.ok(packageManifest.scripts?.[script], `package.json must expose pnpm ${script}`);
+  }
 });
 
 test('does not declare sdkwork-discovery without RPC services', () => {
@@ -214,6 +265,7 @@ test('Rust HTTP crates follow sdkwork-router-notary-* naming', () => {
     'crates/sdkwork-notary-case-contract',
     'crates/sdkwork-notary-case-service',
     'crates/sdkwork-notary-case-repository-sqlx',
+    'crates/sdkwork-notary-database-host',
   ];
 
   const cargo = read('Cargo.toml');

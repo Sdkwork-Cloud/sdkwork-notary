@@ -65,15 +65,16 @@ For Rust, keep `src/lib.rs` limited to module declarations, re-exports, light do
 
 Run commands from this directory unless a command explicitly targets another path.
 
-- `pnpm notary:dev`: load the default self-hosted split-services development topology profile.
+- `pnpm dev`: load the default self-hosted split-services development topology profile.
 - `pnpm test:topology-validate`: validate `specs/topology.spec.json` against `@sdkwork/app-topology`.
 - `pnpm test:contracts`: contract tests for OpenAPI, SDK packages, runtime standards, standard architecture, topology baggage, and optional Chat PC integration.
 - `pnpm test:rust` or `cargo test --workspace --target-dir target-codex-test`: Rust workspace tests.
-- `cargo fmt --all --check`: verify Rust formatting.
+- `pnpm fmt:check` or `pnpm format:check`: verify Rust formatting for workspace crates.
+- `pnpm db:validate`: validate `database/` assets against `DATABASE_FRAMEWORK_SPEC.md`.
 - `pnpm test:topology-baggage`: scan active paths for retired topology vocabulary.
-- `pnpm openapi:materialize`: copy authored `apis/` OpenAPI into `generated/openapi/` and sync framework metadata.
+- `pnpm openapi:materialize` or `pnpm api:materialize`: copy authored `apis/` OpenAPI into `generated/openapi/` and sync framework metadata.
 - `pnpm manifest:sync`: regenerate `sdks/_route-manifests` and sync framework metadata after route/OpenAPI changes.
-- `pnpm verify`: run topology validation, topology baggage scan, contract tests, Rust formatting, and Rust tests.
+- `pnpm verify`: run topology validation, topology baggage scan, database validation, contract tests, Rust formatting, and Rust tests.
 
 Chat PC integration contract tests skip automatically when the real app root is absent. Set `SDKWORK_IM_PC_ROOT` (or legacy `SDKWORK_CHAT_PC_ROOT`) to point at `sdkwork-im/apps/sdkwork-im-pc` when validating cross-repo wiring.
 
