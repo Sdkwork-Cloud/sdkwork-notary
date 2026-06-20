@@ -47,6 +47,19 @@ export interface NotaryAppSdkPort {
     downloadPackages: {
       create(caseId: string, input: unknown): Promise<unknown>;
     };
+    events: {
+      list(caseId: string, input?: unknown): Promise<unknown>;
+    };
+  };
+  dashboard: {
+    statistics: {
+      retrieve(input?: unknown): Promise<unknown>;
+    };
+  };
+  reports: {
+    monthly: {
+      retrieve(input?: unknown): Promise<unknown>;
+    };
   };
 }
 
@@ -214,13 +227,47 @@ export interface CaseCommandInput {
   result?: string;
 }
 
+export interface ListCaseEventsInput {
+  pageSize?: number;
+  cursor?: string;
+}
+
+export interface GetMonthlyReportInput {
+  month?: string;
+  format?: "pdf" | "excel" | "csv";
+}
+
+export interface NotaryMatterOption {
+  skuId: string;
+  title: string;
+  description?: string;
+}
+
 export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNotaryApiOptions) {
   async function getAccess() {
     return notary.access.retrieve();
   }
 
+  async function getDashboardStatistics() {
+    return notary.dashboard.statistics.retrieve();
+  }
+
+  async function getMonthlyReport(input: GetMonthlyReportInput = {}) {
+    return notary.reports.monthly.retrieve({
+      ...(input.month ? { month: input.month } : {}),
+      ...(input.format ? { format: input.format } : {}),
+    });
+  }
+
   async function listMatters(input?: unknown) {
     return notary.matters.list(input);
+  }
+
+  async function listCaseEvents(caseId: string, input: ListCaseEventsInput = {}) {
+    return notary.cases.events.list(caseId, {
+      ...(input.pageSize ? { pageSize: input.pageSize } : {}),
+      ...(input.cursor ? { cursor: input.cursor } : {}),
+    });
   }
 
   async function listStaff(input: ListStaffInput = {}) {
@@ -450,7 +497,10 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
     commerce,
     appbase,
     getAccess,
+    getDashboardStatistics,
+    getMonthlyReport,
     listMatters,
+    listCaseEvents,
     listStaff,
     createCase,
     listCases,

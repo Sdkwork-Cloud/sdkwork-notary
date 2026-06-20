@@ -22,6 +22,9 @@ export {
   type ListCaseFilesInput,
   type ListCasesInput,
   type ListStaffInput,
+  type ListCaseEventsInput,
+  type GetMonthlyReportInput,
+  type NotaryMatterOption,
   type NotaryAppSdkPort,
   type UploadCaseFileInput,
 } from "../composed/index";

@@ -1,0 +1,7 @@
+{
+  "profile": "development",
+  "appSdkBaseUrl": "http://127.0.0.1:18085",
+  "featureFlags": {
+    "notaryMobileDashboard": true
+  }
+}

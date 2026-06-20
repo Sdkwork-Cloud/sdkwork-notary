@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.app.config",
+  "app": {
+    "id": "sdkwork-notary-h5",
+    "displayName": "SDKWork Notary H5",
+    "version": "0.1.0",
+    "runtime": {
+      "family": "h5",
+      "framework": "react",
+      "surface": "mobile-browser"
+    }
+  },
+  "runtime": {
+    "supportedDeploymentProfiles": [
+      "standalone",
+      "cloud"
+    ],
+    "defaultDeploymentProfile": "standalone"
+  }
+}

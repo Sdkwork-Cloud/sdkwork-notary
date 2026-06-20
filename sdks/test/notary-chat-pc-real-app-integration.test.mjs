@@ -121,16 +121,67 @@ imPcTest("real notary UI drives documents, signatures, video, and staff selectio
     "packages/sdkwork-im-pc-notary/src/CreateNotaryTaskView.tsx",
   );
   for (const token of [
-    "file: File",
+    "notaryStaffMembers",
+    "notaryService.getStaff",
+    "notaryService.getMatters",
+    "selectedNotaryStaff",
+    "primaryNotaryMembershipId",
+    "BusinessTypeSelector",
+    "PartyBindingStep",
+    "WizardHeader",
+    "WizardStepper",
+    "WizardNavigation",
+    "NotaryPickerDrawer",
+    "TaskDetailsForm",
+    "ConfirmationSummary",
+    "PartyDriveModal",
+    "VideoCallQROverlay",
+    "useLocalAttachments",
+    "validateWizardStep",
+    "selectBusinessTypeFirst",
+  ]) {
+    assert(createTaskView.includes(token), `CreateNotaryTaskView.tsx must include ${token}`);
+  }
+
+  const localAttachmentsHook = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/hooks/useLocalAttachments.ts",
+  );
+  assert(localAttachmentsHook.includes("file: File"), "useLocalAttachments.ts must include file: File");
+
+  const videoCallQr = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/create/VideoCallQROverlay.tsx",
+  );
+  for (const token of ["react-qr-code", "inviteUrl", "QRCode value={inviteUrl}"]) {
+    assert(videoCallQr.includes(token), `VideoCallQROverlay.tsx must include ${token}`);
+  }
+
+  const notaryPickerDrawer = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/create/NotaryPickerDrawer.tsx",
+  );
+  for (const token of ["searchTerm", "filteredStaff"]) {
+    assert(notaryPickerDrawer.includes(token), `NotaryPickerDrawer.tsx must include ${token}`);
+  }
+
+  const partyListTab = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/list/PartyListTab.tsx",
+  );
+  assert(partyListTab.includes("expandedPartyMediaLoading"), "PartyListTab.tsx must include expandedPartyMediaLoading");
+  for (const token of ["expandedPartyMediaUrls", "identityFrontUrl", "identityBackUrl", "faceImageUrl"]) {
+    assert(partyListTab.includes(token), `PartyListTab.tsx must include ${token}`);
+  }
+
+  const createTaskSubmitBody = createTaskView.slice(createTaskView.indexOf('handleSubmit'));
+  for (const token of [
     "documents: attachments.map",
     "category: 'evidence'",
     "partyId: attachment.partyId",
-    "notaryStaffMembers",
-    "notaryService.getStaff",
-    "selectedNotaryStaff",
-    "primaryNotaryMembershipId",
+    "notaryService.createTask",
   ]) {
-    assert(createTaskView.includes(token), `CreateNotaryTaskView.tsx must include ${token}`);
+    assert(createTaskSubmitBody.includes(token), `CreateNotaryTaskView.tsx submit flow must include ${token}`);
   }
 
   const notaryView = readText(imPcRoot, "packages/sdkwork-im-pc-notary/src/index.tsx");
@@ -142,14 +193,56 @@ imPcTest("real notary UI drives documents, signatures, video, and staff selectio
     "notaryService.uploadPartyDocument",
     "notaryService.createVideoInvite",
     "notaryService.createSignatureInvite",
+    "notaryService.getDashboardStatistics",
+    "notaryService.getMonthlyReport",
+    "notaryService.getTaskById",
+    "handleSelectTask",
+    "matters={matters}",
     "partyDriveDocuments",
     "partyIdentityMediaUrls",
+    "expandedPartyMediaUrls",
+    "isNotaryAssigned",
+    "VideoCallQROverlay",
+    "activeVideoQrParty",
     "activeSignInviteUrl",
     "mobileSignatureUrl={activeSignInviteUrl}",
-    "EMPTY_NOTARY_PRINT_IMAGE_URL",
+    "PrintOverlay",
+    "NotaryHeader",
+    "DetailPane",
+    "PartyDriveModal",
+    "statusFilter",
   ]) {
     assert(notaryView.includes(token), `index.tsx must include ${token}`);
   }
+
+  const filterBar = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/list/NotaryFilterBar.tsx",
+  );
+  for (const token of ["matters", "mattersLoading", "LEGACY_TYPE_FILTERS"]) {
+    assert(filterBar.includes(token), `NotaryFilterBar.tsx must include ${token}`);
+  }
+  assert(!filterBar.includes("advancedFilter"), "NotaryFilterBar.tsx must not include dead advanced filter button");
+
+  const printPartyPage = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/list/PrintPartyPage.tsx",
+  );
+  assert(printPartyPage.includes("EMPTY_NOTARY_PRINT_IMAGE_URL"),
+    "PrintPartyPage.tsx must include EMPTY_NOTARY_PRINT_IMAGE_URL",
+  );
+  assert(printPartyPage.includes("referenceThresholdValue"), "PrintPartyPage.tsx must use i18n reference threshold");
+
+  const printOverlay = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/list/PrintOverlay.tsx",
+  );
+  assert(printOverlay.includes("loadingMedia"), "PrintOverlay.tsx must show loading state while print media loads");
+  assert(notaryView.includes("printMediaLoading"), "index.tsx must track print media loading state");
+  assert(notaryView.includes("assignNotary"), "index.tsx must support notary reassignment through the service");
+  assert(notaryView.includes("debouncedSearchTerm"), "index.tsx must debounce list search input");
+  assert(notaryView.includes("NotaryPickerDrawer"), "index.tsx must include NotaryPickerDrawer for detail reassignment");
+  assert(notaryView.includes("cancelConfirm"), "index.tsx must confirm before cancelling a case");
   for (const forbidden of [
     "new Blob([JSON.stringify(task.documents",
     "picsum.photos/seed/notary_docs",
@@ -160,9 +253,45 @@ imPcTest("real notary UI drives documents, signatures, video, and staff selectio
     assert(!notaryView.includes(forbidden), `index.tsx must not include ${forbidden}`);
   }
 
-  const drawer = readText(imPcRoot, "packages/sdkwork-im-pc-notary/src/PartyDrawer.tsx");
-  for (const token of ["idFrontFile", "idBackFile", "faceImageDataUrl"]) {
-    assert(drawer.includes(token), `PartyDrawer.tsx must include ${token}`);
+  const taskBaseInfo = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/list/TaskBaseInfo.tsx",
+  );
+  assert(taskBaseInfo.includes("getNotaryTaskDisplayNo"), "TaskBaseInfo.tsx must include getNotaryTaskDisplayNo");
+  assert(taskBaseInfo.includes("changeNotary"), "TaskBaseInfo.tsx must support notary reassignment action");
+
+  const detailPane = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/list/DetailPane.tsx",
+  );
+  assert(detailPane.includes("TimelineTab"), "DetailPane.tsx must include TimelineTab");
+  assert(detailPane.includes("loading"), "DetailPane.tsx must support detail loading overlay");
+
+  const materialsTab = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-notary/src/components/list/MaterialsTab.tsx",
+  );
+  assert(materialsTab.includes("otherMaterials"), "MaterialsTab.tsx must include uncategorized otherMaterials section");
+  assert(materialsTab.includes("KNOWN_CATEGORIES"), "MaterialsTab.tsx must group documents by known categories");
+
+  assert(notaryView.includes("openPrintTask"), "index.tsx must fetch full task detail before printing");
+  assert(notaryView.includes("detailLoading"), "index.tsx must track detail loading state");
+
+  const partyDrawer = readText(imPcRoot, "packages/sdkwork-im-pc-notary/src/PartyDrawer.tsx");
+  assert(partyDrawer.includes("generateClientId"), "PartyDrawer.tsx must include generateClientId");
+  for (const token of [
+    "IdentityVerification",
+    "BasicInfoForm",
+    "AuxiliaryMaterials",
+    "PartyDrawerFooter",
+    "FaceCaptureOverlay",
+    "useCameraCapture",
+    "useLocalAttachments",
+    "idFrontFile",
+    "idBackFile",
+    "faceImageDataUrl",
+  ]) {
+    assert(partyDrawer.includes(token), `PartyDrawer.tsx must include ${token}`);
   }
 
   const signaturePad = readText(imPcRoot, "packages/sdkwork-im-pc-notary/src/SignaturePad.tsx");

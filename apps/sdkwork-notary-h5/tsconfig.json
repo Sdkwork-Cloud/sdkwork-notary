@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vite/client"],
+    "paths": {
+      "@sdkwork/notary-h5-core": ["./packages/sdkwork-notary-h5-core/src/index.ts"],
+      "@sdkwork/notary-h5-commons": ["./packages/sdkwork-notary-h5-commons/src/index.ts"],
+      "@sdkwork/notary-h5-shell": ["./packages/sdkwork-notary-h5-shell/src/index.ts"],
+      "@sdkwork/notary-h5-notary": ["./packages/sdkwork-notary-h5-notary/src/index.ts"],
+      "@sdkwork/notary-app-sdk": ["./packages/sdkwork-notary-h5-core/src/notaryAppSdk.d.ts"]
+    }
+  },
+  "include": ["src", "packages"]
+}

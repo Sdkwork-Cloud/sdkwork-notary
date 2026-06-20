@@ -1,0 +1,35 @@
+{
+  "name": "@sdkwork/notary-h5",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "description": "SDKWork Notary phone-first H5 mobile application.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test src/__tests__/h5-architecture.contract.test.mjs",
+    "h5:dev": "vite",
+    "h5:build": "tsc --noEmit && vite build",
+    "h5:preview": "vite preview"
+  },
+  "dependencies": {
+    "@sdkwork/notary-h5-commons": "workspace:*",
+    "@sdkwork/notary-h5-core": "workspace:*",
+    "@sdkwork/notary-h5-notary": "workspace:*",
+    "@sdkwork/notary-h5-shell": "workspace:*",
+    "@sdkwork/sdk-common": "^1.0.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.17.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.3.0"
+  }
+}

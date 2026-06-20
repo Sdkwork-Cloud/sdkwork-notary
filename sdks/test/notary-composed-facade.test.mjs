@@ -22,6 +22,9 @@ test("app composed notary API exposes high-level workflow methods for chat-pc in
   );
 
   for (const method of [
+    "getDashboardStatistics",
+    "getMonthlyReport",
+    "listCaseEvents",
     "listStaff",
     "updateCase",
     "acceptCase",
@@ -45,6 +48,9 @@ test("app composed notary API exposes high-level workflow methods for chat-pc in
     assert.match(source, new RegExp(`\\b${method}\\b`), `${method} must be exported`);
   }
 
+  assert(source.includes("notary.dashboard.statistics.retrieve"));
+  assert(source.includes("notary.reports.monthly.retrieve"));
+  assert(source.includes("notary.cases.events.list"));
   assert(source.includes("notary.staff.list"));
   assert(source.includes("notary.cases.assignments.create"));
   assert(source.includes("notary.cases.acceptances.create"));

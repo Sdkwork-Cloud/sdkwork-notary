@@ -39,6 +39,7 @@ chatPcTest("real chat-pc notary service preserves the existing UI service shape"
     "getTaskById",
     "getStaff",
     "createTask",
+    "assignNotary",
     "updateTaskStatus",
     "updateTask",
     "addParty",
@@ -128,6 +129,8 @@ chatPcTest("real chat-pc notary service keeps operational case id separate from 
 chatPcTest("real chat-pc notary service creates cases with staff assignment and creation uploads", () => {
   const source = readNotaryServiceSource();
   const createTaskBody = methodBody(source, "createTask");
+  assert.match(createTaskBody, /data\.skuId/);
+  assert.match(createTaskBody, /FALLBACK_APPLICANT_NAME/);
 
   for (const token of [
     "documents: data.documents ?? []",
@@ -155,6 +158,27 @@ chatPcTest("real chat-pc notary service creates cases with staff assignment and 
   assert.match(resolveBody, /selectedNotaryStaff/);
 });
 
+chatPcTest("real chat-pc notary service exposes dashboard, report, and matter SDK workflows", () => {
+  const source = readNotaryServiceSource();
+
+  for (const method of [
+    "getDashboardStatistics",
+    "getMonthlyReport",
+    "getMatters",
+  ]) {
+    assert.match(source, new RegExp(`async\\s+${method}\\s*\\(`), `${method} must be implemented`);
+  }
+
+  for (const sdkCall of [
+    "notaryApi.getDashboardStatistics",
+    "notaryApi.getMonthlyReport",
+    "notaryApi.listMatters",
+    "notaryApi.listCaseEvents",
+  ]) {
+    assert(source.includes(sdkCall), `service must call ${sdkCall}`);
+  }
+});
+
 chatPcTest("real chat-pc notary service loads staff, filters cases by SKU, and forwards pagination", () => {
   const source = readNotaryServiceSource();
 
@@ -169,6 +193,7 @@ chatPcTest("real chat-pc notary service loads staff, filters cases by SKU, and f
 
   const queryBody = functionBody(source, "resolveListCaseQuery");
   for (const token of [
+    "startsWith('sku-')",
     "FILTER_SKU_IDS_BY_TYPE",
     "ELECTRONIC",
     "IPR",
@@ -177,6 +202,8 @@ chatPcTest("real chat-pc notary service loads staff, filters cases by SKU, and f
     "pageSize: filters?.pageSize ?? 50",
     "cursor: filters?.cursor",
     "skuId",
+    "businessType",
+    "filters?.status",
   ]) {
     assert(source.includes(token) || queryBody.includes(token), `${notaryServicePath} must include ${token}`);
   }
