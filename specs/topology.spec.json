@@ -1,128 +1,153 @@
-{
-  "schemaVersion": 2,
-  "kind": "sdkwork.app.topology",
-  "appId": "sdkwork-notary",
-  "archetype": "application-http-gateway",
-  "profileRoot": "configs/topology",
-  "profilePattern": "{hosting}.{serviceLayout}.{environment}.env",
-  "vocabulary": {
-    "hosting": { "allowed": ["self-hosted", "cloud-hosted"] },
-    "serviceLayout": { "allowed": ["split-services"] },
-    "environment": { "allowed": ["development", "production"] },
-    "connectivityPlane": { "allowed": ["application", "platform"] }
-  },
-  "defaults": {
-    "developmentProfileId": "self-hosted.split-services.development",
-    "productionProfileId": "cloud-hosted.split-services.production",
-    "gatewayBind": "127.0.0.1:3900"
-  },
-  "profileFiles": {
-    "self-hosted.split-services.development": "configs/topology/self-hosted.split-services.development.env",
-    "cloud-hosted.split-services.development": "configs/topology/cloud-hosted.split-services.development.env",
-    "self-hosted.split-services.production": "configs/topology/self-hosted.split-services.production.env",
-    "cloud-hosted.split-services.production": "configs/topology/cloud-hosted.split-services.production.env"
-  },
-  "envKeys": {
-    "hosting": "SDKWORK_NOTARY_HOSTING",
-    "serviceLayout": "SDKWORK_NOTARY_SERVICE_LAYOUT",
-    "environment": "SDKWORK_NOTARY_ENVIRONMENT",
-    "profileId": "SDKWORK_NOTARY_PROFILE_ID",
-    "clientHosting": "VITE_SDKWORK_NOTARY_HOSTING",
-    "gatewayAutostart": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_AUTOSTART",
-    "cloudGatewayBind": "SDKWORK_API_GATEWAY_BIND",
-    "apiGatewayBaseUrl": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
-    "clientApiGatewayBaseUrl": "VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL"
-  },
-  "surfaces": {
-    "application.public-ingress": {
-      "connectivityPlane": "application",
-      "protocols": ["http"],
-      "bindEnv": "SDKWORK_NOTARY_APPLICATION_PUBLIC_INGRESS_BIND",
-      "httpUrlEnv": "SDKWORK_NOTARY_APPLICATION_PUBLIC_HTTP_URL",
-      "clientHttpEnv": "VITE_SDKWORK_NOTARY_APPLICATION_PUBLIC_HTTP_URL"
-    },
-    "application.backend-http": {
-      "connectivityPlane": "application",
-      "protocols": ["http"],
-      "bindEnv": "SDKWORK_NOTARY_APPLICATION_BACKEND_HTTP_BIND",
-      "httpUrlEnv": "SDKWORK_NOTARY_APPLICATION_BACKEND_HTTP_URL",
-      "clientHttpEnv": "VITE_SDKWORK_NOTARY_APPLICATION_BACKEND_HTTP_URL"
-    },
-    "platform.api-gateway": {
-      "connectivityPlane": "platform",
-      "protocols": ["http"],
-      "owner": "sdkwork-api-gateway",
-      "bindEnv": "SDKWORK_API_GATEWAY_BIND",
-      "httpUrlEnv": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
-      "clientHttpEnv": "VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
-      "autostartEnv": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_AUTOSTART"
-    }
-  },
-  "cloudPublicHosts": {
-    "application.public-ingress": { "httpHost": "notary.sdkwork.com" },
-    "application.backend-http": { "httpHost": "notary-admin.sdkwork.com" },
-    "platform.api-gateway": { "httpHost": "api.sdkwork.com" }
-  },
-  "database": {
-    "appPrefix": "SDKWORK_NOTARY"
-  },
-  "iamDevDefaults": {
-    "SDKWORK_IAM_LOCAL_APP_ID": "sdkwork-notary-pc",
-    "SDKWORK_IAM_LOCAL_TENANT_ID": "tenant_notary_dev",
-    "SDKWORK_IAM_LOCAL_ORGANIZATION_ID": "org_notary_dev",
-    "SDKWORK_IAM_LOCAL_ORGANIZATION_NAME": "Notary Dev Organization",
-    "SDKWORK_IAM_LOCAL_DEPARTMENT_ID": "dept_notary_dev",
-    "SDKWORK_IAM_LOCAL_DEPARTMENT_NAME": "Notary Dev Department",
-    "SDKWORK_IAM_LOCAL_POSITION_ID": "pos_notary_dev",
-    "SDKWORK_IAM_LOCAL_POSITION_NAME": "Notary Dev Position",
-    "SDKWORK_IAM_LOCAL_BOOTSTRAP_EMAIL": "admin@sdkwork.test",
-    "SDKWORK_IAM_LOCAL_BOOTSTRAP_PASSWORD": "AdminPass#2026",
-    "SDKWORK_IAM_TENANT_SIGNING_MASTER_SECRET": "sdkwork-notary-dev-signing-secret"
-  },
-  "components": {
-    "appApiRouter": {
-      "crate": "sdkwork-router-notary-app-api",
-      "library": "sdkwork_router_notary_app_api"
-    },
-    "backendApiRouter": {
-      "crate": "sdkwork-router-notary-backend-api",
-      "library": "sdkwork_router_notary_backend_api"
-    },
-    "cloudGateway": {
-      "crate": "sdkwork-api-gateway-api-server",
-      "binary": "sdkwork-api-gateway",
-      "repository": "sdkwork-api-gateway"
-    }
-  },
-  "orchestration": {
-    "profiles": {
-      "self-hosted.split-services.development": {
-        "processes": [],
-        "healthSurfaces": [
-          "application.public-ingress",
-          "application.backend-http",
-          "platform.api-gateway"
-        ]
-      },
-      "cloud-hosted.split-services.development": {
-        "processes": [
-          {
-            "id": "platform.api-gateway",
-            "crate": "sdkwork-api-gateway-api-server",
-            "binary": "sdkwork-api-gateway",
-            "repository": "sdkwork-api-gateway",
-            "required": false
-          }
-        ],
-        "healthSurfaces": ["platform.api-gateway"]
-      }
-    }
-  },
-  "scripts": {
-    "notaryDev": "scripts/notary-dev.mjs"
-  },
-  "retired": {
-    "envKeys": ["SDKWORK_NOTARY_TOPOLOGY", "VITE_SDKWORK_NOTARY_TOPOLOGY"],
-    "notes": "sdkwork-notary is a domain library. Host applications wire sdkwork-router-notary-* route crates and load profile env from this repository."
-  }
+﻿{
+    "schemaVersion":  2,
+    "kind":  "sdkwork.app.topology",
+    "appId":  "sdkwork-notary",
+    "archetype":  "application-http-gateway",
+    "profileRoot":  "configs/topology",
+    "profilePattern":  "{hosting}.{serviceLayout}.{environment}.env",
+    "vocabulary":  {
+                       "hosting":  {
+                                       "allowed":  [
+                                                       "self-hosted",
+                                                       "cloud-hosted"
+                                                   ]
+                                   },
+                       "serviceLayout":  {
+                                             "allowed":  [
+                                                             "split-services"
+                                                         ]
+                                         },
+                       "environment":  {
+                                           "allowed":  [
+                                                           "development",
+                                                           "production"
+                                                       ]
+                                       },
+                       "connectivityPlane":  {
+                                                 "allowed":  [
+                                                                 "application",
+                                                                 "platform"
+                                                             ]
+                                             }
+                   },
+    "defaults":  {
+                     "developmentProfileId":  "self-hosted.split-services.development",
+                     "productionProfileId":  "cloud-hosted.split-services.production",
+                     "gatewayBind":  "127.0.0.1:3900"
+                 },
+    "profileFiles":  {
+                         "self-hosted.split-services.development":  "configs/topology/self-hosted.split-services.development.env",
+                         "cloud-hosted.split-services.development":  "configs/topology/cloud-hosted.split-services.development.env",
+                         "self-hosted.split-services.production":  "configs/topology/self-hosted.split-services.production.env",
+                         "cloud-hosted.split-services.production":  "configs/topology/cloud-hosted.split-services.production.env"
+                     },
+    "envKeys":  {
+                    "hosting":  "SDKWORK_NOTARY_HOSTING",
+                    "serviceLayout":  "SDKWORK_NOTARY_SERVICE_LAYOUT",
+                    "environment":  "SDKWORK_NOTARY_ENVIRONMENT",
+                    "profileId":  "SDKWORK_NOTARY_PROFILE_ID",
+                    "clientHosting":  "VITE_SDKWORK_NOTARY_HOSTING",
+                    "gatewayAutostart":  "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_AUTOSTART",
+                    "cloudGatewayBind":  "SDKWORK_API_GATEWAY_BIND",
+                    "apiGatewayBaseUrl":  "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
+                    "clientApiGatewayBaseUrl":  "VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL"
+                },
+    "surfaces":  {
+                     "application.public-ingress":  {
+                                                        "connectivityPlane":  "application",
+                                                        "protocols":  [
+                                                                          "http"
+                                                                      ],
+                                                        "bindEnv":  "SDKWORK_NOTARY_APPLICATION_PUBLIC_INGRESS_BIND",
+                                                        "httpUrlEnv":  "SDKWORK_NOTARY_APPLICATION_PUBLIC_HTTP_URL",
+                                                        "clientHttpEnv":  "VITE_SDKWORK_NOTARY_APPLICATION_PUBLIC_HTTP_URL"
+                                                    },
+                     "application.backend-http":  {
+                                                      "connectivityPlane":  "application",
+                                                      "protocols":  [
+                                                                        "http"
+                                                                    ],
+                                                      "bindEnv":  "SDKWORK_NOTARY_APPLICATION_BACKEND_HTTP_BIND",
+                                                      "httpUrlEnv":  "SDKWORK_NOTARY_APPLICATION_BACKEND_HTTP_URL",
+                                                      "clientHttpEnv":  "VITE_SDKWORK_NOTARY_APPLICATION_BACKEND_HTTP_URL"
+                                                  },
+                     "platform.api-gateway":  {
+                                                  "connectivityPlane":  "platform",
+                                                  "protocols":  [
+                                                                    "http"
+                                                                ],
+                                                  "owner":  "sdkwork-api-gateway",
+                                                  "bindEnv":  "SDKWORK_API_GATEWAY_BIND",
+                                                  "httpUrlEnv":  "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
+                                                  "clientHttpEnv":  "VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
+                                                  "autostartEnv":  "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_AUTOSTART"
+                                              }
+                 },
+    "cloudPublicHosts":  {
+                             "application.public-ingress":  {
+                                                                "httpHost":  "notary.sdkwork.com"
+                                                            },
+                             "application.backend-http":  {
+                                                              "httpHost":  "notary-admin.sdkwork.com"
+                                                          },
+                             "platform.api-gateway":  {
+                                                          "httpHost":  "api.sdkwork.com"
+                                                      }
+                         },
+    "database":  {
+                     "appPrefix":  "SDKWORK_NOTARY"
+                 },
+    "components":  {
+                       "appApiRouter":  {
+                                            "crate":  "sdkwork-router-notary-app-api",
+                                            "library":  "sdkwork_router_notary_app_api"
+                                        },
+                       "backendApiRouter":  {
+                                                "crate":  "sdkwork-router-notary-backend-api",
+                                                "library":  "sdkwork_router_notary_backend_api"
+                                            },
+                       "cloudGateway":  {
+                                            "crate":  "sdkwork-api-gateway-api-server",
+                                            "binary":  "sdkwork-api-gateway",
+                                            "repository":  "sdkwork-api-gateway"
+                                        }
+                   },
+    "orchestration":  {
+                          "profiles":  {
+                                           "self-hosted.split-services.development":  {
+                                                                                          "processes":  [
+
+                                                                                                        ],
+                                                                                          "healthSurfaces":  [
+                                                                                                                 "application.public-ingress",
+                                                                                                                 "application.backend-http",
+                                                                                                                 "platform.api-gateway"
+                                                                                                             ]
+                                                                                      },
+                                           "cloud-hosted.split-services.development":  {
+                                                                                           "processes":  [
+                                                                                                             {
+                                                                                                                 "id":  "platform.api-gateway",
+                                                                                                                 "crate":  "sdkwork-api-gateway-api-server",
+                                                                                                                 "binary":  "sdkwork-api-gateway",
+                                                                                                                 "repository":  "sdkwork-api-gateway",
+                                                                                                                 "required":  false
+                                                                                                             }
+                                                                                                         ],
+                                                                                           "healthSurfaces":  [
+                                                                                                                  "platform.api-gateway"
+                                                                                                              ]
+                                                                                       }
+                                       }
+                      },
+    "scripts":  {
+                    "notaryDev":  "scripts/notary-dev.mjs"
+                },
+    "retired":  {
+                    "envKeys":  [
+                                    "SDKWORK_NOTARY_TOPOLOGY",
+                                    "VITE_SDKWORK_NOTARY_TOPOLOGY"
+                                ],
+                    "notes":  "sdkwork-notary is a domain library. Host applications wire sdkwork-router-notary-* route crates and load profile env from this repository."
+                }
 }

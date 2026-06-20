@@ -128,13 +128,13 @@ mod tests {
             .tenant_id("tenant-1")
             .organization_id(Some("org_notary_dev".to_owned()))
             .login_scope(WebLoginScope::Organization)
-            .user_id("admin@sdkwork.test")
+            .user_id("contract-test-user-001")
             .app_id("app-1")
             .build();
 
         assert_eq!(
             resolve_membership_id(&principal),
-            Some("orgmem_org_notary_dev_admin_sdkwork_test".to_owned())
+            Some("orgmem_org_notary_dev_contract_test_user_001".to_owned())
         );
     }
 
