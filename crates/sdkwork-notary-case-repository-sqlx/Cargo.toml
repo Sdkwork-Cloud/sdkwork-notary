@@ -8,8 +8,9 @@ license.workspace = true
 name = "sdkwork_notary_case_repository_sqlx"
 
 [dependencies]
-sdkwork-database-config = { path = "../../../sdkwork-database/crates/sdkwork-database-config" }
-sdkwork-database-sqlx = { path = "../../../sdkwork-database/crates/sdkwork-database-sqlx" }
+sdkwork-database-config.workspace = true
+sdkwork-database-sqlx.workspace = true
+sdkwork-notary-database-host.workspace = true
 async-trait = "0.1.89"
 sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
 sdkwork-notary-case-service = { path = "../sdkwork-notary-case-service" }
