@@ -18,7 +18,7 @@ import {
 
 function parseArgs(argv) {
   const settings = {
-    hosting: 'self-hosted',
+    deploymentProfile: 'standalone',
     serviceLayout: 'split-services',
     printEnv: false,
     dryRun: false,
@@ -31,8 +31,8 @@ function parseArgs(argv) {
       settings.help = true;
       continue;
     }
-    if (arg === '--hosting') {
-      settings.hosting = argv[index + 1] ?? settings.hosting;
+    if (arg === '--deployment-profile') {
+      settings.deploymentProfile = argv[index + 1] ?? settings.deploymentProfile;
       index += 1;
       continue;
     }
@@ -62,7 +62,7 @@ This repository ships route/runtime libraries only. Host applications wire
 sdkwork-router-notary-* crates and consume the resolved profile env below.
 
 Options:
-  --hosting <self-hosted|cloud-hosted>              Default: self-hosted
+  --deployment-profile <standalone|cloud>           Default: standalone
   --service-layout <split-services>                 Default: split-services
   --print-env                                       Print merged profile env keys
   --dry-run                                         Print resolved URLs only
@@ -77,17 +77,18 @@ function main() {
     return;
   }
 
-  const profileId = resolveDevProfileId(settings.hosting, settings.serviceLayout);
+  const profileId = resolveDevProfileId(settings.deploymentProfile, settings.serviceLayout);
   const profileEnv = loadProfile(profileId);
   const mergedEnv = mergeRuntimeEnv(process.env, profileEnv, resolveIamDevEnv(process.env));
 
   const summary = {
     repoRoot: REPO_ROOT,
     profileId,
+    deploymentProfile: settings.deploymentProfile,
     defaultDevProfileId: DEFAULT_DEV_PROFILE_ID,
     applicationPublicHttpUrl: resolveSurfaceHttpUrl(profileId, 'application.public-ingress', mergedEnv),
     applicationBackendHttpUrl: resolveSurfaceHttpUrl(profileId, 'application.backend-http', mergedEnv),
-    platformApiGatewayHttpUrl: resolveGatewayBaseUrl(mergedEnv, settings.hosting),
+    platformApiGatewayHttpUrl: resolveGatewayBaseUrl(mergedEnv, settings.deploymentProfile),
     appSdkBaseUrl: resolveDefaultAppSdkBaseUrl(mergedEnv),
     backendSdkBaseUrl: resolveDefaultBackendSdkBaseUrl(mergedEnv),
     healthSurfaces: listHealthSurfaces(profileId),

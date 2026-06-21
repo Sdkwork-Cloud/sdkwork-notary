@@ -1,4 +1,5 @@
 import { getNotaryH5ComposedApi } from '@sdkwork/notary-h5-core';
+import { isBlank } from '@sdkwork/utils/string';
 
 export interface NotaryH5DashboardStats {
   pendingCount: number;
@@ -26,6 +27,15 @@ function numberValue(value: unknown): number {
 
 function stringValue(value: unknown): string {
   return typeof value === 'string' ? value : '';
+}
+
+function coalesce(...values: Array<string | null | undefined>): string | undefined {
+  for (const value of values) {
+    if (!isBlank(value)) {
+      return value!.trim();
+    }
+  }
+  return undefined;
 }
 
 function extractItems(value: unknown): Record<string, unknown>[] {
@@ -69,12 +79,23 @@ export function createNotaryH5Service(): NotaryH5Service {
       });
 
       return extractItems(response).map((record) => ({
-        id: stringValue(record.caseId ?? record.id),
+        id: coalesce(stringValue(record.caseId), stringValue(record.id)) ?? '',
         title: stringValue(record.title),
-        type: stringValue(record.businessType ?? record.type ?? record.matterTitle),
+        type: coalesce(
+          stringValue(record.businessType),
+          stringValue(record.type),
+          stringValue(record.matterTitle),
+        ) ?? '',
         status: stringValue(record.status),
-        notary: stringValue(record.primaryNotaryName ?? record.notary),
-        createTime: stringValue(record.createTime ?? record.createdAt ?? record.submittedAt),
+        notary: coalesce(
+          stringValue(record.primaryNotaryName),
+          stringValue(record.notary),
+        ),
+        createTime: coalesce(
+          stringValue(record.createTime),
+          stringValue(record.createdAt),
+          stringValue(record.submittedAt),
+        ),
       }));
     },
   };

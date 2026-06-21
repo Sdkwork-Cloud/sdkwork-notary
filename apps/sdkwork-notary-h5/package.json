@@ -10,10 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --test src/__tests__/h5-architecture.contract.test.mjs",
-    "h5:dev": "vite",
-    "h5:build": "tsc --noEmit && vite build",
-    "h5:preview": "vite preview"
+    "test": "node --test src/__tests__/h5-architecture.contract.test.mjs"
   },
   "dependencies": {
     "@sdkwork/notary-h5-commons": "workspace:*",
@@ -21,6 +18,7 @@
     "@sdkwork/notary-h5-notary": "workspace:*",
     "@sdkwork/notary-h5-shell": "workspace:*",
     "@sdkwork/sdk-common": "^1.0.3",
+    "@sdkwork/utils": "file:../../../sdkwork-utils/packages/sdkwork-utils-typescript",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.17.0"

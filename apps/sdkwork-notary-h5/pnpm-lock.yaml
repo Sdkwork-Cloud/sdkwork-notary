@@ -23,6 +23,9 @@ importers:
       '@sdkwork/sdk-common':
         specifier: ^1.0.3
         version: 1.0.3
+      '@sdkwork/utils-typescript':
+        specifier: file:../../../sdkwork-utils/packages/sdkwork-utils-typescript
+        version: file:../../../sdkwork-utils/packages/sdkwork-utils-typescript
       react:
         specifier: ^19.2.0
         version: 19.2.7
@@ -72,6 +75,9 @@ importers:
       '@sdkwork/notary-h5-shell':
         specifier: workspace:*
         version: link:../sdkwork-notary-h5-shell
+      '@sdkwork/utils-typescript':
+        specifier: file:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript
+        version: file:../../../sdkwork-utils/packages/sdkwork-utils-typescript
       react:
         specifier: ^19.0.0
         version: 19.2.7
@@ -483,6 +489,9 @@ packages:
   '@sdkwork/sdk-common@1.0.3':
     resolution: {integrity: sha512-EGCm742ya1VL9hZ+9SVVArUxieFxIwQ3MMpt8Tv6Vc++U5ug4qG2TBUQ/hKAeJIwhL5Tvbhs6Tzy31P8fBO/cQ==}
     engines: {node: '>=18.0.0'}
+
+  '@sdkwork/utils-typescript@file:../../../sdkwork-utils/packages/sdkwork-utils-typescript':
+    resolution: {directory: ../../../sdkwork-utils/packages/sdkwork-utils-typescript, type: directory}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -1010,6 +1019,8 @@ snapshots:
     optional: true
 
   '@sdkwork/sdk-common@1.0.3': {}
+
+  '@sdkwork/utils-typescript@file:../../../sdkwork-utils/packages/sdkwork-utils-typescript': {}
 
   '@types/babel__core@7.20.5':
     dependencies:

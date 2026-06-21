@@ -7,7 +7,7 @@ This repository is a **contract-first domain library** governed by `sdkwork-spec
 | Directory | Status | Purpose |
 | --- | --- | --- |
 | `apis/` | Active | Author-owned OpenAPI authorities |
-| `apps/` | Pointer | Documents domain-library model (no local app root) |
+| `apps/` | Active | H5 mobile client at `apps/sdkwork-notary-h5/`; host integration pointers in `apps/README.md` |
 | `crates/` | Active | Rust contract, service, repository, and route crates |
 | `configs/` | Active | Topology profiles for host application wiring |
 | `database/` | Active | Canonical database lifecycle assets (`database.manifest.json`, contract, baseline DDL, seeds) |
@@ -28,7 +28,8 @@ This repository is a **contract-first domain library** governed by `sdkwork-spec
 
 | Standard path | Notary decision |
 | --- | --- |
-| `apps/sdkwork-notary/` | Domain library; identity manifest is root `sdkwork.app.config.json` |
+| `apps/sdkwork-notary-h5/` | H5 mobile client root (`APP_H5_ARCHITECTURE_SPEC.md`) |
+| `apps/sdkwork-notary/` (legacy) | Domain library catalog identity remains at root `sdkwork.app.config.json` |
 | `services/*-api-server` | Route crates are consumed by host gateways, not a local API server |
 | RPC / `sdkwork-discovery` | No gRPC services yet; discovery deferred until RPC is introduced |
 

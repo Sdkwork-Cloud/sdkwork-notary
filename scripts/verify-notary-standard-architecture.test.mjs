@@ -245,7 +245,25 @@ test('declares topology profiles for host application wiring', () => {
   }
 
   assert.equal(topology.database?.appPrefix, 'SDKWORK_NOTARY');
+  assert.equal(topology.defaults?.developmentProfileId, 'standalone.split-services.development');
   assert.deepEqual(topology.surfaces?.['application.public-ingress']?.protocols, ['http']);
+});
+
+test('declares SDKWORK workspace config and test skeleton directories', () => {
+  for (const directory of [
+    'configs/schemas',
+    'configs/profiles',
+    'configs/examples',
+    'configs/defaults',
+    'tests/contract',
+    'tests/integration',
+    'tests/e2e',
+    'tests/fixtures',
+    'tests/static',
+  ]) {
+    assert.equal(exists(directory), true, `${directory}/ should exist`);
+    assert.equal(exists(path.join(directory, 'README.md')), true, `${directory}/README.md should exist`);
+  }
 });
 
 test('domain library root declares sdkwork.app.config.json', () => {
@@ -255,6 +273,8 @@ test('domain library root declares sdkwork.app.config.json', () => {
   assert.equal(manifest.schemaVersion, 3);
   assert.equal(manifest.kind, 'sdkwork.app');
   assert.equal(manifest.app.key, 'sdkwork-notary');
+  assert.equal(manifest.runtime.family, 'library');
+  assert.equal(manifest.devApp.sourceRoot, 'apps/sdkwork-notary-h5');
 });
 
 test('Rust HTTP crates follow sdkwork-router-notary-* naming', () => {
@@ -288,13 +308,14 @@ test('route crate component specs reference canonical route manifest files', () 
 test('declares contract maintenance scripts and schema registry', () => {
   const packageManifest = readJson('package.json');
   assert.equal(
-    packageManifest.scripts['openapi:materialize'],
-    'node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs',
+    packageManifest.scripts['api:materialize'],
+    'node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs && node scripts/generate-notary-route-manifests.mjs',
   );
-  assert.equal(
-    packageManifest.scripts['manifest:sync'],
-    'node scripts/generate-notary-route-manifests.mjs && node scripts/sync-notary-api-framework-metadata.mjs',
-  );
+  assert.ok(packageManifest.scripts['dev:browser'], 'package.json must expose pnpm dev:browser');
+  assert.ok(packageManifest.scripts['api:check'], 'package.json must expose pnpm api:check');
+  assert.ok(packageManifest.scripts['sdk:check'], 'package.json must expose pnpm sdk:check');
+  assert.ok(packageManifest.scripts['topology:plan'], 'package.json must expose pnpm topology:plan');
+  assert.ok(packageManifest.scripts.typecheck, 'package.json must expose pnpm typecheck');
 
   assert.equal(exists('specs/README.md'), true);
   assert.equal(exists('generated/README.md'), true);

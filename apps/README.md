@@ -10,7 +10,13 @@ The phone-first mobile client lives at `apps/sdkwork-notary-h5/` and follows `sd
 - Business screens and services live in `packages/sdkwork-notary-h5-*`.
 - UI flows call `@sdkwork/notary-app-sdk` composed APIs through `sdkwork-notary-h5-core`.
 
-Run locally:
+Run locally from the repository root:
+
+```bash
+pnpm dev:browser
+```
+
+Or from the H5 app root:
 
 ```bash
 cd apps/sdkwork-notary-h5

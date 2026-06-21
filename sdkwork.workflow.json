@@ -84,6 +84,11 @@
         "name": "Run SDKWork Notary contract checks",
         "shell": "pwsh",
         "run": "pnpm run verify"
+      },
+      {
+        "name": "Build H5 browser bundle",
+        "shell": "pwsh",
+        "run": "pnpm run build:browser"
       }
     ],
     "package": [

@@ -22,10 +22,10 @@ const runtime = createTopologyRuntime(spec, REPO_ROOT);
 export const DEFAULT_DEV_PROFILE_ID = runtime.defaults.developmentProfileId;
 export const DEFAULT_PRODUCTION_PROFILE_ID = runtime.defaults.productionProfileId;
 
-export function resolveDevProfileId(hosting, serviceLayout = 'split-services') {
-  runtime.assertHosting(hosting);
+export function resolveDevProfileId(deploymentProfile, serviceLayout = 'split-services') {
+  runtime.assertHosting(deploymentProfile);
   runtime.assertServiceLayout(serviceLayout);
-  return buildProfileId(hosting, serviceLayout, 'development');
+  return buildProfileId(deploymentProfile, serviceLayout, 'development');
 }
 
 export function resolveDefaultAppSdkBaseUrl(profileEnv = {}) {

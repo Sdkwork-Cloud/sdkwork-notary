@@ -10,8 +10,7 @@ Authoritative HTTP contracts for this repository:
 Keep authored contracts in `apis/` aligned with `generated/openapi/` when contracts change:
 
 ```powershell
-pnpm openapi:materialize
-pnpm manifest:sync
+pnpm api:materialize
 pnpm sdk:generate
 ```
 

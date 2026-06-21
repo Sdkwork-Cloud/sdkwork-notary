@@ -1,10 +1,26 @@
-# Cross-cutting verification
+# Tests
 
-Contract and integration tests live under:
+Cross-cutting verification index for `sdkwork-notary`.
 
-- `sdks/test/` — OpenAPI, SDK, runtime, database framework, and storage contract tests
-- `scripts/verify-notary-standard-architecture.test.mjs` — workspace dictionary and framework alignment
-- `scripts/verify-notary-utils-standard.test.mjs` — sdkwork-utils integration checks
-- `scripts/dev/` — topology baggage and dev helper tests
+## Executable suites
 
-Run the aggregate gate with `pnpm verify`.
+- `sdks/test/*.test.mjs` — OpenAPI, SDK, web-framework, database, and integration contract tests
+- `scripts/verify-notary-standard-architecture.test.mjs` — workspace and framework alignment
+- `scripts/verify-notary-utils-standard.test.mjs` — `sdkwork-utils-rust` integration
+- `scripts/dev/sdkwork-notary-topology-baggage.test.mjs` — retired topology vocabulary scan
+- `apps/sdkwork-notary-h5/src/__tests__/*.test.mjs` — H5 architecture contracts
+- `tests/contract/*.test.mjs` — manifest, workflow, SDK generation, and H5 component specs
+
+## Directories
+
+- `contract/` — standards and manifest contract tests
+- `integration/` — host wiring and runtime integration checks
+- `e2e/` — end-to-end verification flows
+- `fixtures/` — shared fixtures
+- `static/` — static assets for verification
+
+Run the merge gate with:
+
+```bash
+pnpm verify
+```

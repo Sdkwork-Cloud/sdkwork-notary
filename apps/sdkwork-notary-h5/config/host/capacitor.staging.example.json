@@ -1,0 +1,6 @@
+{
+  "profile": "staging",
+  "appId": "com.sdkwork.notary.h5",
+  "appName": "SDKWork Notary",
+  "bundledWebRuntime": false
+}

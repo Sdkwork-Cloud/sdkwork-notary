@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-h5-shell",
+    "displayName": "SDKWork Notary H5 Shell",
+    "version": "0.1.0",
+    "type": "typescript-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-h5/packages/sdkwork-notary-h5-shell",
+    "domain": "notary",
+    "capability": "shell",
+    "surface": "h5",
+    "languages": ["typescript"],
+    "generated": false,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_H5_ARCHITECTURE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_H5_ARCHITECTURE_SPEC.md",
+      "purpose": "Mobile shell composition and route assembly."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["@sdkwork/notary-h5-shell"],
+    "runtimeEntrypoints": ["AppLayout"],
+    "sdkClients": [],
+    "dependencyApiSurfaces": []
+  },
+  "verification": {
+    "commands": ["pnpm --dir apps/sdkwork-notary-h5 typecheck"]
+  }
+}

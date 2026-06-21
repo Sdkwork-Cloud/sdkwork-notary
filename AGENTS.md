@@ -27,7 +27,7 @@ Do not copy root standard text into this repository. If these relative paths do 
 - `AGENTS.md`: local agent entrypoint and relative SDKWORK spec index.
 - `.sdkwork/`: local skills, plugins, manifests, and workspace metadata (see `.sdkwork/README.md` and `.sdkwork/.gitignore`).
 - `apis/`: API authority index and authored OpenAPI contracts for notary app/backend surfaces.
-- `apps/`: pointer dictionary for host application roots (domain library has no local app).
+- `apps/`: H5 mobile client at `apps/sdkwork-notary-h5/` plus host integration pointers
 - `configs/topology/`: v2 runtime topology profile env files.
 - `deployments/`, `jobs/`, `tools/`, `plugins/`, `examples/`, `tests/`: standard workspace directories (see `docs/root-layout.md`).
 - `docs/topology-standard.md`: human topology summary and dev commands.
@@ -53,7 +53,9 @@ Do not copy root standard text into this repository. If these relative paths do 
 - Rust code: `../sdkwork-specs/RUST_CODE_SPEC.md`.
 - HTTP route crates and web integration: `../sdkwork-specs/WEB_FRAMEWORK_SPEC.md`, `../sdkwork-specs/WEB_BACKEND_SPEC.md`.
 - TypeScript SDK and contract tests: `../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md`.
+- pnpm script surfaces: `../sdkwork-specs/PNPM_SCRIPT_SPEC.md`.
 - API, SDK, database, runtime, security, and deployment changes must follow the task matrix in `../sdkwork-specs/README.md`.
+- GitHub packaging workflows: `../sdkwork-specs/GITHUB_WORKFLOW_SPEC.md`.
 
 ## Code Style Rules
 
@@ -65,15 +67,14 @@ For Rust, keep `src/lib.rs` limited to module declarations, re-exports, light do
 
 Run commands from this directory unless a command explicitly targets another path.
 
-- `pnpm dev`: load the default self-hosted split-services development topology profile.
+- `pnpm dev`: load the default standalone split-services development topology profile.
 - `pnpm test:topology-validate`: validate `specs/topology.spec.json` against `@sdkwork/app-topology`.
 - `pnpm test:contracts`: contract tests for OpenAPI, SDK packages, runtime standards, standard architecture, topology baggage, and optional Chat PC integration.
 - `pnpm test:rust` or `cargo test --workspace --target-dir target-codex-test`: Rust workspace tests.
-- `pnpm fmt:check` or `pnpm format:check`: verify Rust formatting for workspace crates.
+- `pnpm format:check`: verify Rust formatting for workspace crates.
 - `pnpm db:validate`: validate `database/` assets against `DATABASE_FRAMEWORK_SPEC.md`.
 - `pnpm test:topology-baggage`: scan active paths for retired topology vocabulary.
-- `pnpm openapi:materialize` or `pnpm api:materialize`: copy authored `apis/` OpenAPI into `generated/openapi/` and sync framework metadata.
-- `pnpm manifest:sync`: regenerate `sdks/_route-manifests` and sync framework metadata after route/OpenAPI changes.
+- `pnpm api:materialize`: copy authored `apis/` OpenAPI into `generated/openapi/`, regenerate route manifests, and sync framework metadata.
 - `pnpm verify`: run topology validation, topology baggage scan, database validation, contract tests, Rust formatting, and Rust tests.
 
 Chat PC integration contract tests skip automatically when the real app root is absent. Set `SDKWORK_IM_PC_ROOT` (or legacy `SDKWORK_CHAT_PC_ROOT`) to point at `sdkwork-im/apps/sdkwork-im-pc` when validating cross-repo wiring.

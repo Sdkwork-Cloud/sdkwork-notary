@@ -1,0 +1,7 @@
+{
+  "profile": "staging",
+  "appSdkBaseUrl": "https://api-staging.sdkwork.com/apps/sdkwork-notary",
+  "featureFlags": {
+    "notaryMobileDashboard": true
+  }
+}

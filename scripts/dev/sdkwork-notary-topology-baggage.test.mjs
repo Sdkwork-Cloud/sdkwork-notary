@@ -32,6 +32,10 @@ const bannedPatterns = [
   { id: 'topology v1 env key', pattern: /SDKWORK_NOTARY_TOPOLOGY/u },
   { id: 'client topology v1 env key', pattern: /VITE_SDKWORK_NOTARY_TOPOLOGY/u },
   { id: 'topology CLI flag', pattern: /--topology\b/u },
+  { id: 'retired hosting env key', pattern: /SDKWORK_NOTARY_HOSTING/u },
+  { id: 'retired client hosting env key', pattern: /VITE_SDKWORK_NOTARY_HOSTING/u },
+  { id: 'retired self-hosted token', pattern: /\bself-hosted\b/u },
+  { id: 'retired cloud-hosted token', pattern: /\bcloud-hosted\b/u },
   { id: 'hardcoded legacy app sdk port', pattern: /http:\/\/127\.0\.0\.1:18080/u },
 ];
 
@@ -108,7 +112,7 @@ assert.ok(fs.existsSync(path.join(repoRoot, 'specs/topology.spec.json')), 'topol
 const spec = JSON.parse(readText('specs/topology.spec.json'));
 assert.equal(spec.schemaVersion, 2);
 assert.equal(spec.archetype, 'application-http-gateway');
-assert.equal(spec.defaults.developmentProfileId, 'self-hosted.split-services.development');
+assert.equal(spec.defaults.developmentProfileId, 'standalone.split-services.development');
 
 const profileDir = path.join(repoRoot, 'configs/topology');
 const profileFiles = fs.readdirSync(profileDir).filter((name) => name.endsWith('.env'));

@@ -6,16 +6,22 @@ Platform standard: `../sdkwork-specs/APP_RUNTIME_TOPOLOGY_ADOPTION.md`
 
 ## Default dev profile
 
-`self-hosted.split-services.development` — load the profile with:
+`standalone.split-services.development` — load the profile with:
 
 ```bash
-pnpm notary:dev
+pnpm dev
 ```
 
 Cloud development profile:
 
 ```bash
-pnpm notary:dev:cloud
+pnpm dev:cloud
+```
+
+H5 browser client:
+
+```bash
+pnpm dev:browser
 ```
 
 ## Surfaces

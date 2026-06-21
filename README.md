@@ -96,7 +96,7 @@ Runtime topology follows SDKWork v2 (`application-http-gateway`):
 - Spec: `specs/topology.spec.json`
 - Profiles: `configs/topology/*.env`
 - Adapter: `scripts/lib/notary-topology.mjs`
-- Dev entry: `pnpm notary:dev`
+- Dev entry: `pnpm dev`
 
 See `docs/topology-standard.md` and `../sdkwork-specs/APP_RUNTIME_TOPOLOGY_ADOPTION.md`.
 
@@ -108,7 +108,7 @@ Run from this repository root:
 pnpm dev
 pnpm verify
 pnpm api:materialize
-pnpm manifest:sync
+pnpm api:materialize
 pnpm sdk:generate
 ```
 

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-h5-commons",
+    "displayName": "SDKWork Notary H5 Commons",
+    "version": "0.1.0",
+    "type": "typescript-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-h5/packages/sdkwork-notary-h5-commons",
+    "domain": "notary",
+    "capability": "commons",
+    "surface": "h5",
+    "languages": ["typescript"],
+    "generated": false,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_MOBILE_REACT_UI_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_MOBILE_REACT_UI_SPEC.md",
+      "purpose": "Shared mobile UI states and presentation primitives."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["@sdkwork/notary-h5-commons"],
+    "runtimeEntrypoints": [],
+    "sdkClients": [],
+    "dependencyApiSurfaces": []
+  },
+  "verification": {
+    "commands": ["pnpm --dir apps/sdkwork-notary-h5 typecheck"]
+  }
+}

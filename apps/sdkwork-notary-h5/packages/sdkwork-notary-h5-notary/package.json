@@ -16,7 +16,8 @@
   "dependencies": {
     "@sdkwork/notary-h5-commons": "workspace:*",
     "@sdkwork/notary-h5-core": "workspace:*",
-    "@sdkwork/notary-h5-shell": "workspace:*"
+    "@sdkwork/notary-h5-shell": "workspace:*",
+    "@sdkwork/utils": "file:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript"
   },
   "peerDependencies": {
     "react": "^19.0.0"

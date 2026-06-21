@@ -14,4 +14,4 @@ node scripts/generate-notary-route-manifests.mjs
 node scripts/sync-notary-api-framework-metadata.mjs
 ```
 
-Or run `pnpm manifest:sync`.
+Or run `pnpm api:materialize`.

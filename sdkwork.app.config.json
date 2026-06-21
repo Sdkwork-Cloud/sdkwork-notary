@@ -12,7 +12,7 @@
     "privacyPolicyUrl": "https://sdkwork.com/privacy",
     "termsOfServiceUrl": "https://sdkwork.com/terms",
     "iconUrl": "https://cdn.sdkwork.com/apps/sdkwork-notary/assets/icon-1024.png",
-    "appType": "APP_HTML",
+    "appType": "SDK",
     "versionSource": "package.json",
     "identifiers": {
       "packageName": null,
@@ -30,23 +30,21 @@
     "organizationId": null
   },
   "runtime": {
-    "family": "web",
-    "framework": "node-service",
+    "family": "library",
+    "framework": "rust-domain-library",
     "runtimes": [
-      "WEB",
-      "BROWSER"
+      "LIBRARY"
     ],
     "deliveryModes": [
-      "WEB_URL",
       "DIRECT_DOWNLOAD"
     ],
-    "defaultPlatform": "WEB",
-    "defaultArchitecture": "x64",
+    "defaultPlatform": "LIBRARY",
+    "defaultArchitecture": "noarch",
     "supportedDeploymentProfiles": [
       "cloud",
       "standalone"
     ],
-    "defaultDeploymentProfile": "cloud"
+    "defaultDeploymentProfile": "standalone"
   },
   "media": {
     "icons": {
@@ -130,17 +128,17 @@
       "name": "sdkwork-skills-app"
     },
     "platforms": [
-      "WEB"
+      "LIBRARY"
     ],
     "installPlatforms": [
-      "WEB"
+      "LIBRARY"
     ],
-    "defaultPackageId": "web-universal-cloud-browser-zip",
+    "defaultPackageId": "test-noarch-standalone-library-contracts-tar-gz",
     "storeUrl": "https://sdkwork.com/apps/sdkwork-notary",
     "stores": [],
     "config": {
       "workspaceRoot": ".",
-      "framework": "node-service",
+      "framework": "rust-domain-library",
       "managedBy": "apps/scripts/initialize-sdkwork-app-standard-v3.mjs"
     }
   },
@@ -155,6 +153,11 @@
       "deployUrl": "https://api-test.sdkwork.com/apps/sdkwork-notary",
       "deployEnv": "test"
     },
+    "staging": {
+      "accessUrl": "https://api-staging.sdkwork.com/apps/sdkwork-notary",
+      "deployUrl": "https://api-staging.sdkwork.com/apps/sdkwork-notary",
+      "deployEnv": "staging"
+    },
     "production": {
       "accessUrl": "https://api.sdkwork.com/apps/sdkwork-notary",
       "deployUrl": "https://api.sdkwork.com/apps/sdkwork-notary",
@@ -163,79 +166,32 @@
   },
   "artifacts": {
     "installConfig": {
-      "defaultPackageId": "web-universal-cloud-browser-zip",
+      "defaultPackageId": "test-noarch-standalone-library-contracts-tar-gz",
       "installCommand": "sdkwork install sdkwork-notary",
       "launchCommand": "sdkwork open sdkwork-notary",
       "uninstallCommand": "sdkwork uninstall sdkwork-notary",
       "packages": [
         {
-          "id": "web-universal-cloud-browser-zip",
-          "name": "SDKWork Notary Web Bundle",
-          "sourceType": "WEB_URL",
-          "packageFormat": "ZIP",
-          "platform": "WEB",
-          "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/STABLE/0.1.0/web.zip",
-          "enabled": true,
-          "metadata": {},
-          "checksumAlgorithm": "SHA-256",
-          "checksum": "aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0",
-          "architecture": "universal",
-          "deploymentProfile": "cloud",
-          "runtimeTarget": "browser"
-        },
-        {
-          "id": "windows-x64-standalone-desktop-zip",
-          "name": "SDKWork Notary Windows Bundle",
+          "id": "test-noarch-standalone-library-contracts-tar-gz",
+          "name": "SDKWork Notary Domain Library Contracts",
           "sourceType": "BINARY_URL",
-          "packageFormat": "ZIP",
-          "platform": "DESKTOP_WINDOWS",
-          "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/STABLE/0.1.0/windows/x64/app.zip",
-          "enabled": true,
-          "metadata": {},
-          "architecture": "x64",
-          "checksumAlgorithm": "SHA-256",
-          "checksum": "cf490a84cf490a84cf490a84cf490a84cf490a84cf490a84cf490a84cf490a84",
-          "deploymentProfile": "standalone",
-          "runtimeTarget": "desktop"
-        },
-        {
-          "id": "macos-universal-standalone-desktop-dmg",
-          "name": "SDKWork Notary macOS Bundle",
-          "sourceType": "BINARY_URL",
-          "packageFormat": "DMG",
-          "platform": "DESKTOP_MACOS",
-          "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/STABLE/0.1.0/macos/universal/app.dmg",
-          "enabled": true,
-          "metadata": {},
-          "architecture": "universal",
-          "checksumAlgorithm": "SHA-256",
-          "checksum": "88930fb488930fb488930fb488930fb488930fb488930fb488930fb488930fb4",
-          "deploymentProfile": "standalone",
-          "runtimeTarget": "desktop"
-        },
-        {
-          "id": "linux-x64-standalone-desktop-appimage",
-          "name": "SDKWork Notary Linux Bundle",
-          "sourceType": "BINARY_URL",
-          "packageFormat": "APPIMAGE",
-          "platform": "DESKTOP_LINUX",
-          "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/STABLE/0.1.0/linux/generic/x64/app.AppImage",
+          "packageFormat": "TAR_GZ",
+          "platform": "LIBRARY",
+          "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/STABLE/0.1.0/library/contracts.tar.gz",
           "enabled": true,
           "metadata": {
-            "linux": {
-              "distro": "generic"
-            }
+            "kind": "domain-library"
           },
-          "architecture": "x64",
           "checksumAlgorithm": "SHA-256",
-          "checksum": "8888c5358888c5358888c5358888c5358888c5358888c5358888c5358888c535",
+          "checksum": "aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0",
+          "architecture": "noarch",
           "deploymentProfile": "standalone",
-          "runtimeTarget": "desktop"
+          "runtimeTarget": "test-runner"
         }
       ],
       "metadata": {
         "workspaceRoot": ".",
-        "framework": "node-service",
+        "framework": "rust-domain-library",
         "packageManager": "pnpm",
         "migratedFromLegacyConfig": false
       }
@@ -260,10 +216,7 @@
           "Download package matrix normalized"
         ],
         "packageIds": [
-          "web-universal-cloud-browser-zip",
-          "windows-x64-standalone-desktop-zip",
-          "macos-universal-standalone-desktop-dmg",
-          "linux-x64-standalone-desktop-appimage"
+          "test-noarch-standalone-library-contracts-tar-gz"
         ],
         "publishedAt": "2026-05-07T00:00:00Z",
         "current": true,
@@ -280,9 +233,11 @@
   },
   "devApp": {
     "build": {
-      "targets": []
+      "targets": [
+        "browser"
+      ]
     },
-    "sourceRoot": "."
+    "sourceRoot": "apps/sdkwork-notary-h5"
   },
   "metadata": {
     "standardOwner": "sdkwork-platform",

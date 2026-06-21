@@ -10,5 +10,5 @@ Owner OpenAPI authority documents materialized from authored contracts in `apis/
 Refresh after contract edits:
 
 ```powershell
-pnpm openapi:materialize
+pnpm api:materialize
 ```

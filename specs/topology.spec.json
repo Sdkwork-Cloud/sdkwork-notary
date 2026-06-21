@@ -4,12 +4,12 @@
   "appId": "sdkwork-notary",
   "archetype": "application-http-gateway",
   "profileRoot": "configs/topology",
-  "profilePattern": "{hosting}.{serviceLayout}.{environment}.env",
+  "profilePattern": "{deploymentProfile}.{serviceLayout}.{environment}.env",
   "vocabulary": {
-    "hosting": {
+    "deploymentProfile": {
       "allowed": [
-        "self-hosted",
-        "cloud-hosted"
+        "standalone",
+        "cloud"
       ]
     },
     "serviceLayout": {
@@ -31,22 +31,22 @@
     }
   },
   "defaults": {
-    "developmentProfileId": "self-hosted.split-services.development",
-    "productionProfileId": "cloud-hosted.split-services.production",
+    "developmentProfileId": "standalone.split-services.development",
+    "productionProfileId": "cloud.split-services.production",
     "gatewayBind": "127.0.0.1:3900"
   },
   "profileFiles": {
-    "self-hosted.split-services.development": "configs/topology/self-hosted.split-services.development.env",
-    "cloud-hosted.split-services.development": "configs/topology/cloud-hosted.split-services.development.env",
-    "self-hosted.split-services.production": "configs/topology/self-hosted.split-services.production.env",
-    "cloud-hosted.split-services.production": "configs/topology/cloud-hosted.split-services.production.env"
+    "standalone.split-services.development": "configs/topology/standalone.split-services.development.env",
+    "cloud.split-services.development": "configs/topology/cloud.split-services.development.env",
+    "standalone.split-services.production": "configs/topology/standalone.split-services.production.env",
+    "cloud.split-services.production": "configs/topology/cloud.split-services.production.env"
   },
   "envKeys": {
-    "hosting": "SDKWORK_NOTARY_HOSTING",
+    "deploymentProfile": "SDKWORK_NOTARY_DEPLOYMENT_PROFILE",
     "serviceLayout": "SDKWORK_NOTARY_SERVICE_LAYOUT",
     "environment": "SDKWORK_NOTARY_ENVIRONMENT",
     "profileId": "SDKWORK_NOTARY_PROFILE_ID",
-    "clientHosting": "VITE_SDKWORK_NOTARY_HOSTING",
+    "clientDeploymentProfile": "VITE_SDKWORK_NOTARY_DEPLOYMENT_PROFILE",
     "gatewayAutostart": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_AUTOSTART",
     "cloudGatewayBind": "SDKWORK_API_GATEWAY_BIND",
     "apiGatewayBaseUrl": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
@@ -114,7 +114,7 @@
   },
   "orchestration": {
     "profiles": {
-      "self-hosted.split-services.development": {
+      "standalone.split-services.development": {
         "processes": [],
         "healthSurfaces": [
           "application.public-ingress",
@@ -122,7 +122,7 @@
           "platform.api-gateway"
         ]
       },
-      "cloud-hosted.split-services.development": {
+      "cloud.split-services.development": {
         "processes": [
           {
             "id": "platform.api-gateway",
@@ -144,7 +144,15 @@
   "retired": {
     "envKeys": [
       "SDKWORK_NOTARY_TOPOLOGY",
-      "VITE_SDKWORK_NOTARY_TOPOLOGY"
+      "VITE_SDKWORK_NOTARY_TOPOLOGY",
+      "SDKWORK_NOTARY_HOSTING",
+      "VITE_SDKWORK_NOTARY_HOSTING"
+    ],
+    "profileIds": [
+      "self-hosted.split-services.development",
+      "cloud-hosted.split-services.development",
+      "self-hosted.split-services.production",
+      "cloud-hosted.split-services.production"
     ],
     "notes": "sdkwork-notary is a domain library. Host applications wire sdkwork-router-notary-* route crates and load profile env from this repository."
   }

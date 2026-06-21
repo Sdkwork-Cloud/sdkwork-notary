@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-h5-core",
+    "displayName": "SDKWork Notary H5 Core",
+    "version": "0.1.0",
+    "type": "typescript-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-h5/packages/sdkwork-notary-h5-core",
+    "domain": "notary",
+    "capability": "core",
+    "surface": "h5",
+    "languages": ["typescript"],
+    "generated": false,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_H5_ARCHITECTURE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_H5_ARCHITECTURE_SPEC.md",
+      "purpose": "H5 core SDK wiring and bootstrap boundaries."
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "Generated app SDK client construction and TokenManager injection."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["@sdkwork/notary-h5-core"],
+    "runtimeEntrypoints": ["initNotaryH5AppSdkClient", "getNotaryH5ComposedApi"],
+    "sdkClients": ["@sdkwork/notary-app-sdk"],
+    "dependencyApiSurfaces": []
+  },
+  "verification": {
+    "commands": ["pnpm --dir apps/sdkwork-notary-h5 typecheck", "pnpm test:browser"]
+  }
+}

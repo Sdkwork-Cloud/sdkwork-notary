@@ -24,7 +24,8 @@ test("notary database module satisfies DATABASE_FRAMEWORK_SPEC", () => {
 
 test("notary verify aggregate includes database framework validation", () => {
   const packageManifest = readJson("package.json");
-  assert(packageManifest.scripts.verify.includes("db:validate"));
+  assert(packageManifest.scripts.verify.includes("check"));
+  assert(packageManifest.scripts.check.includes("db:validate"));
   assert.equal(packageManifest.scripts["db:validate"], packageManifest.scripts["test:contract:database"]);
 });
 
