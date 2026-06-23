@@ -92,10 +92,15 @@ pub fn identity_fingerprint(value: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Mutex;
+
     use super::{identity_fingerprint, PiiVault};
+
+    static ENV_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn pii_vault_round_trips_sensitive_values() {
+        let _guard = ENV_TEST_LOCK.lock().expect("env test lock");
         let vault = PiiVault::for_tenant("tenant-1").expect("vault");
         let encrypted = vault.encrypt("110101199001011234").expect("encrypt");
         assert!(encrypted.starts_with("notary-vault:v1:"));
@@ -105,6 +110,7 @@ mod tests {
 
     #[test]
     fn pii_vault_requires_key_outside_dev_environments() {
+        let _guard = ENV_TEST_LOCK.lock().expect("env test lock");
         let previous_env = std::env::var("SDKWORK_NOTARY_ENVIRONMENT").ok();
         let previous_key = std::env::var("NOTARY_PII_VAULT_KEY").ok();
         std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "production");

@@ -131,8 +131,12 @@ fn normalize_identifier(value: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Mutex;
+
     use super::*;
     use sdkwork_web_core::{WebLoginScope, WebRequestPrincipal};
+
+    static ENV_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn resolves_explicit_organization_membership_scope() {
@@ -215,6 +219,7 @@ mod tests {
 
     #[test]
     fn production_environment_blocks_synthetic_membership_without_explicit_scope() {
+        let _guard = ENV_TEST_LOCK.lock().expect("env test lock");
         let previous = std::env::var("SDKWORK_NOTARY_ENVIRONMENT").ok();
         std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "production");
 
