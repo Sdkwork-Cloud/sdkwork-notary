@@ -34,6 +34,11 @@
       "file": "RUST_CODE_SPEC.md",
       "path": "../../../../sdkwork-specs/RUST_CODE_SPEC.md",
       "purpose": "Rust crate structure and verification rules."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../../../../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Database connection secrets and host bootstrap boundaries."
     }
   ],
   "contracts": {

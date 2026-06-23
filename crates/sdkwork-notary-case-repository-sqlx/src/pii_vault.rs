@@ -110,10 +110,10 @@ mod tests {
         std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "production");
         std::env::remove_var("NOTARY_PII_VAULT_KEY");
 
-        let error = PiiVault::for_tenant("tenant-1").expect_err("production vault");
-        assert!(error
-            .message()
-            .contains("NOTARY_PII_VAULT_KEY is required"));
+        match PiiVault::for_tenant("tenant-1") {
+            Ok(_) => panic!("production vault must fail without NOTARY_PII_VAULT_KEY"),
+            Err(error) => assert!(error.message().contains("NOTARY_PII_VAULT_KEY is required")),
+        }
 
         if let Some(value) = previous_env {
             std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", value);

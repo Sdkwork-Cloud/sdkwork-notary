@@ -1535,7 +1535,9 @@ async fn app_operation_dispatcher_rejects_missing_operation_permission() {
     .await
     .expect_err("missing permission");
 
-    assert!(error.message().contains("missing permission: notary.cases.create"));
+    assert!(error
+        .message()
+        .contains("missing permission: notary.cases.create"));
 }
 
 fn runtime_context() -> NotaryRuntimeContext {

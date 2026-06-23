@@ -23,7 +23,7 @@
     "check": "pnpm test:topology-validate && pnpm db:validate && pnpm format:check && pnpm typecheck && node ../sdkwork-specs/tools/check-pnpm-script-standard.mjs --root . --application-code-prefix notary",
     "clean": "cargo clean --target-dir target-codex-test",
     "test": "pnpm.cmd test:contracts",
-    "test:contracts": "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs scripts/verify-notary-utils-standard.test.mjs apps/sdkwork-notary-h5/src/__tests__/*.test.mjs apps/sdkwork-notary-pc/src/__tests__/*.test.mjs tests/contract/*.test.mjs",
+    "test:contracts": "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs scripts/verify-notary-iam-manifest.test.mjs scripts/verify-notary-utils-standard.test.mjs apps/sdkwork-notary-h5/src/__tests__/*.test.mjs apps/sdkwork-notary-pc/src/__tests__/*.test.mjs tests/contract/*.test.mjs",
     "test:topology-baggage": "node --test scripts/dev/sdkwork-notary-topology-baggage.test.mjs",
     "test:topology-validate": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs validate --root . --spec specs/topology.spec.json",
     "topology:validate": "pnpm test:topology-validate",

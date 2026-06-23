@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary",
+    "displayName": "SDKWork Notary Domain Library",
+    "version": "0.1.0",
+    "type": "domain-library",
+    "root": "sdkwork-notary",
+    "domain": "notary",
+    "capability": "notary",
+    "surface": "library",
+    "languages": ["rust", "typescript"],
+    "generated": false,
+    "manifests": ["Cargo.toml", "package.json", "sdkwork.app.config.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "SDKWORK_WORKSPACE_SPEC.md",
+      "path": "../sdkwork-specs/SDKWORK_WORKSPACE_SPEC.md",
+      "purpose": "Domain library workspace dictionary and verification surfaces."
+    },
+    {
+      "file": "DOMAIN_SPEC.md",
+      "path": "../sdkwork-specs/DOMAIN_SPEC.md",
+      "purpose": "Contract-first domain library ownership and host integration."
+    },
+    {
+      "file": "API_SPEC.md",
+      "path": "../sdkwork-specs/API_SPEC.md",
+      "purpose": "OpenAPI authorities, route manifests, and SDK generation."
+    },
+    {
+      "file": "WEB_BACKEND_SPEC.md",
+      "path": "../sdkwork-specs/WEB_BACKEND_SPEC.md",
+      "purpose": "Service, repository, and route crate layering."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Authn/authz, tenant isolation, and secrets handling."
+    },
+    {
+      "file": "IAM_MODULE_MANIFEST_SPEC.md",
+      "path": "../sdkwork-specs/IAM_MODULE_MANIFEST_SPEC.md",
+      "purpose": "IMF permission catalog and OpenAPI authority alignment."
+    },
+    {
+      "file": "TEST_SPEC.md",
+      "path": "../sdkwork-specs/TEST_SPEC.md",
+      "purpose": "Contract, runtime, and verification expectations."
+    },
+    {
+      "file": "OBSERVABILITY_SPEC.md",
+      "path": "../sdkwork-specs/OBSERVABILITY_SPEC.md",
+      "purpose": "Structured logging and operational diagnostics."
+    }
+  ],
+  "contracts": {
+    "publicExports": [],
+    "runtimeEntrypoints": [
+      "build_sdkwork_notary_app_api_router",
+      "build_sdkwork_notary_backend_api_router"
+    ],
+    "routeManifest": null,
+    "sdkClients": [
+      "@sdkwork/notary-app-sdk",
+      "@sdkwork/notary-backend-sdk"
+    ],
+    "events": ["notary.case.submitted"],
+    "configKeys": [
+      "NOTARY_PII_VAULT_KEY",
+      "SDKWORK_NOTARY_ENVIRONMENT"
+    ]
+  },
+  "verification": {
+    "commands": ["pnpm verify"]
+  }
+}

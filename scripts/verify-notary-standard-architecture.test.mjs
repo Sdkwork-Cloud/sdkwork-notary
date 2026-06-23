@@ -336,22 +336,43 @@ test('production topology profiles document PII vault secret injection', () => {
   }
 });
 
+test('declares domain library root component spec', () => {
+  assert.equal(exists('specs/component.spec.json'), true);
+  const spec = readJson('specs/component.spec.json');
+  assert.equal(spec.component.name, 'sdkwork-notary');
+  assert.equal(spec.component.type, 'domain-library');
+  const files = spec.canonicalSpecs.map((entry) => entry.file);
+  assert.ok(files.includes('SECURITY_SPEC.md'));
+  assert.ok(files.includes('IAM_MODULE_MANIFEST_SPEC.md'));
+});
+
 test('database seed manifest wires bootstrap common seed', () => {
   const seeds = readJson('database/seeds/seed.manifest.json');
   assert.ok(seeds.profiles.standard.common.includes('001_bootstrap.sql'));
 });
 
 test('route and service component specs reference security and observability standards', () => {
+  const observabilityRequired = new Set([
+    'sdkwork-router-notary-app-api',
+    'sdkwork-router-notary-backend-api',
+    'sdkwork-notary-case-service',
+  ]);
+
   for (const specPath of [
     'crates/sdkwork-router-notary-app-api/specs/component.spec.json',
     'crates/sdkwork-router-notary-backend-api/specs/component.spec.json',
     'crates/sdkwork-router-notary-http-auth/specs/component.spec.json',
     'crates/sdkwork-notary-case-service/specs/component.spec.json',
+    'crates/sdkwork-notary-case-contract/specs/component.spec.json',
+    'crates/sdkwork-notary-case-repository-sqlx/specs/component.spec.json',
+    'crates/sdkwork-notary-database-host/specs/component.spec.json',
+    'sdks/sdkwork-notary-app-sdk/specs/component.spec.json',
+    'sdks/sdkwork-notary-backend-sdk/specs/component.spec.json',
   ]) {
     const spec = readJson(specPath);
     const files = spec.canonicalSpecs.map((entry) => entry.file);
     assert.ok(files.includes('SECURITY_SPEC.md'), `${specPath} must cite SECURITY_SPEC.md`);
-    if (spec.component.name !== 'sdkwork-router-notary-http-auth') {
+    if (observabilityRequired.has(spec.component.name)) {
       assert.ok(
         files.includes('OBSERVABILITY_SPEC.md'),
         `${specPath} must cite OBSERVABILITY_SPEC.md`,
@@ -364,6 +385,13 @@ test('H5 AuthGate redirects unauthenticated production sessions to platform IAM 
   const authGate = read('apps/sdkwork-notary-h5/src/AuthGate.tsx');
   assert.match(authGate, /import\.meta\.env\.PROD/);
   assert.match(authGate, /\/auth\/login\?redirect=/);
+});
+
+test('PC AuthGate redirects unauthenticated production sessions to platform IAM login', () => {
+  const authGate = read('apps/sdkwork-notary-pc/src/AuthGate.tsx');
+  assert.match(authGate, /import\.meta\.env\.PROD/);
+  assert.match(authGate, /\/auth\/login\?redirect=/);
+  assert.match(authGate, /LoadingState/);
 });
 
 test('notary runtime enforces operation permission map and production membership guard', () => {

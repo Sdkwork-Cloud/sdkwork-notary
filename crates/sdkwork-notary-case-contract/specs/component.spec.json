@@ -33,6 +33,11 @@
       "file": "TEST_SPEC.md",
       "path": "../../../../sdkwork-specs/TEST_SPEC.md",
       "purpose": "Runtime and contract verification expectations."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../../../../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Runtime context, tenant isolation, and permission contract boundaries."
     }
   ],
   "contracts": {
