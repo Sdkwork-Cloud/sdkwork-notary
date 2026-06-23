@@ -85,6 +85,7 @@ fn runtime_context_from_route(context: NotaryRequestContext) -> NotaryRuntimeCon
         membership_id: context.membership_id,
         session_id: context.session_id,
         app_id: context.app_id,
+        permission_scopes: context.permission_scopes,
     }
 }
 

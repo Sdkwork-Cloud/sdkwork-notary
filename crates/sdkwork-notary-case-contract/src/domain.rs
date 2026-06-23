@@ -6,6 +6,7 @@ pub struct NotaryRuntimeContext {
     pub membership_id: Option<String>,
     pub session_id: String,
     pub app_id: String,
+    pub permission_scopes: Vec<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

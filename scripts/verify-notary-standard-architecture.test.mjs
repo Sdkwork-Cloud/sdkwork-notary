@@ -72,6 +72,11 @@ function exists(relativePath) {
   return existsSync(path.join(ROOT, relativePath));
 }
 
+test('declares sdkwork-notary-pc application root for host integrations', () => {
+  assert.equal(exists('apps/sdkwork-notary-pc/package.json'), true);
+  assert.equal(exists('apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-notary/package.json'), true);
+});
+
 test('declares SDKWork standard root directory dictionary', () => {
   for (const directory of STANDARD_ROOT_DIRECTORIES) {
     assert.equal(exists(directory), true, `${directory}/ should exist`);
@@ -303,6 +308,73 @@ test('route crate component specs reference canonical route manifest files', () 
     readJson('crates/sdkwork-router-notary-backend-api/specs/component.spec.json').contracts.routeManifest,
     '../../../sdks/_route-manifests/backend-api/sdkwork-router-notary-backend-api.route-manifest.json',
   );
+});
+
+test('declares IMF module manifest for notary permissions', () => {
+  assert.equal(exists('specs/iam.module.manifest.json'), true);
+  const manifest = readJson('specs/iam.module.manifest.json');
+  assert.equal(manifest.moduleId, 'notary');
+  assert.equal(manifest.owner, 'sdkwork-notary');
+  assert.ok(Array.isArray(manifest.permissions?.catalog));
+  assert.ok(manifest.permissions.catalog.length > 0);
+});
+
+test('declares IMF registry config with notary module enabled', () => {
+  assert.equal(exists('iam/registry/iam-registry.config.json'), true);
+  const registry = readJson('iam/registry/iam-registry.config.json');
+  assert.equal(registry.kind, 'sdkwork.iam.registry.config');
+  assert.ok(registry.enabledModules.includes('notary'));
+});
+
+test('production topology profiles document PII vault secret injection', () => {
+  for (const profile of [
+    'configs/topology/standalone.split-services.production.env',
+    'configs/topology/cloud.split-services.production.env',
+  ]) {
+    const env = read(profile);
+    assert.match(env, /NOTARY_PII_VAULT_KEY/);
+  }
+});
+
+test('database seed manifest wires bootstrap common seed', () => {
+  const seeds = readJson('database/seeds/seed.manifest.json');
+  assert.ok(seeds.profiles.standard.common.includes('001_bootstrap.sql'));
+});
+
+test('route and service component specs reference security and observability standards', () => {
+  for (const specPath of [
+    'crates/sdkwork-router-notary-app-api/specs/component.spec.json',
+    'crates/sdkwork-router-notary-backend-api/specs/component.spec.json',
+    'crates/sdkwork-router-notary-http-auth/specs/component.spec.json',
+    'crates/sdkwork-notary-case-service/specs/component.spec.json',
+  ]) {
+    const spec = readJson(specPath);
+    const files = spec.canonicalSpecs.map((entry) => entry.file);
+    assert.ok(files.includes('SECURITY_SPEC.md'), `${specPath} must cite SECURITY_SPEC.md`);
+    if (spec.component.name !== 'sdkwork-router-notary-http-auth') {
+      assert.ok(
+        files.includes('OBSERVABILITY_SPEC.md'),
+        `${specPath} must cite OBSERVABILITY_SPEC.md`,
+      );
+    }
+  }
+});
+
+test('H5 AuthGate redirects unauthenticated production sessions to platform IAM login', () => {
+  const authGate = read('apps/sdkwork-notary-h5/src/AuthGate.tsx');
+  assert.match(authGate, /import\.meta\.env\.PROD/);
+  assert.match(authGate, /\/auth\/login\?redirect=/);
+});
+
+test('notary runtime enforces operation permission map and production membership guard', () => {
+  const permissions = read('crates/sdkwork-notary-case-service/src/permissions.rs');
+  assert.match(permissions, /require_operation_permission/);
+  assert.match(permissions, /OPERATION_PERMISSIONS/);
+
+  const context = read('crates/sdkwork-router-notary-http-auth/src/context.rs');
+  assert.match(context, /allows_dev_synthetic_membership/);
+  assert.match(context, /permission_scopes/);
+  assert.match(context, /extract_permission_scopes/);
 });
 
 test('declares contract maintenance scripts and schema registry', () => {

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-pc-core",
+    "displayName": "SDKWork Notary PC Core",
+    "version": "0.1.0",
+    "type": "typescript-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-core",
+    "domain": "notary",
+    "capability": "core",
+    "surface": "pc",
+    "languages": ["typescript"],
+    "generated": false,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_PC_ARCHITECTURE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md",
+      "purpose": "PC core SDK wiring and bootstrap boundaries."
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "Generated app SDK client construction and TokenManager injection."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["@sdkwork/notary-pc-core"],
+    "runtimeEntrypoints": ["initNotaryPcAppSdkClient", "configureNotaryPcSdkPorts", "createNotaryAccessService"],
+    "sdkClients": ["@sdkwork/notary-app-sdk"],
+    "dependencyApiSurfaces": []
+  },
+  "verification": {
+    "commands": ["pnpm --dir apps/sdkwork-notary-pc typecheck", "pnpm test:desktop"]
+  }
+}

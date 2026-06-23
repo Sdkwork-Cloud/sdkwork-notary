@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-pc-shell",
+    "displayName": "SDKWork Notary PC Shell",
+    "version": "0.1.0",
+    "type": "typescript-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-shell",
+    "domain": "notary",
+    "capability": "shell",
+    "surface": "pc",
+    "languages": ["typescript"],
+    "generated": false,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_PC_ARCHITECTURE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md",
+      "purpose": "PC route assembly and layout shell."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["@sdkwork/notary-pc-shell"],
+    "runtimeEntrypoints": ["NotaryPcRoutes", "NOTARY_PC_HOME_PATH"],
+    "sdkClients": [],
+    "dependencyApiSurfaces": ["@sdkwork/notary-pc-notary"]
+  },
+  "verification": {
+    "commands": ["pnpm --dir apps/sdkwork-notary-pc typecheck", "pnpm test:desktop"]
+  }
+}

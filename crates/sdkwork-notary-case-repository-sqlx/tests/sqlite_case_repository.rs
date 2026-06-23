@@ -188,7 +188,7 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
     assert_eq!(assignment.status, "active");
 
     repository
-        .release_assignment(&assignment.assignment_id)
+        .release_assignment("case-1", &assignment.assignment_id)
         .await
         .unwrap();
 

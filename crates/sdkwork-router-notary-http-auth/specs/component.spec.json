@@ -24,6 +24,16 @@
       "file": "RUST_CODE_SPEC.md",
       "path": "../../../../sdkwork-specs/RUST_CODE_SPEC.md",
       "purpose": "Rust crate structure and verification rules."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../../../../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Request principal extraction, membership resolution, and fail-closed production guards."
+    },
+    {
+      "file": "IAM_SPEC.md",
+      "path": "../../../../sdkwork-specs/IAM_SPEC.md",
+      "purpose": "Permission scope propagation from web principal into notary runtime context."
     }
   ],
   "contracts": {

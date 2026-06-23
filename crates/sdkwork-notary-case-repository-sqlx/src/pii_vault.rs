@@ -13,8 +13,17 @@ pub struct PiiVault {
 
 impl PiiVault {
     pub fn for_tenant(tenant_id: &str) -> Result<Self, NotaryServiceError> {
-        let key_material = std::env::var("NOTARY_PII_VAULT_KEY")
-            .unwrap_or_else(|_| format!("sdkwork-notary-dev:{tenant_id}"));
+        let key_material = match std::env::var("NOTARY_PII_VAULT_KEY") {
+            Ok(value) if !value.is_empty() => value,
+            Ok(_) | Err(_) if allows_dev_pii_vault_key() => {
+                format!("sdkwork-notary-dev:{tenant_id}")
+            }
+            Ok(_) | Err(_) => {
+                return Err(NotaryServiceError::storage(
+                    "NOTARY_PII_VAULT_KEY is required outside development and test environments",
+                ));
+            }
+        };
         let mut key = [0u8; 32];
         let bytes = key_material.as_bytes();
         let len = bytes.len().min(32);
@@ -62,6 +71,21 @@ fn random_nonce() -> [u8; 12] {
     nonce
 }
 
+fn allows_dev_pii_vault_key() -> bool {
+    notary_runtime_environment_allows_dev_fallback()
+}
+
+fn notary_runtime_environment_allows_dev_fallback() -> bool {
+    matches!(
+        std::env::var("SDKWORK_NOTARY_ENVIRONMENT")
+            .or_else(|_| std::env::var("SDKWORK_ENVIRONMENT"))
+            .unwrap_or_else(|_| "development".to_owned())
+            .to_ascii_lowercase()
+            .as_str(),
+        "development" | "dev" | "test" | "local"
+    )
+}
+
 pub fn identity_fingerprint(value: &str) -> String {
     format!("notary-sha256:{}", sha256_hash(value.as_bytes()))
 }
@@ -77,6 +101,28 @@ mod tests {
         assert!(encrypted.starts_with("notary-vault:v1:"));
         let decrypted = vault.decrypt(&encrypted).expect("decrypt");
         assert_eq!(decrypted, "110101199001011234");
+    }
+
+    #[test]
+    fn pii_vault_requires_key_outside_dev_environments() {
+        let previous_env = std::env::var("SDKWORK_NOTARY_ENVIRONMENT").ok();
+        let previous_key = std::env::var("NOTARY_PII_VAULT_KEY").ok();
+        std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "production");
+        std::env::remove_var("NOTARY_PII_VAULT_KEY");
+
+        let error = PiiVault::for_tenant("tenant-1").expect_err("production vault");
+        assert!(error
+            .message()
+            .contains("NOTARY_PII_VAULT_KEY is required"));
+
+        if let Some(value) = previous_env {
+            std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", value);
+        } else {
+            std::env::remove_var("SDKWORK_NOTARY_ENVIRONMENT");
+        }
+        if let Some(value) = previous_key {
+            std::env::set_var("NOTARY_PII_VAULT_KEY", value);
+        }
     }
 
     #[test]

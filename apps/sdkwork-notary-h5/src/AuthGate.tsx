@@ -1,14 +1,27 @@
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 
+import { LoadingState } from '@sdkwork/notary-h5-commons';
+
+import { resolveEnvironment } from './bootstrap/environment';
 import { getTokenManager } from './bootstrap/tokenManager';
 
 export interface AuthGateProps {
   children: ReactNode;
 }
 
+function resolveLoginRedirectUrl(): string {
+  const gateway = import.meta.env.VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL;
+  const baseUrl = typeof gateway === 'string' && gateway.trim()
+    ? gateway.trim()
+    : resolveEnvironment().apiBaseUrl;
+  const returnUrl = encodeURIComponent(window.location.href);
+  return `${baseUrl.replace(/\/$/, '')}/auth/login?redirect=${returnUrl}`;
+}
+
 /**
  * Route guard for authenticated H5 sessions.
- * Appbase IAM H5 login routes mount here when @sdkwork/appbase H5 auth packages are wired.
+ * Production redirects to platform IAM login; appbase H5 login UI mounts here when available.
  */
 export function AuthGate({ children }: AuthGateProps) {
   const tokenManager = getTokenManager();
@@ -16,11 +29,16 @@ export function AuthGate({ children }: AuthGateProps) {
     tokenManager?.hasAccessToken?.() || tokenManager?.hasAuthToken?.(),
   );
 
+  useEffect(() => {
+    if (!hasSession && import.meta.env.PROD) {
+      window.location.replace(resolveLoginRedirectUrl());
+    }
+  }, [hasSession]);
+
   if (!hasSession && import.meta.env.PROD) {
     return (
       <main className="notary-h5-auth-gate">
-        <h1>SDKWork Notary</h1>
-        <p>Sign in to continue.</p>
+        <LoadingState label="Redirecting to sign in…" />
       </main>
     );
   }

@@ -472,7 +472,7 @@ async fn retrieving_case_rejects_cross_organization_access() {
 
 #[tokio::test]
 async fn accepting_case_rejects_invalid_status_transitions() {
-    let mut appbase = RecordingAppbase::default();
+    let mut appbase = appbase_with_notary_staff();
     let mut commerce = RecordingCommerce::default();
     let mut drive = RecordingDrive::default();
     let mut repository =
@@ -825,7 +825,7 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
     rejected_case.case_no = "NT-20260610-003".to_string();
     rejected_case.title = "Rejected evidence preservation".to_string();
 
-    let mut appbase = RecordingAppbase::default();
+    let mut appbase = appbase_with_notary_staff();
     let mut commerce = RecordingCommerce::default();
     let mut drive = RecordingDrive::default();
     let mut repository = RecordingNotaryCaseRepository::default()
@@ -856,7 +856,7 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
         statistics["monthlyPreservationTotal"]["blockchainSyncStatus"],
         "OK"
     );
-    assert_eq!(repository.events()[0], "list_cases:org-1::::500:");
+    assert_eq!(repository.events()[0], "list_cases:org-1::::100:");
 
     let report = handle_notary_app_operation(
         &runtime_context(),
@@ -881,12 +881,12 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
         report["downloadUrl"],
         "sdkwork://notary/reports/notary-monthly-2026-06-csv.csv"
     );
-    assert_eq!(repository.events()[1], "list_cases:org-1::::500:");
+    assert_eq!(repository.events()[1], "list_cases:org-1::::100:");
 }
 
 #[tokio::test]
 async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() {
-    let mut appbase = RecordingAppbase::default();
+    let mut appbase = appbase_with_notary_staff();
     let mut commerce = RecordingCommerce::default();
     let mut drive = RecordingDrive::default();
     let mut case = sample_case_record("case-1");
@@ -1370,7 +1370,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
     let mut profile_path = BTreeMap::new();
     profile_path.insert("organizationProfileId".to_string(), "org-1".to_string());
     let updated_profile = handle_notary_backend_operation(
-        &runtime_context(),
+        &admin_runtime_context(),
         "notary.organizationProfiles.update",
         profile_path,
         json!({"status": "suspended", "settings": {"reviewMode": "manual"}}),
@@ -1387,7 +1387,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
     assert_eq!(updated_profile["status"], "suspended");
 
     let created_matter = handle_notary_backend_operation(
-        &runtime_context(),
+        &admin_runtime_context(),
         "notary.matters.create",
         BTreeMap::new(),
         json!({
@@ -1444,7 +1444,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         "sku-electronic-evidence-preservation".to_string(),
     );
     let updated_matter = handle_notary_backend_operation(
-        &runtime_context(),
+        &admin_runtime_context(),
         "notary.matters.update",
         matter_path,
         json!({"title": "Updated evidence preservation", "status": "inactive"}),
@@ -1512,6 +1512,32 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
     );
 }
 
+#[tokio::test]
+async fn app_operation_dispatcher_rejects_missing_operation_permission() {
+    let mut context = runtime_context();
+    context.permission_scopes = vec!["notary.cases.read".to_string()];
+
+    let error = handle_notary_app_operation(
+        &context,
+        "notary.cases.create",
+        BTreeMap::new(),
+        serde_json::json!({
+            "organizationId": "org-1",
+            "matterSkuId": "sku-electronic-contract"
+        }),
+        &NotaryRuntimePorts {
+            appbase: &appbase_with_notary_staff(),
+            commerce: &RecordingCommerce::default(),
+            drive: &RecordingDrive::default(),
+            repository: &RecordingNotaryCaseRepository::default(),
+        },
+    )
+    .await
+    .expect_err("missing permission");
+
+    assert!(error.message().contains("missing permission: notary.cases.create"));
+}
+
 fn runtime_context() -> NotaryRuntimeContext {
     NotaryRuntimeContext {
         tenant_id: "tenant-1".to_string(),
@@ -1520,7 +1546,32 @@ fn runtime_context() -> NotaryRuntimeContext {
         membership_id: Some("member-notary-1".to_string()),
         session_id: "session-1".to_string(),
         app_id: "sdkwork-im-pc".to_string(),
+        permission_scopes: vec!["notary.*".to_string()],
     }
+}
+
+fn notary_staff_member() -> AppbaseOrganizationMember {
+    AppbaseOrganizationMember {
+        membership_id: "member-notary-1".to_string(),
+        user_id: "user-1".to_string(),
+        organization_id: "org-1".to_string(),
+        display_name: "Notary Staff".to_string(),
+        enterprise_verified: true,
+        notary_enabled: true,
+        roles: vec!["notary".to_string()],
+        positions: vec!["notary".to_string()],
+        departments: vec!["notary-office".to_string()],
+    }
+}
+
+fn appbase_with_notary_staff() -> RecordingAppbase {
+    RecordingAppbase::default().with_member(notary_staff_member())
+}
+
+fn admin_runtime_context() -> NotaryRuntimeContext {
+    let mut context = runtime_context();
+    context.membership_id = Some("member-owner".to_string());
+    context
 }
 
 fn sample_case_record(case_id: &str) -> NotaryCaseRecord {

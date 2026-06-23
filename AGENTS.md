@@ -13,14 +13,20 @@ Canonical SDKWORK specs path from this root:
 - `../sdkwork-specs/README.md`
 - `../sdkwork-specs/SOUL.md`
 - `../sdkwork-specs/AGENTS_SPEC.md`
+- `../sdkwork-specs/AGENTS_SPEC.md`
 - `../sdkwork-specs/CODE_STYLE_SPEC.md`
 - `../sdkwork-specs/NAMING_SPEC.md`
 
 Do not copy root standard text into this repository. If these relative paths do not resolve, stop and report the broken workspace layout.
 
-## Project Purpose
+## Application Identity
 
-`sdkwork-notary` is the contract-first notary domain library for SDKWork. It owns notary-specific persistence facts, OpenAPI authorities, TypeScript SDK families, and Rust runtime orchestration crates. Host applications wire route layers and dependency ports; this repository does not ship a standalone deployable server.
+- App key: `sdkwork-notary`
+- Manifest: `sdkwork.app.config.json`
+- Runtime family: `library` (contract-first domain library; host apps wire route layers)
+- Dev client surface: `apps/sdkwork-notary-h5`
+
+Read `sdkwork.app.config.json` when changing application identity, release metadata, runtime config, SDK wiring, or packaging behavior.
 
 ## Local Dictionary Structure
 
@@ -41,10 +47,16 @@ Do not copy root standard text into this repository. If these relative paths do 
 
 ## Spec Resolution Order
 
+Use dynamic progressive loading:
+
 1. Read this `AGENTS.md` and any nearer component-level `AGENTS.md`.
-2. Read `.sdkwork/README.md` when present.
-3. Read `../sdkwork-specs/README.md` and the task-specific root specs.
-4. Inspect implementation files only after the relevant dictionary entries are clear.
+2. Read `sdkwork.app.config.json` only when app behavior, runtime config, SDK wiring, release, or packaging is touched.
+3. Read local `specs/README.md` and `specs/component.spec.json` only when local contracts are relevant.
+4. Read `.sdkwork/README.md`, `.sdkwork/skills/`, and `.sdkwork/plugins/` only when local agent extensions are relevant.
+5. Read `../sdkwork-specs/README.md`, then only the task-specific root specs required by the current task.
+6. Inspect implementation files only after the relevant dictionary entries are clear.
+
+Language-specific specs are on-demand; do not eagerly load Rust, TypeScript, and frontend specs for unrelated work.
 
 ## Required Specs By Task Type
 
@@ -56,6 +68,7 @@ Do not copy root standard text into this repository. If these relative paths do 
 - pnpm script surfaces: `../sdkwork-specs/PNPM_SCRIPT_SPEC.md`.
 - API, SDK, database, runtime, security, and deployment changes must follow the task matrix in `../sdkwork-specs/README.md`.
 - GitHub packaging workflows: `../sdkwork-specs/GITHUB_WORKFLOW_SPEC.md`.
+- Security/auth changes: `../sdkwork-specs/IAM_SPEC.md`, `../sdkwork-specs/SECURITY_SPEC.md`, `../sdkwork-specs/IAM_MODULE_MANIFEST_SPEC.md`.
 
 ## Code Style Rules
 

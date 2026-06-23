@@ -1,0 +1,366 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.iam.module",
+  "moduleId": "notary",
+  "catalogVersion": "1.0.0",
+  "domain": "notary",
+  "owner": "sdkwork-notary",
+  "displayName": "SDKWork Notary Module",
+  "permissions": {
+    "catalog": [
+      {
+        "code": "notary.access.read",
+        "name": "Read notary access state",
+        "resource": "notary.access",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.matters.read",
+        "name": "Read notary matters",
+        "resource": "notary.matters",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.matters.management.read",
+        "name": "Read notary matter management catalog",
+        "resource": "notary.matters",
+        "action": "management.read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.matters.create",
+        "name": "Create notary matters",
+        "resource": "notary.matters",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.matters.update",
+        "name": "Update notary matters",
+        "resource": "notary.matters",
+        "action": "update",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.organization_profiles.read",
+        "name": "Read notary organization profiles",
+        "resource": "notary.organization_profiles",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.organization_profiles.create",
+        "name": "Open notary business for an organization",
+        "resource": "notary.organization_profiles",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.organization_profiles.update",
+        "name": "Update notary organization profiles",
+        "resource": "notary.organization_profiles",
+        "action": "update",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.read",
+        "name": "Read notary cases",
+        "resource": "notary.cases",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.management.read",
+        "name": "Read notary case management views",
+        "resource": "notary.cases",
+        "action": "management.read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.create",
+        "name": "Create notary cases",
+        "resource": "notary.cases",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.update",
+        "name": "Update notary cases",
+        "resource": "notary.cases",
+        "action": "update",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.accept",
+        "name": "Accept notary cases",
+        "resource": "notary.cases",
+        "action": "accept",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.reject",
+        "name": "Reject notary cases",
+        "resource": "notary.cases",
+        "action": "reject",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.complete",
+        "name": "Complete notary cases",
+        "resource": "notary.cases",
+        "action": "complete",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.assignments.create",
+        "name": "Assign notary staff to cases",
+        "resource": "notary.cases.assignments",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.cases.assignments.delete",
+        "name": "Release notary case assignments",
+        "resource": "notary.cases.assignments",
+        "action": "delete",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.parties.read",
+        "name": "Read notary case parties",
+        "resource": "notary.parties",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.parties.create",
+        "name": "Create notary case parties",
+        "resource": "notary.parties",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.parties.update",
+        "name": "Update notary case parties",
+        "resource": "notary.parties",
+        "action": "update",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.parties.delete",
+        "name": "Delete notary case parties",
+        "resource": "notary.parties",
+        "action": "delete",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.parties.signatures.create",
+        "name": "Attach party signatures",
+        "resource": "notary.parties.signatures",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.parties.video_invites.create",
+        "name": "Create party video invites",
+        "resource": "notary.parties.video_invites",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.parties.signature_invites.create",
+        "name": "Create party signature invites",
+        "resource": "notary.parties.signature_invites",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.files.read",
+        "name": "Read notary case files",
+        "resource": "notary.files",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.files.create",
+        "name": "Attach notary case files",
+        "resource": "notary.files",
+        "action": "create",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.files.download",
+        "name": "Download notary case files",
+        "resource": "notary.files",
+        "action": "download",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.events.read",
+        "name": "Read notary case events",
+        "resource": "notary.events",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.staff.read",
+        "name": "Read notary staff directory",
+        "resource": "notary.staff",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.dashboard.read",
+        "name": "Read notary dashboard statistics",
+        "resource": "notary.dashboard",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.reports.read",
+        "name": "Read notary reports",
+        "resource": "notary.reports",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      },
+      {
+        "code": "notary.reports.case_summary.read",
+        "name": "Read notary case summary reports",
+        "resource": "notary.reports.case_summary",
+        "action": "read",
+        "status": "active",
+        "since": "1.0.0",
+        "replacementCode": null
+      }
+    ],
+    "openapiAuthorities": [
+      "apis/app-api/notary/notary-app-api.openapi.json",
+      "apis/backend-api/notary/notary-backend-api.openapi.json"
+    ]
+  },
+  "roles": {
+    "domainStandardRoles": [
+      {
+        "code": "notary_staff",
+        "name": "Notary Staff",
+        "surface": "organization",
+        "scope": "organization",
+        "standard": true,
+        "assignable": true,
+        "bindingPrincipalKind": "organization_membership",
+        "permissionPatterns": [
+          "notary.access.read",
+          "notary.matters.read",
+          "notary.cases.read",
+          "notary.cases.create",
+          "notary.cases.update",
+          "notary.cases.accept",
+          "notary.cases.reject",
+          "notary.cases.complete",
+          "notary.cases.assignments.create",
+          "notary.parties.*",
+          "notary.files.*",
+          "notary.events.read",
+          "notary.staff.read",
+          "notary.dashboard.read",
+          "notary.reports.read"
+        ]
+      },
+      {
+        "code": "notary_admin",
+        "name": "Notary Administrator",
+        "surface": "organization",
+        "scope": "organization",
+        "standard": true,
+        "assignable": true,
+        "bindingPrincipalKind": "organization_membership",
+        "permissionPatterns": [
+          "notary.*"
+        ]
+      }
+    ],
+    "roleGrantExtensions": [],
+    "roleExclusions": []
+  },
+  "directory": {
+    "organizationTemplates": [],
+    "departmentTemplates": [],
+    "positionTemplates": [],
+    "membershipTemplates": []
+  },
+  "policyConditions": {
+    "supportedAttributes": []
+  },
+  "oauthScopeMappings": [],
+  "dependencies": {
+    "requiresModules": [
+      "iam-kernel",
+      "commerce",
+      "drive"
+    ]
+  }
+}

@@ -71,6 +71,7 @@ export function NotaryHomePage() {
   const [tasks, setTasks] = useState<NotaryH5TaskSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState<string | null>(null);
 
   useEffect(() => {
     let disposed = false;
@@ -78,7 +79,16 @@ export function NotaryHomePage() {
     async function load() {
       setLoading(true);
       setError(null);
+      setAccessDenied(null);
       try {
+        const access = await service.retrieveAccess();
+        if (!access.visible) {
+          if (!disposed) {
+            setAccessDenied(access.reason ?? 'Notary business is not enabled for this organization.');
+          }
+          return;
+        }
+
         const [nextStats, nextTasks] = await Promise.all([
           service.getDashboardStatistics(),
           service.listTasks(),
@@ -139,10 +149,13 @@ export function NotaryHomePage() {
       )}
     >
       {loading ? <LoadingState label="Syncing notary data…" /> : null}
+      {!loading && accessDenied ? (
+        <EmptyState title="Notary access unavailable" description={accessDenied} />
+      ) : null}
       {!loading && error ? (
         <EmptyState title="Unable to load workbench" description={error} />
       ) : null}
-      {!loading && !error && stats ? (
+      {!loading && !error && !accessDenied && stats ? (
         <>
           <section
             style={{

@@ -32,6 +32,9 @@ pub fn test_web_request_context() -> WebRequestContext {
             oauth_bearer_present: false,
         },
         locale: None,
+        client_kind: None,
+        operation: None,
+        trace_id: None,
     }
 }
 

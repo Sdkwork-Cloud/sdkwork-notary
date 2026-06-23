@@ -1,0 +1,4 @@
+# Reserved for local preview/server runtime when the H5 root owns a server surface.
+
+[runtime]
+profile = "development"

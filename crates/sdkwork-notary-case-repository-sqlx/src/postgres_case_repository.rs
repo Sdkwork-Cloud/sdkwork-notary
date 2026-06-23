@@ -756,20 +756,26 @@ impl PostgresNotaryCaseRepository {
         })
     }
 
-    pub async fn release_assignment(&self, assignment_id: &str) -> Result<(), NotaryServiceError> {
+    pub async fn release_assignment(
+        &self,
+        case_id: &str,
+        assignment_id: &str,
+    ) -> Result<(), NotaryServiceError> {
         let result = sqlx::query(
             r#"
             UPDATE notary_case_assignment
             SET
                 status = 'released',
-                released_at = $3,
-                updated_at = $3
+                released_at = $4,
+                updated_at = $4
             WHERE tenant_id = $1
-              AND id = $2
+              AND case_id = $2
+              AND id = $3
               AND status = 'active'
             "#,
         )
         .bind(&self.tenant_id)
+        .bind(case_id)
         .bind(assignment_id)
         .bind(now_iso8601())
         .execute(&self.pool)
@@ -788,7 +794,7 @@ impl PostgresNotaryCaseRepository {
         &self,
         query: NotaryCaseListQuery,
     ) -> Result<NotaryCaseListPage, NotaryServiceError> {
-        let page_size = query.page_size.max(1);
+        let page_size = query.page_size.max(1).min(100);
         let fetch_limit = page_size + 1;
         let search_pattern = query
             .search_term
@@ -898,7 +904,7 @@ impl PostgresNotaryCaseRepository {
         &self,
         query: NotaryCaseEventListQuery,
     ) -> Result<NotaryCaseEventListPage, NotaryServiceError> {
-        let page_size = query.page_size.max(1);
+        let page_size = query.page_size.max(1).min(100);
         let fetch_limit = page_size + 1;
         let rows = sqlx::query(
             r#"
@@ -1161,8 +1167,12 @@ impl NotaryCaseRepositoryPort for PostgresNotaryCaseRepository {
         PostgresNotaryCaseRepository::insert_assignment(self, command).await
     }
 
-    async fn release_assignment(&self, assignment_id: &str) -> Result<(), NotaryServiceError> {
-        PostgresNotaryCaseRepository::release_assignment(self, assignment_id).await
+    async fn release_assignment(
+        &self,
+        case_id: &str,
+        assignment_id: &str,
+    ) -> Result<(), NotaryServiceError> {
+        PostgresNotaryCaseRepository::release_assignment(self, case_id, assignment_id).await
     }
 
     async fn list_cases(

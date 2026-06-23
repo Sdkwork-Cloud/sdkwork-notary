@@ -48,6 +48,7 @@ function extractItems(value: unknown): Record<string, unknown>[] {
 }
 
 export interface NotaryH5Service {
+  retrieveAccess(): Promise<{ visible: boolean; reason?: string }>;
   getDashboardStatistics(): Promise<NotaryH5DashboardStats>;
   listTasks(filters?: { searchTerm?: string; status?: string; pageSize?: number }): Promise<NotaryH5TaskSummary[]>;
 }
@@ -56,6 +57,14 @@ export function createNotaryH5Service(): NotaryH5Service {
   const api = getNotaryH5ComposedApi();
 
   return {
+    async retrieveAccess() {
+      const response = asRecord(await api.getAccess());
+      return {
+        visible: response.visible === true,
+        reason: stringValue(response.reason) || undefined,
+      };
+    },
+
     async getDashboardStatistics() {
       const response = asRecord(await api.getDashboardStatistics());
       const pendingReviewQueue = asRecord(response.pendingReviewQueue);

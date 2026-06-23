@@ -166,7 +166,7 @@ test("workspace verification includes contract tests and Rust runtime tests", ()
   const packageManifest = readJson("package.json");
   assert.equal(
     packageManifest.scripts["test:contracts"],
-    "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs scripts/verify-notary-utils-standard.test.mjs apps/sdkwork-notary-h5/src/__tests__/*.test.mjs tests/contract/*.test.mjs",
+    "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs scripts/verify-notary-utils-standard.test.mjs apps/sdkwork-notary-h5/src/__tests__/*.test.mjs apps/sdkwork-notary-pc/src/__tests__/*.test.mjs tests/contract/*.test.mjs",
   );
   assert.equal(
     packageManifest.scripts["test:topology-baggage"],
@@ -191,7 +191,7 @@ test("workspace verification includes contract tests and Rust runtime tests", ()
 
   const readme = readText("README.md");
   assert(readme.includes("sdkwork-notary-case-service"));
-  assert(readme.includes("packages/sdkwork-im-pc-notary/src/services/NotaryService.ts"));
+  assert(readme.includes("packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts"));
   assert(readme.includes("pnpm verify"));
   assert(readme.includes("pnpm test:rust"));
   assert(readme.includes("pnpm api:materialize"));

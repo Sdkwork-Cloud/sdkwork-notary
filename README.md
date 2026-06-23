@@ -77,17 +77,19 @@ Route runtime services are implemented for both app and backend route crates, so
 
 ## Chat PC Integration
 
-The frontend notary package is integrated directly in the real SDKWork IM PC application root:
+The frontend notary capability package lives in this repository:
 
-- `../sdkwork-im/apps/sdkwork-im-pc`
-- `packages/sdkwork-im-pc-core/src/sdk/notaryAppSdkClient.ts`
-- `packages/sdkwork-im-pc-notary/src/services/NotaryService.ts`
+- `apps/sdkwork-notary-pc`
+- `packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts`
 
-The app root includes `@sdkwork/notary-app-sdk` as a workspace dependency and aliases it through `vite.config.ts` and `tsconfig.json` to `../sdkwork-notary/sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript`. The core bootstrap constructs the generated Notary App SDK client with the same app SDK base URL, request-context interceptors, and global TokenManager used by the other authenticated app SDK clients.
+SDKWork IM PC integrates the package directly:
 
-`sdkwork-im-pc-notary` uses a real service facade over the approved `createNotaryApi` composed facade. It maps generated Notary App SDK case models to the existing `NotaryTask`, `Party`, `NotaryDocument`, and timeline view models, keeps Drive references as task/document metadata, and contains no raw HTTP, manual auth headers, mock tasks, or local success branches.
+- `../sdkwork-im/apps/sdkwork-im-pc/packages/sdkwork-im-pc-core/src/sdk/notaryPcIntegration.ts`
+- `../sdkwork-im/apps/sdkwork-im-pc/src/bootstrap/notaryPc.ts`
 
-The obsolete `integrations/sdkwork-chat-pc/` fork was removed. The contract test `sdks/test/notary-chat-pc-real-app-integration.test.mjs` verifies the real IM PC app root wiring, notary UI service closure, notary access gating, and the absence of the deleted integration fork.
+The IM app root includes `@sdkwork/notary-app-sdk` and `@sdkwork/notary-pc-notary` as workspace dependencies. IM core constructs the generated Notary App SDK client with the shared TokenManager, while `sdkwork-notary-pc-notary` owns the UI and service facade over `createNotaryApi`.
+
+The obsolete `integrations/sdkwork-chat-pc/` fork and `sdkwork-im-pc-notary` package were removed. Contract tests `sdks/test/notary-chat-pc-real-app-integration.test.mjs` and `apps/sdkwork-notary-pc/src/__tests__/pc-architecture.contract.test.mjs` verify the notary-owned PC package, IM integration wiring, and absence of duplicate notary forks.
 
 ## Topology
 

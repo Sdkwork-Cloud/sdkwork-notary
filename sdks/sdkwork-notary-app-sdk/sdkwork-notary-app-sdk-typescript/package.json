@@ -35,11 +35,15 @@
   },
   "peerDependencies": {
     "@sdkwork/appbase-app-sdk": "workspace:*",
+    "@sdkwork/commerce-app-sdk": "workspace:*",
     "@sdkwork/drive-app-sdk": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@sdkwork/appbase-app-sdk": {
       "optional": false
+    },
+    "@sdkwork/commerce-app-sdk": {
+      "optional": true
     },
     "@sdkwork/drive-app-sdk": {
       "optional": false

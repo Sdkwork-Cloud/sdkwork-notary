@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(testDir, "..", "..");
-import { chatPcRoot, chatPcTest } from "./helpers/chat-pc-root.mjs";
+import { chatPcTest, notaryPcRoot } from "./helpers/chat-pc-root.mjs";
 
 function readText(relativePath) {
   return readFileSync(path.join(workspaceRoot, relativePath), "utf8");
@@ -237,7 +237,10 @@ test("app composed assignCase delegates to app notary assignment resource", asyn
 });
 
 chatPcTest("real chat-pc notary service consumes the composed workflow facade instead of raw resources", () => {
-  const source = readChatPcText("packages/sdkwork-im-pc-notary/src/services/NotaryService.ts");
+  const source = readFileSync(
+    path.join(notaryPcRoot, "packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts"),
+    "utf8",
+  );
 
   for (const method of [
     "notaryApi.acceptCase",

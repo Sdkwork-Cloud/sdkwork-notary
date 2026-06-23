@@ -34,6 +34,16 @@
       "file": "API_SPEC.md",
       "path": "../../../../sdkwork-specs/API_SPEC.md",
       "purpose": "App API prefix and route manifest contract."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../../../../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Protected request, tenant, token, and permission boundary rules."
+    },
+    {
+      "file": "OBSERVABILITY_SPEC.md",
+      "path": "../../../../sdkwork-specs/OBSERVABILITY_SPEC.md",
+      "purpose": "Structured logging and operational trace correlation for route dispatch."
     }
   ],
   "contracts": {

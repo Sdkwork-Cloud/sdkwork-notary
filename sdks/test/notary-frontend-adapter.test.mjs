@@ -2,18 +2,17 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { chatPcRoot, chatPcTest } from "./helpers/chat-pc-root.mjs";
+import { chatPcRoot, chatPcTest, notaryPcRoot, workspaceRoot } from "./helpers/chat-pc-root.mjs";
 
-const testDir = path.dirname(fileURLToPath(import.meta.url));
-const workspaceRoot = path.resolve(testDir, "..", "..");
-const notaryServicePath = "packages/sdkwork-im-pc-notary/src/services/NotaryService.ts";
+const notaryServicePath =
+  "packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts";
 
-function readChatPcText(relativePath) {
-  return readFileSync(path.join(chatPcRoot, relativePath), "utf8");
+function readNotaryPcText(relativePath) {
+  return readFileSync(path.join(notaryPcRoot, relativePath), "utf8");
 }
 
 function readNotaryServiceSource() {
-  return readChatPcText(notaryServicePath);
+  return readNotaryPcText(notaryServicePath);
 }
 
 function methodBody(source, methodName) {
@@ -62,9 +61,9 @@ chatPcTest("real chat-pc notary service preserves the existing UI service shape"
     "Party",
     "NotaryDocument",
     "createNotaryApi",
-    "getNotaryAppSdkClient",
-    "getDriveAppSdkClient",
-    "getAppbaseAppSdkClient",
+    "getConfiguredNotaryAppSdkClient",
+    "getConfiguredDriveAppSdkClient",
+    "getConfiguredAppbaseAppSdkClient",
     "driveSpaceType: 'notary'",
   ]) {
     assert(source.includes(token), `${notaryServicePath} must include ${token}`);

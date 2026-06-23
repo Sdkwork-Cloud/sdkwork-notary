@@ -1,0 +1,31 @@
+{
+  "name": "@sdkwork/notary-pc-shell",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sdkwork/notary-pc-notary": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-router-dom": "^7.0.0"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-notary",
+    "product": "sdkwork-notary",
+    "architecture": "pc",
+    "domain": "notary",
+    "capability": "shell",
+    "status": "ready"
+  }
+}

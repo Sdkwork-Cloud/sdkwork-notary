@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-notary-pc-notary",
+    "displayName": "SDKWork Notary PC Notary",
+    "version": "0.1.0",
+    "type": "typescript-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-notary",
+    "domain": "notary",
+    "capability": "notary",
+    "surface": "pc",
+    "languages": ["typescript"],
+    "generated": false,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_PC_REACT_UI_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_PC_REACT_UI_SPEC.md",
+      "purpose": "Notary PC screens and service boundaries."
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "Business services must consume composed app SDK APIs only."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["@sdkwork/notary-pc-notary"],
+    "runtimeEntrypoints": ["NotaryView", "createNotaryPcService", "configureNotaryPcRuntime"],
+    "sdkClients": ["@sdkwork/notary-pc-core"],
+    "dependencyApiSurfaces": ["@sdkwork/notary-pc-commons"]
+  },
+  "verification": {
+    "commands": ["pnpm --dir apps/sdkwork-notary-pc typecheck", "pnpm test:desktop"]
+  }
+}

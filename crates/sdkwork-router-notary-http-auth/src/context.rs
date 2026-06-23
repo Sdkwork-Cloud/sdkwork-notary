@@ -9,6 +9,7 @@ pub struct NotaryRequestContext {
     pub membership_id: Option<String>,
     pub session_id: String,
     pub app_id: String,
+    pub permission_scopes: Vec<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -45,7 +46,33 @@ pub fn notary_request_context_from_web(
             .map(str::to_owned)
             .unwrap_or_else(|| format!("{}:{}", principal.app_id(), principal.user_id())),
         app_id: principal.app_id().to_owned(),
+        permission_scopes: extract_permission_scopes(principal),
     })
+}
+
+fn extract_permission_scopes(principal: &sdkwork_web_core::WebRequestPrincipal) -> Vec<String> {
+    principal
+        .scopes
+        .permission_scope
+        .iter()
+        .filter(|scope| scope.starts_with("notary.") || scope.as_str() == "notary.*")
+        .cloned()
+        .collect()
+}
+
+fn notary_runtime_environment_allows_dev_fallback() -> bool {
+    matches!(
+        std::env::var("SDKWORK_NOTARY_ENVIRONMENT")
+            .or_else(|_| std::env::var("SDKWORK_ENVIRONMENT"))
+            .unwrap_or_else(|_| "development".to_owned())
+            .to_ascii_lowercase()
+            .as_str(),
+        "development" | "dev" | "test" | "local"
+    )
+}
+
+fn allows_dev_synthetic_membership() -> bool {
+    notary_runtime_environment_allows_dev_fallback()
 }
 
 fn resolve_membership_id(principal: &sdkwork_web_core::WebRequestPrincipal) -> Option<String> {
@@ -67,6 +94,7 @@ fn resolve_membership_id(principal: &sdkwork_web_core::WebRequestPrincipal) -> O
 
     principal
         .organization_id()
+        .filter(|_| allows_dev_synthetic_membership())
         .map(|organization_id| stable_local_membership_id(organization_id, principal.user_id()))
 }
 
@@ -165,6 +193,45 @@ mod tests {
             context.membership_id,
             Some("orgmem_org_1_user_1".to_owned()),
         );
+    }
+
+    #[test]
+    fn extracts_notary_permission_scopes_from_principal() {
+        let principal = WebRequestPrincipal::builder()
+            .tenant_id("tenant-1")
+            .user_id("user-1")
+            .app_id("app-1")
+            .permission_scope(vec![
+                "notary.cases.read".to_owned(),
+                "commerce.orders.read".to_owned(),
+            ])
+            .build();
+
+        assert_eq!(
+            extract_permission_scopes(&principal),
+            vec!["notary.cases.read".to_owned()]
+        );
+    }
+
+    #[test]
+    fn production_environment_blocks_synthetic_membership_without_explicit_scope() {
+        let previous = std::env::var("SDKWORK_NOTARY_ENVIRONMENT").ok();
+        std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "production");
+
+        let principal = WebRequestPrincipal::builder()
+            .tenant_id("tenant-1")
+            .organization_id(Some("org-1".to_owned()))
+            .user_id("user-1")
+            .app_id("app-1")
+            .build();
+
+        assert_eq!(resolve_membership_id(&principal), None);
+
+        if let Some(value) = previous {
+            std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", value);
+        } else {
+            std::env::remove_var("SDKWORK_NOTARY_ENVIRONMENT");
+        }
     }
 
     #[test]

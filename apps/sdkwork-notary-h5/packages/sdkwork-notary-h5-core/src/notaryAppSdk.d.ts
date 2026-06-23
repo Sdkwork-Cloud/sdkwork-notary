@@ -22,6 +22,7 @@ declare module '@sdkwork/notary-app-sdk' {
   export function createNotaryApi(options: CreateNotaryApiOptions): NotaryComposedApi;
 
   export interface NotaryComposedApi {
+    getAccess(): Promise<unknown>;
     getDashboardStatistics(): Promise<unknown>;
     listCases(input?: unknown): Promise<unknown>;
   }

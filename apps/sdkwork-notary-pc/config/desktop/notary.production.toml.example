@@ -1,0 +1,4 @@
+# Reserved for desktop/Tauri runtime when the PC root owns a desktop surface.
+
+[runtime]
+profile = "production"

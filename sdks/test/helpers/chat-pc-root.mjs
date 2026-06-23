@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 export const workspaceRoot = path.resolve(testDir, "..", "..", "..");
 
+export const notaryPcRoot = path.resolve(workspaceRoot, "apps", "sdkwork-notary-pc");
+
 const defaultImPcRoot = path.resolve(workspaceRoot, "..", "sdkwork-im", "apps", "sdkwork-im-pc");
 
 export const imPcRoot = process.env.SDKWORK_IM_PC_ROOT

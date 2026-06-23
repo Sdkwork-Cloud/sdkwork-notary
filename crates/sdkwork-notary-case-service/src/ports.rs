@@ -625,7 +625,11 @@ pub trait NotaryCaseRepositoryPort: Send + Sync {
         ))
     }
 
-    async fn release_assignment(&self, _assignment_id: &str) -> Result<(), NotaryServiceError> {
+    async fn release_assignment(
+        &self,
+        _case_id: &str,
+        _assignment_id: &str,
+    ) -> Result<(), NotaryServiceError> {
         Err(NotaryServiceError::provider_unavailable(
             "notary case assignment release is not configured",
         ))

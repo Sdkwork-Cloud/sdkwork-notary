@@ -58,6 +58,7 @@ fn request_context() -> NotaryRequestContext {
         membership_id: Some("member-notary-1".to_string()),
         session_id: "session-1".to_string(),
         app_id: "sdkwork-im-pc".to_string(),
+        permission_scopes: vec!["notary.*".to_string()],
     }
 }
 

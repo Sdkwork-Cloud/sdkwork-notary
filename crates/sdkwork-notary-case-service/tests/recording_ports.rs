@@ -682,17 +682,23 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
         Ok(assignment)
     }
 
-    async fn release_assignment(&self, assignment_id: &str) -> Result<(), NotaryServiceError> {
+    async fn release_assignment(
+        &self,
+        case_id: &str,
+        assignment_id: &str,
+    ) -> Result<(), NotaryServiceError> {
         let mut state = lock(&self.inner);
         let assignment = state
             .assignments
             .iter_mut()
-            .find(|assignment| assignment.assignment_id == assignment_id)
+            .find(|assignment| {
+                assignment.assignment_id == assignment_id && assignment.case_id == case_id
+            })
             .ok_or_else(|| NotaryServiceError::not_found("notary case assignment not found"))?;
         assignment.status = "released".to_string();
         state
             .events
-            .push(format!("release_assignment:{assignment_id}"));
+            .push(format!("release_assignment:{case_id}:{assignment_id}"));
         Ok(())
     }
 

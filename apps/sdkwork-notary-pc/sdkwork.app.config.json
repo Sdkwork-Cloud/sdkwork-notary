@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 3,
+  "kind": "sdkwork.app",
+  "app": {
+    "key": "sdkwork-notary-pc",
+    "name": "SDKWork Notary PC",
+    "displayName": "SDKWork Notary PC",
+    "description": "Large-screen PC browser client for SDKWork Notary.",
+    "vendor": "SDKWork",
+    "officialWebsiteUrl": "https://sdkwork.com/apps/sdkwork-notary",
+    "supportUrl": "https://sdkwork.com/support",
+    "privacyPolicyUrl": "https://sdkwork.com/privacy",
+    "termsOfServiceUrl": "https://sdkwork.com/terms",
+    "iconUrl": "https://cdn.sdkwork.com/apps/sdkwork-notary/assets/icon-1024.png",
+    "appType": "APP_REACT",
+    "versionSource": "package.json",
+    "identifiers": {
+      "packageName": "com.sdkwork.notary.pc",
+      "bundleId": "com.sdkwork.notary.pc",
+      "desktopAppId": null,
+      "containerImage": null
+    }
+  },
+  "runtime": {
+    "family": "pc",
+    "framework": "react-pc",
+    "runtimes": [
+      "BROWSER"
+    ],
+    "deliveryModes": [
+      "browser"
+    ]
+  },
+  "devApp": {
+    "build": {
+      "targets": [
+        "browser"
+      ]
+    },
+    "sourceRoot": "apps/sdkwork-notary-pc"
+  }
+}
