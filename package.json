@@ -27,7 +27,7 @@
     "test:topology-baggage": "node --test scripts/dev/sdkwork-notary-topology-baggage.test.mjs",
     "test:topology-validate": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs validate --root . --spec specs/topology.spec.json",
     "topology:validate": "pnpm test:topology-validate",
-    "topology:plan": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs print-matrix --root . --spec specs/topology.spec.json",
+    "topology:plan": "node ../sdkwork-app-topology/scripts/sdkwork-topology.mjs plan --root . --spec specs/topology.spec.json",
     "test:rust": "cargo test --workspace --target-dir target-codex-test",
     "api:materialize": "node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs && node scripts/generate-notary-route-manifests.mjs",
     "api:materialize:check": "node --test sdks/test/notary-web-framework.test.mjs",
@@ -49,6 +49,8 @@
     "db:drift:check": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . drift-check",
     "db:bootstrap": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . bootstrap",
     "format:check": "cargo fmt -p sdkwork-notary-case-contract -p sdkwork-notary-case-service -p sdkwork-notary-case-repository-sqlx -p sdkwork-notary-database-host -p sdkwork-router-notary-http-auth -p sdkwork-router-notary-app-api -p sdkwork-router-notary-backend-api -- --check",
-    "test:contract:database": "node ../sdkwork-specs/tools/check-database-framework-standard.mjs --root ."
+    "test:contract:database": "node ../sdkwork-specs/tools/check-database-framework-standard.mjs --root .",
+    "gateway:package:cloud": "node ../sdkwork-app-topology/scripts/gateway-cloud-bundle.mjs bundle --root .",
+    "gateway:validate:cloud": "node ../sdkwork-app-topology/scripts/gateway-cloud-bundle.mjs validate --root ."
   }
 }

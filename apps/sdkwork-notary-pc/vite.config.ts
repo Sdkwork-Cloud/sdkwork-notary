@@ -4,6 +4,22 @@ import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 
 const pcRoot = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(pcRoot, '../..');
+const workspaceRoot = path.resolve(repoRoot, '..');
+const appbaseRoot = path.resolve(workspaceRoot, 'sdkwork-appbase');
+const uiRoot = path.resolve(workspaceRoot, 'sdkwork-ui');
+const coreRoot = path.resolve(workspaceRoot, 'sdkwork-core');
+const sdkCommonRoot = path.resolve(workspaceRoot, 'sdkwork-sdk-commons/sdkwork-sdk-common-typescript/src');
+const utilsRoot = path.resolve(workspaceRoot, 'sdkwork-utils/packages/sdkwork-utils-typescript/src');
+
+const generatedDriveAppSdkEntry = path.resolve(
+  workspaceRoot,
+  'sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript/src/index.ts',
+);
+const generatedAppbaseAppSdkEntry = path.resolve(
+  appbaseRoot,
+  'sdks/sdkwork-appbase-app-sdk/sdkwork-appbase-app-sdk-typescript/generated/server-openapi/src/index.ts',
+);
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, pcRoot, '');
@@ -14,19 +30,79 @@ export default defineConfig(({ mode }) => {
       'process.env.SDKWORK_ACCESS_TOKEN': JSON.stringify(env.SDKWORK_ACCESS_TOKEN ?? ''),
     },
     resolve: {
-      alias: {
-        '@sdkwork/notary-pc-core': path.resolve(pcRoot, 'packages/sdkwork-notary-pc-core/src/index.ts'),
-        '@sdkwork/notary-pc-commons': path.resolve(pcRoot, 'packages/sdkwork-notary-pc-commons/src/index.ts'),
-        '@sdkwork/notary-pc-shell': path.resolve(pcRoot, 'packages/sdkwork-notary-pc-shell/src/index.ts'),
-        '@sdkwork/notary-pc-notary': path.resolve(pcRoot, 'packages/sdkwork-notary-pc-notary/src/index.ts'),
-        '@sdkwork/notary-app-sdk': path.resolve(
-          pcRoot,
-          '../../sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/src/index.ts',
-        ),
-      },
+      alias: [
+        { find: '@sdkwork/utils/string', replacement: path.resolve(utilsRoot, 'string.ts') },
+        { find: '@sdkwork/utils', replacement: path.resolve(utilsRoot, 'index.ts') },
+        { find: '@sdkwork/notary-pc-core', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-core/src/index.ts') },
+        { find: '@sdkwork/notary-pc-commons', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-commons/src/index.ts') },
+        { find: '@sdkwork/notary-pc-shell', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-shell/src/index.ts') },
+        { find: '@sdkwork/notary-pc-notary', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-notary/src/index.ts') },
+        {
+          find: '@sdkwork/notary-app-sdk',
+          replacement: path.resolve(
+            repoRoot,
+            'sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/src/index.ts',
+          ),
+        },
+        { find: '@sdkwork/drive-app-sdk', replacement: generatedDriveAppSdkEntry },
+        { find: '@sdkwork/appbase-app-sdk', replacement: generatedAppbaseAppSdkEntry },
+        { find: '@sdkwork/auth-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/iam/sdkwork-auth-pc-react/src/index.ts') },
+        { find: '@sdkwork/auth-runtime-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/iam/sdkwork-auth-runtime-pc-react/src/index.ts') },
+        { find: '@sdkwork/iam-runtime', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-runtime/src/index.ts') },
+        { find: '@sdkwork/iam-contracts', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-contracts/src/index.ts') },
+        { find: '@sdkwork/iam-sdk-ports', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-sdk-ports/src/index.ts') },
+        { find: '@sdkwork/iam-sdk-adapter', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-sdk-adapter/src/index.ts') },
+        { find: '@sdkwork/appbase-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/foundation/sdkwork-appbase-pc-react/src/index.ts') },
+        { find: '@sdkwork/i18n-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/foundation/sdkwork-i18n-pc-react/src/index.ts') },
+        { find: '@sdkwork/core-pc-react', replacement: path.resolve(coreRoot, 'sdkwork-core-pc-react/src') },
+        { find: '@sdkwork/ui-pc-react', replacement: path.resolve(uiRoot, 'sdkwork-ui-pc-react/src/index.ts') },
+        { find: '@sdkwork/sdk-common', replacement: path.resolve(sdkCommonRoot, 'index.ts') },
+      ],
     },
     optimizeDeps: {
-      exclude: ['@sdkwork/notary-app-sdk'],
+      exclude: [
+        '@sdkwork/notary-app-sdk',
+        '@sdkwork/drive-app-sdk',
+        '@sdkwork/appbase-app-sdk',
+        '@sdkwork/auth-pc-react',
+        '@sdkwork/auth-runtime-pc-react',
+        '@sdkwork/iam-runtime',
+        '@sdkwork/iam-contracts',
+        '@sdkwork/iam-sdk-ports',
+        '@sdkwork/iam-sdk-adapter',
+        '@sdkwork/appbase-pc-react',
+        '@sdkwork/i18n-pc-react',
+        '@sdkwork/core-pc-react',
+        '@sdkwork/ui-pc-react',
+        '@sdkwork/sdk-common',
+      ],
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (
+              id.includes('node_modules/react/')
+              || id.includes('node_modules/react-dom/')
+              || id.includes('node_modules/react-router')
+            ) {
+              return 'react-vendor';
+            }
+
+            if (
+              id.includes('node_modules/motion/')
+              || id.includes('node_modules/i18next/')
+              || id.includes('node_modules/react-i18next/')
+            ) {
+              return 'i18n-motion-vendor';
+            }
+
+            if (id.includes('/sdkwork-auth-pc-react/') || id.includes('/sdkwork-iam-runtime/')) {
+              return 'auth-vendor';
+            }
+          },
+        },
+      },
     },
     server: {
       port: 5285,

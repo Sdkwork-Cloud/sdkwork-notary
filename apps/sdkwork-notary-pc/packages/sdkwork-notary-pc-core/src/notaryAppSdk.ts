@@ -1,10 +1,15 @@
 import {
   createNotaryApi,
   createNotaryAppClient,
+  type AppbaseAppSdkPort,
   type CreateNotaryApiOptions,
+  type DriveAppSdkPort,
   type SdkworkAppConfig,
   type SdkworkNotaryAppClient,
 } from '@sdkwork/notary-app-sdk';
+
+import { getNotaryPcAppbaseAppSdkClient, resetNotaryPcAppbaseAppSdkClient } from './appbaseAppSdk';
+import { getNotaryPcDriveAppSdkClient, resetNotaryPcDriveAppSdkClient } from './driveAppSdk';
 
 let notaryAppSdkClient: SdkworkNotaryAppClient | null = null;
 let notaryComposedApi: ReturnType<typeof createNotaryApi> | null = null;
@@ -25,14 +30,25 @@ export function getNotaryPcAppSdkClient(): SdkworkNotaryAppClient {
   return notaryAppSdkClient;
 }
 
+function resolveComposedDependencyClients(
+  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'>>,
+): Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'> {
+  return {
+    drive: (options.drive ?? getNotaryPcDriveAppSdkClient()) as DriveAppSdkPort,
+    commerce: options.commerce,
+    appbase: (options.appbase ?? getNotaryPcAppbaseAppSdkClient()) as AppbaseAppSdkPort,
+  };
+}
+
 export function createNotaryPcComposedApi(
   options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'>> = {},
 ) {
+  const dependencies = resolveComposedDependencyClients(options);
   return createNotaryApi({
     notary: getNotaryPcAppSdkClient().notary,
-    drive: options.drive ?? {},
-    commerce: options.commerce,
-    appbase: options.appbase ?? {},
+    drive: dependencies.drive,
+    commerce: dependencies.commerce,
+    appbase: dependencies.appbase,
   });
 }
 
@@ -53,4 +69,6 @@ export function bootstrapNotaryPcSdkClients() {
 export function resetNotaryPcSdkClients(): void {
   notaryAppSdkClient = null;
   notaryComposedApi = null;
+  resetNotaryPcDriveAppSdkClient();
+  resetNotaryPcAppbaseAppSdkClient();
 }

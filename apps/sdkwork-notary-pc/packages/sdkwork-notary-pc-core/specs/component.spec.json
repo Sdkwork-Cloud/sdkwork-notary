@@ -24,12 +24,27 @@
       "file": "APP_SDK_INTEGRATION_SPEC.md",
       "path": "../../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
       "purpose": "Generated app SDK client construction and TokenManager injection."
+    },
+    {
+      "file": "IAM_LOGIN_INTEGRATION_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/IAM_LOGIN_INTEGRATION_SPEC.md",
+      "purpose": "Appbase IAM runtime factory and session bridge."
     }
   ],
   "contracts": {
     "publicExports": ["@sdkwork/notary-pc-core"],
-    "runtimeEntrypoints": ["initNotaryPcAppSdkClient", "configureNotaryPcSdkPorts", "createNotaryAccessService"],
-    "sdkClients": ["@sdkwork/notary-app-sdk"],
+    "runtimeEntrypoints": [
+      "initNotaryPcAppSdkClient",
+      "configureNotaryPcSdkPorts",
+      "createNotaryAccessService",
+      "getNotaryPcIamRuntime",
+      "notaryPcAuthService"
+    ],
+    "sdkClients": [
+      "@sdkwork/notary-app-sdk",
+      "@sdkwork/drive-app-sdk",
+      "@sdkwork/appbase-app-sdk"
+    ],
     "dependencyApiSurfaces": []
   },
   "verification": {

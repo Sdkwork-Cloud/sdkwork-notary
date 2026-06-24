@@ -45,6 +45,12 @@ Read `sdkwork.app.config.json` when changing application identity, release metad
 - `sdkwork.workflow.json`: release and packaging workflow for domain library verification.
 - `package.json` / `Cargo.toml`: workspace manifests.
 
+## Documentation Canon
+
+- [docs/README.md](docs/README.md)
+- [docs/product/prd/PRD.md](docs/product/prd/PRD.md)
+- [docs/architecture/tech/TECH_ARCHITECTURE.md](docs/architecture/tech/TECH_ARCHITECTURE.md)
+
 ## Spec Resolution Order
 
 Use dynamic progressive loading:

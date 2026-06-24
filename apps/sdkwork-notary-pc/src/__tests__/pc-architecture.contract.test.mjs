@@ -34,6 +34,7 @@ const REQUIRED_LAYOUT_PATHS = [
   'config/browser/runtime-env.test.example.json',
   'config/browser/runtime-env.staging.example.json',
   'config/browser/runtime-env.production.example.json',
+  '.env.example',
   'config/desktop/notary.development.toml.example',
   'config/desktop/notary.test.toml.example',
   'config/desktop/notary.staging.toml.example',
@@ -64,6 +65,10 @@ const REQUIRED_LAYOUT_PATHS = [
   'src/bootstrap/sdkClients.ts',
   'src/bootstrap/iamRuntime.ts',
   'src/bootstrap/routes.ts',
+  'packages/sdkwork-notary-pc-core/src/appAuthRuntime.ts',
+  'packages/sdkwork-notary-pc-core/src/appAuthService.ts',
+  'packages/sdkwork-notary-pc-core/src/session.ts',
+  'packages/sdkwork-notary-pc-core/src/sdkSessionLifecycle.ts',
   'packages/sdkwork-notary-pc-core/package.json',
   'packages/sdkwork-notary-pc-commons/package.json',
   'packages/sdkwork-notary-pc-shell/package.json',
@@ -101,7 +106,15 @@ test('notary pc root keeps thin bootstrap and host-port based notary package', (
   const runtime = read('src/bootstrap/runtime.ts');
   const sdkClients = read('src/bootstrap/sdkClients.ts');
   const environment = read('src/bootstrap/environment.ts');
+  const iamRuntime = read('src/bootstrap/iamRuntime.ts');
+  const authGate = read('src/AuthGate.tsx');
+  const session = read('packages/sdkwork-notary-pc-core/src/session.ts');
+  const sdkSessionLifecycle = read('packages/sdkwork-notary-pc-core/src/sdkSessionLifecycle.ts');
+  const appAuthRuntime = read('packages/sdkwork-notary-pc-core/src/appAuthRuntime.ts');
+  const appAuthService = read('packages/sdkwork-notary-pc-core/src/appAuthService.ts');
+  const viteConfig = read('vite.config.ts');
   const notaryService = read('packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts');
+  const notaryRoutes = read('packages/sdkwork-notary-pc-shell/src/notaryRoutes.tsx');
   const notaryI18n = read('packages/sdkwork-notary-pc-notary/src/i18n/index.ts');
   const host = read('packages/sdkwork-notary-pc-commons/src/host/notaryPcHost.ts');
   const core = read('packages/sdkwork-notary-pc-core/src/index.ts');
@@ -109,10 +122,39 @@ test('notary pc root keeps thin bootstrap and host-port based notary package', (
   assert(app.includes('AuthGate'));
   assert(app.includes('bootstrap()'));
   assert(runtime.includes('bootstrapSdkClients'));
+  assert(runtime.includes('finalizeIamRuntime'));
   assert(sdkClients.includes('configureNotaryPcRuntime'));
-  assert(sdkClients.includes('createDefaultBrowserHostAdapter'));
+  assert(sdkClients.includes('initNotaryPcDriveAppSdkClient'));
+  assert(sdkClients.includes('initNotaryPcAppbaseAppSdkClient'));
+  assert(sdkClients.includes('getNotaryPcDriveAppSdkClient'));
+  assert(sdkClients.includes('getNotaryPcAppbaseAppSdkClient'));
+  assert(sdkClients.includes('registerNotaryPcSdkClientRefresh'));
+  assert(!sdkClients.includes('getDriveClient: () => ({})'));
+  assert(iamRuntime.includes('createNotaryPcTokenManager'));
+  assert(iamRuntime.includes('registerNotaryPcServiceReset'));
+  assert(session.includes('SDKWORK_ACCESS_TOKEN'));
+  assert(session.includes('createSdkworkAppbasePcAuthRuntime') === false);
+  assert(sdkSessionLifecycle.includes('refreshAuthenticatedNotaryPcSdkClients'));
+  assert(sdkSessionLifecycle.includes('enableNotaryPcSessionLifecycle'));
+  assert(appAuthRuntime.includes('createSdkworkAppbasePcAuthRuntime'));
+  assert(appAuthRuntime.includes('getNotaryPcIamRuntime'));
+  assert(appAuthService.includes('notaryPcAuthService'));
+  assert(appAuthService.includes('sessions.current.retrieve'));
+  assert(authGate.includes('SdkworkIamAuthRoutes'));
+  assert(authGate.includes('getNotaryPcIamRuntime'));
+  assert(authGate.includes("AUTH_BASE_PATH = '/auth'"));
+  assert(authGate.includes('/login?'));
+  assert(authGate.includes('notaryPcAuthService.getCurrentSession'));
+  assert(viteConfig.includes('@sdkwork/drive-app-sdk'));
+  assert(viteConfig.includes('@sdkwork/appbase-app-sdk'));
+  assert(viteConfig.includes('@sdkwork/auth-runtime-pc-react'));
+  assert(notaryRoutes.includes('lazy('));
+  assert(notaryRoutes.includes("import('@sdkwork/notary-pc-notary')"));
+  assert(notaryRoutes.includes('Suspense'));
+  assert(notaryRoutes.includes('LoadingState'));
   assert(environment.includes('resolveEnvironment'));
   assert(core.includes('configureNotaryPcSdkPorts'));
+  assert(core.includes('getNotaryPcIamRuntime'));
   assert(host.includes('configureNotaryPcHost'));
   assert(notaryService.includes('createNotaryPcService'));
   assert(notaryService.includes('getConfiguredNotaryAppSdkClient'));

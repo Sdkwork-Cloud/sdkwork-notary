@@ -30,7 +30,7 @@ pnpm dev:browser
 | --- | --- | --- |
 | `application.public-ingress` | application | Notary App SDK (`/app/v3/api/notary`) |
 | `application.backend-http` | application | Notary Backend SDK (`/backend/v3/api/notary`) |
-| `platform.api-gateway` | platform | Appbase, Commerce, Drive SDKs via `sdkwork-api-gateway` |
+| `platform.api-gateway` | platform | Appbase, Commerce, Drive SDKs via `sdkwork-api-cloud-gateway` |
 
 `sdkwork-notary` is a domain library. It declares topology authority and profile env, but host applications wire `sdkwork-router-notary-app-api` and `sdkwork-router-notary-backend-api` into their own HTTP servers.
 

@@ -387,11 +387,14 @@ test('H5 AuthGate redirects unauthenticated production sessions to platform IAM 
   assert.match(authGate, /\/auth\/login\?redirect=/);
 });
 
-test('PC AuthGate redirects unauthenticated production sessions to platform IAM login', () => {
+test('PC AuthGate mounts sdkwork-appbase IAM login routes for unauthenticated sessions', () => {
   const authGate = read('apps/sdkwork-notary-pc/src/AuthGate.tsx');
-  assert.match(authGate, /import\.meta\.env\.PROD/);
-  assert.match(authGate, /\/auth\/login\?redirect=/);
-  assert.match(authGate, /LoadingState/);
+  assert.match(authGate, /SdkworkIamAuthRoutes/u);
+  assert.match(authGate, /getNotaryPcIamRuntime/u);
+  assert.match(authGate, /AUTH_BASE_PATH = '\/auth'/u);
+  assert.match(authGate, /\/login\?/u);
+  assert.match(authGate, /LoadingState/u);
+  assert.match(authGate, /notaryPcAuthService\.getCurrentSession/u);
 });
 
 test('notary runtime enforces operation permission map and production membership guard', () => {

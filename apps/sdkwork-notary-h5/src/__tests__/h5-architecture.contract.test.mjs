@@ -117,7 +117,8 @@ test('notary h5 root keeps a thin bootstrap shell and SDK-backed notary package'
   assert(environment.includes('VITE_SDKWORK_NOTARY_APPLICATION_PUBLIC_HTTP_URL'));
   assert(tokenManager.includes('createTokenManager'));
   assert(tokenManager.includes('@sdkwork/sdk-common'));
-  assert(core.includes('createNotaryApi'));
+  assert(core.includes('createNotaryH5ComposedApi'));
+  assert(core.includes('getNotaryH5ComposedApi'));
   assert(notaryService.includes('getNotaryH5ComposedApi'));
   assert(notaryService.includes('@sdkwork/utils/string'));
   assert(notaryService.includes('getDashboardStatistics'));

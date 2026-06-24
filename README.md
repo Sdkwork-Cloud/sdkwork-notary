@@ -91,6 +91,14 @@ The IM app root includes `@sdkwork/notary-app-sdk` and `@sdkwork/notary-pc-notar
 
 The obsolete `integrations/sdkwork-chat-pc/` fork and `sdkwork-im-pc-notary` package were removed. Contract tests `sdks/test/notary-chat-pc-real-app-integration.test.mjs` and `apps/sdkwork-notary-pc/src/__tests__/pc-architecture.contract.test.mjs` verify the notary-owned PC package, IM integration wiring, and absence of duplicate notary forks.
 
+Standalone PC client commands from the repository root:
+
+```powershell
+pnpm dev:desktop
+pnpm test:desktop
+pnpm build:desktop
+```
+
 ## Topology
 
 Runtime topology follows SDKWork v2 (`application-http-gateway`):
@@ -124,3 +132,10 @@ pnpm test:contracts
 pnpm format:check
 pnpm test:rust
 ```
+
+## Documentation Canon
+
+- [docs/README.md](docs/README.md)
+- [docs/product/prd/PRD.md](docs/product/prd/PRD.md)
+- [docs/architecture/tech/TECH_ARCHITECTURE.md](docs/architecture/tech/TECH_ARCHITECTURE.md)
+

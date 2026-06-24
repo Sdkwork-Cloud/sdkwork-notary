@@ -19,7 +19,12 @@
       "@sdkwork/notary-pc-commons": ["./packages/sdkwork-notary-pc-commons/src/index.ts"],
       "@sdkwork/notary-pc-shell": ["./packages/sdkwork-notary-pc-shell/src/index.ts"],
       "@sdkwork/notary-pc-notary": ["./packages/sdkwork-notary-pc-notary/src/index.ts"],
-      "@sdkwork/notary-app-sdk": ["./packages/sdkwork-notary-pc-core/src/notaryAppSdk.d.ts"]
+      "@sdkwork/notary-app-sdk": ["./packages/sdkwork-notary-pc-core/src/notaryAppSdk.d.ts"],
+      "@sdkwork/drive-app-sdk": ["./packages/sdkwork-notary-pc-core/src/dependencyAppSdk.d.ts"],
+      "@sdkwork/appbase-app-sdk": ["./packages/sdkwork-notary-pc-core/src/dependencyAppSdk.d.ts"],
+      "@sdkwork/auth-pc-react": ["./packages/sdkwork-notary-pc-core/src/iamAppbase.d.ts"],
+      "@sdkwork/auth-runtime-pc-react": ["./packages/sdkwork-notary-pc-core/src/iamAppbase.d.ts"],
+      "@sdkwork/iam-contracts": ["./packages/sdkwork-notary-pc-core/src/iamAppbase.d.ts"]
     }
   },
   "include": ["src", "packages"]

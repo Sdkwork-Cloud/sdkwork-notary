@@ -4,10 +4,21 @@ import {
   type AuthTokens,
 } from '@sdkwork/sdk-common';
 
+import {
+  refreshAuthenticatedNotaryH5SdkClients,
+  resetAuthenticatedNotaryH5SdkClients,
+} from '@sdkwork/notary-h5-core';
+
 const ACCESS_TOKEN_KEY = 'sdkwork.accessToken';
 const AUTH_TOKEN_KEY = 'sdkwork.authToken';
 
 let tokenManager: AuthTokenManager | null = null;
+
+function readDevBootstrapAccessToken(): string | undefined {
+  const nodeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+  const value = (nodeProcess?.env?.SDKWORK_ACCESS_TOKEN ?? '').trim();
+  return value.length > 0 ? value : undefined;
+}
 
 function readPersistedTokens(): AuthTokens | undefined {
   if (typeof window === 'undefined') {
@@ -22,6 +33,15 @@ function readPersistedTokens(): AuthTokens | undefined {
   }
 
   return { accessToken, authToken };
+}
+
+function readInitialTokens(): AuthTokens | undefined {
+  const devAccessToken = readDevBootstrapAccessToken();
+  if (devAccessToken) {
+    return { accessToken: devAccessToken };
+  }
+
+  return readPersistedTokens();
 }
 
 function persistTokens(tokens: AuthTokens): void {
@@ -52,9 +72,15 @@ function clearPersistedTokens(): void {
 }
 
 export function createNotaryH5TokenManager(): AuthTokenManager {
-  return createTokenManager(readPersistedTokens(), {
-    onTokenSet: persistTokens,
-    onTokenCleared: clearPersistedTokens,
+  return createTokenManager(readInitialTokens(), {
+    onTokenSet: (tokens: AuthTokens) => {
+      persistTokens(tokens);
+      refreshAuthenticatedNotaryH5SdkClients();
+    },
+    onTokenCleared: () => {
+      clearPersistedTokens();
+      resetAuthenticatedNotaryH5SdkClients();
+    },
   });
 }
 
