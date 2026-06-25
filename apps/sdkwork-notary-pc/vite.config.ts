@@ -7,6 +7,7 @@ const pcRoot = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(pcRoot, '../..');
 const workspaceRoot = path.resolve(repoRoot, '..');
 const appbaseRoot = path.resolve(workspaceRoot, 'sdkwork-appbase');
+const iamRoot = path.resolve(workspaceRoot, 'sdkwork-iam');
 const uiRoot = path.resolve(workspaceRoot, 'sdkwork-ui');
 const coreRoot = path.resolve(workspaceRoot, 'sdkwork-core');
 const sdkCommonRoot = path.resolve(workspaceRoot, 'sdkwork-sdk-commons/sdkwork-sdk-common-typescript/src');
@@ -17,8 +18,8 @@ const generatedDriveAppSdkEntry = path.resolve(
   'sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript/src/index.ts',
 );
 const generatedAppbaseAppSdkEntry = path.resolve(
-  appbaseRoot,
-  'sdks/sdkwork-appbase-app-sdk/sdkwork-appbase-app-sdk-typescript/generated/server-openapi/src/index.ts',
+  iamRoot,
+  'sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript/generated/server-openapi/src/index.ts',
 );
 
 export default defineConfig(({ mode }) => {
@@ -45,13 +46,13 @@ export default defineConfig(({ mode }) => {
           ),
         },
         { find: '@sdkwork/drive-app-sdk', replacement: generatedDriveAppSdkEntry },
-        { find: '@sdkwork/appbase-app-sdk', replacement: generatedAppbaseAppSdkEntry },
-        { find: '@sdkwork/auth-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/iam/sdkwork-auth-pc-react/src/index.ts') },
-        { find: '@sdkwork/auth-runtime-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/iam/sdkwork-auth-runtime-pc-react/src/index.ts') },
-        { find: '@sdkwork/iam-runtime', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-runtime/src/index.ts') },
-        { find: '@sdkwork/iam-contracts', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-contracts/src/index.ts') },
-        { find: '@sdkwork/iam-sdk-ports', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-sdk-ports/src/index.ts') },
-        { find: '@sdkwork/iam-sdk-adapter', replacement: path.resolve(appbaseRoot, 'packages/common/iam/sdkwork-iam-sdk-adapter/src/index.ts') },
+        { find: '@sdkwork/iam-app-sdk', replacement: generatedAppbaseAppSdkEntry },
+        { find: '@sdkwork/auth-pc-react', replacement: path.resolve(iamRoot, 'apps/sdkwork-iam-pc/packages/sdkwork-auth-pc-react/src/index.ts') },
+        { find: '@sdkwork/auth-runtime-pc-react', replacement: path.resolve(iamRoot, 'apps/sdkwork-iam-pc/packages/sdkwork-auth-runtime-pc-react/src/index.ts') },
+        { find: '@sdkwork/iam-runtime', replacement: path.resolve(iamRoot, 'apps/sdkwork-iam-common/packages/sdkwork-iam-runtime/src/index.ts') },
+        { find: '@sdkwork/iam-contracts', replacement: path.resolve(iamRoot, 'apps/sdkwork-iam-common/packages/sdkwork-iam-contracts/src/index.ts') },
+        { find: '@sdkwork/iam-sdk-ports', replacement: path.resolve(iamRoot, 'apps/sdkwork-iam-common/packages/sdkwork-iam-sdk-ports/src/index.ts') },
+        { find: '@sdkwork/iam-sdk-adapter', replacement: path.resolve(iamRoot, 'apps/sdkwork-iam-common/packages/sdkwork-iam-sdk-adapter/src/index.ts') },
         { find: '@sdkwork/appbase-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/foundation/sdkwork-appbase-pc-react/src/index.ts') },
         { find: '@sdkwork/i18n-pc-react', replacement: path.resolve(appbaseRoot, 'packages/pc-react/foundation/sdkwork-i18n-pc-react/src/index.ts') },
         { find: '@sdkwork/core-pc-react', replacement: path.resolve(coreRoot, 'sdkwork-core-pc-react/src') },
@@ -63,7 +64,7 @@ export default defineConfig(({ mode }) => {
       exclude: [
         '@sdkwork/notary-app-sdk',
         '@sdkwork/drive-app-sdk',
-        '@sdkwork/appbase-app-sdk',
+        '@sdkwork/iam-app-sdk',
         '@sdkwork/auth-pc-react',
         '@sdkwork/auth-runtime-pc-react',
         '@sdkwork/iam-runtime',

@@ -10,9 +10,13 @@
     "domain": "notary",
     "capability": "core",
     "surface": "h5",
-    "languages": ["typescript"],
+    "languages": [
+      "typescript"
+    ],
     "generated": false,
-    "manifests": ["package.json"]
+    "manifests": [
+      "package.json"
+    ]
   },
   "canonicalSpecs": [
     {
@@ -27,12 +31,23 @@
     }
   ],
   "contracts": {
-    "publicExports": ["@sdkwork/notary-h5-core"],
-    "runtimeEntrypoints": ["initNotaryH5AppSdkClient", "getNotaryH5ComposedApi"],
-    "sdkClients": ["@sdkwork/notary-app-sdk"],
-    "dependencyApiSurfaces": []
+    "publicExports": [
+      "@sdkwork/notary-h5-core"
+    ],
+    "runtimeEntrypoints": [
+      "initNotaryH5AppSdkClient",
+      "getNotaryH5ComposedApi"
+    ],
+    "sdkClients": [
+      "@sdkwork/notary-app-sdk"
+    ],
+    "dependencyApiSurfaces": [],
+    "dependencyComposition": "../../../specs/dependency.composition.json"
   },
   "verification": {
-    "commands": ["pnpm --dir apps/sdkwork-notary-h5 typecheck", "pnpm test:browser"]
+    "commands": [
+      "pnpm --dir apps/sdkwork-notary-h5 typecheck",
+      "pnpm test:browser"
+    ]
   }
 }

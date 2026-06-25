@@ -117,6 +117,9 @@ importers:
 
   packages/sdkwork-notary-pc-shell:
     dependencies:
+      '@sdkwork/notary-pc-commons':
+        specifier: workspace:*
+        version: link:../sdkwork-notary-pc-commons
       '@sdkwork/notary-pc-notary':
         specifier: workspace:*
         version: link:../sdkwork-notary-pc-notary

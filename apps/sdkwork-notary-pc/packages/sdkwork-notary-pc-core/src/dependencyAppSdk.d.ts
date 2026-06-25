@@ -12,7 +12,7 @@ declare module '@sdkwork/drive-app-sdk' {
   export function createDriveAppClient(config: SdkworkAppConfig): SdkworkDriveAppClient;
 }
 
-declare module '@sdkwork/appbase-app-sdk' {
+declare module '@sdkwork/iam-app-sdk' {
   import type { SdkworkAppConfig } from '@sdkwork/notary-app-sdk';
 
   export type { SdkworkAppConfig };

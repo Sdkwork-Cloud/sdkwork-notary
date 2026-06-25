@@ -146,7 +146,7 @@ test('notary pc root keeps thin bootstrap and host-port based notary package', (
   assert(authGate.includes('/login?'));
   assert(authGate.includes('notaryPcAuthService.getCurrentSession'));
   assert(viteConfig.includes('@sdkwork/drive-app-sdk'));
-  assert(viteConfig.includes('@sdkwork/appbase-app-sdk'));
+  assert(viteConfig.includes('@sdkwork/iam-app-sdk'));
   assert(viteConfig.includes('@sdkwork/auth-runtime-pc-react'));
   assert(notaryRoutes.includes('lazy('));
   assert(notaryRoutes.includes("import('@sdkwork/notary-pc-notary')"));

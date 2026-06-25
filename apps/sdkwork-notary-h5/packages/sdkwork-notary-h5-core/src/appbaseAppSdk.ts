@@ -2,7 +2,7 @@ import {
   createClient,
   type SdkworkAppClient as SdkworkAppbaseAppClient,
   type SdkworkAppConfig,
-} from '@sdkwork/appbase-app-sdk';
+} from '@sdkwork/iam-app-sdk';
 
 let appbaseAppSdkClient: SdkworkAppbaseAppClient | null = null;
 

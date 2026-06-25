@@ -140,7 +140,7 @@ const sdkFamilies = [
     input: "generated/openapi/notary-app-api.openapi.json",
     apiPrefix: "/app/v3/api",
     dependencies: [
-      ["sdkwork-appbase-app-sdk", "sdkwork-appbase-app-api"],
+      ["sdkwork-iam-app-sdk", "sdkwork-iam-app-api"],
       ["sdkwork-commerce-app-sdk", "sdkwork-commerce.app"],
       ["sdkwork-drive-app-sdk", "sdkwork-drive.app"],
     ],
@@ -152,7 +152,7 @@ const sdkFamilies = [
     input: "generated/openapi/notary-backend-api.openapi.json",
     apiPrefix: "/backend/v3/api",
     dependencies: [
-      ["sdkwork-appbase-backend-sdk", "sdkwork-appbase-backend-api"],
+      ["sdkwork-iam-backend-sdk", "sdkwork-iam-backend-api"],
       ["sdkwork-commerce-backend-sdk", "sdkwork-commerce.backend"],
       ["sdkwork-drive-backend-sdk", "sdkwork-drive.backend"],
     ],

@@ -1,3 +1,4 @@
+import { notaryPcAccessService } from './notaryPcAccessService';
 import { resetNotaryPcSdkClients } from './notaryAppSdk';
 
 let sessionLifecycleEnabled = false;
@@ -17,6 +18,7 @@ export function resetAuthenticatedNotaryPcSdkClients(): void {
   }
 
   resetNotaryPcSdkClients();
+  notaryPcAccessService.reset();
   resetNotaryServiceDelegate?.();
 }
 

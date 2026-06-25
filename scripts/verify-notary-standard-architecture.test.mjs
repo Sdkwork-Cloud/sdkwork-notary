@@ -387,7 +387,7 @@ test('H5 AuthGate redirects unauthenticated production sessions to platform IAM 
   assert.match(authGate, /\/auth\/login\?redirect=/);
 });
 
-test('PC AuthGate mounts sdkwork-appbase IAM login routes for unauthenticated sessions', () => {
+test('PC AuthGate mounts sdkwork-iam login routes for unauthenticated sessions', () => {
   const authGate = read('apps/sdkwork-notary-pc/src/AuthGate.tsx');
   assert.match(authGate, /SdkworkIamAuthRoutes/u);
   assert.match(authGate, /getNotaryPcIamRuntime/u);

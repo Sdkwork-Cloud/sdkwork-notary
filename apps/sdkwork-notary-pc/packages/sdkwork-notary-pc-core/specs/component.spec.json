@@ -10,9 +10,13 @@
     "domain": "notary",
     "capability": "core",
     "surface": "pc",
-    "languages": ["typescript"],
+    "languages": [
+      "typescript"
+    ],
     "generated": false,
-    "manifests": ["package.json"]
+    "manifests": [
+      "package.json"
+    ]
   },
   "canonicalSpecs": [
     {
@@ -32,22 +36,29 @@
     }
   ],
   "contracts": {
-    "publicExports": ["@sdkwork/notary-pc-core"],
+    "publicExports": [
+      "@sdkwork/notary-pc-core"
+    ],
     "runtimeEntrypoints": [
       "initNotaryPcAppSdkClient",
       "configureNotaryPcSdkPorts",
       "createNotaryAccessService",
+      "notaryPcAccessService",
       "getNotaryPcIamRuntime",
       "notaryPcAuthService"
     ],
     "sdkClients": [
       "@sdkwork/notary-app-sdk",
       "@sdkwork/drive-app-sdk",
-      "@sdkwork/appbase-app-sdk"
+      "@sdkwork/iam-app-sdk"
     ],
-    "dependencyApiSurfaces": []
+    "dependencyApiSurfaces": [],
+    "dependencyComposition": "../../../specs/dependency.composition.json"
   },
   "verification": {
-    "commands": ["pnpm --dir apps/sdkwork-notary-pc typecheck", "pnpm test:desktop"]
+    "commands": [
+      "pnpm --dir apps/sdkwork-notary-pc typecheck",
+      "pnpm test:desktop"
+    ]
   }
 }

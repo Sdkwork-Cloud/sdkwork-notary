@@ -11,7 +11,7 @@ const generatedDriveAppSdkEntry = path.resolve(
 );
 const generatedAppbaseAppSdkEntry = path.resolve(
   repoRoot,
-  '../sdkwork-appbase/sdks/sdkwork-appbase-app-sdk/sdkwork-appbase-app-sdk-typescript/generated/server-openapi/src/index.ts',
+  '../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript/generated/server-openapi/src/index.ts',
 );
 
 export default defineConfig(({ mode }) => {
@@ -33,11 +33,11 @@ export default defineConfig(({ mode }) => {
           '../../sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/src/index.ts',
         ),
         '@sdkwork/drive-app-sdk': generatedDriveAppSdkEntry,
-        '@sdkwork/appbase-app-sdk': generatedAppbaseAppSdkEntry,
+        '@sdkwork/iam-app-sdk': generatedAppbaseAppSdkEntry,
       },
     },
     optimizeDeps: {
-      exclude: ['@sdkwork/notary-app-sdk', '@sdkwork/drive-app-sdk', '@sdkwork/appbase-app-sdk'],
+      exclude: ['@sdkwork/notary-app-sdk', '@sdkwork/drive-app-sdk', '@sdkwork/iam-app-sdk'],
     },
     server: {
       port: 5185,

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.dependency.composition",
+  "applicationCode": "notary",
+  "clientArchitecture": "h5",
+  "surfaces": [
+    {
+      "surface": "app",
+      "corePackage": "sdkwork-notary-h5-core",
+      "sdkClients": [],
+      "reusableModules": [],
+      "hostAdapters": [],
+      "dependencyApiExports": [],
+      "dependencyApiSurfaces": []
+    }
+  ],
+  "buildToolEntries": {
+    "pnpm": {
+      "workspacePackages": [
+        "sdkwork-notary-h5-core",
+        "@sdkwork/notary-h5-commons",
+        "@sdkwork/notary-h5-core",
+        "@sdkwork/notary-h5-notary",
+        "@sdkwork/notary-h5-shell"
+      ]
+    }
+  }
+}

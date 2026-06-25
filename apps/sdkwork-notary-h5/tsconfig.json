@@ -21,7 +21,7 @@
       "@sdkwork/notary-h5-notary": ["./packages/sdkwork-notary-h5-notary/src/index.ts"],
       "@sdkwork/notary-app-sdk": ["./packages/sdkwork-notary-h5-core/src/notaryAppSdk.d.ts"],
       "@sdkwork/drive-app-sdk": ["./packages/sdkwork-notary-h5-core/src/dependencyAppSdk.d.ts"],
-      "@sdkwork/appbase-app-sdk": ["./packages/sdkwork-notary-h5-core/src/dependencyAppSdk.d.ts"]
+      "@sdkwork/iam-app-sdk": ["./packages/sdkwork-notary-h5-core/src/dependencyAppSdk.d.ts"]
     }
   },
   "include": ["src", "packages"]

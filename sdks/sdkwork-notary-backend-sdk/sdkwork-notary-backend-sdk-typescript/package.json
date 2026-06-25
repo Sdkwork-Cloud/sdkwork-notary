@@ -34,12 +34,12 @@
     "@sdkwork/sdk-common": "^1.0.3"
   },
   "peerDependencies": {
-    "@sdkwork/appbase-backend-sdk": "workspace:*",
+    "@sdkwork/iam-backend-sdk": "workspace:*",
     "@sdkwork/commerce-backend-sdk": "workspace:*",
     "@sdkwork/drive-backend-sdk": "workspace:*"
   },
   "peerDependenciesMeta": {
-    "@sdkwork/appbase-backend-sdk": {
+    "@sdkwork/iam-backend-sdk": {
       "optional": false
     },
     "@sdkwork/commerce-backend-sdk": {

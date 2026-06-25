@@ -5,7 +5,7 @@ Operator SDK family for Notary management workflows.
 - API authority: `sdkwork-notary.backend`
 - API prefix: `/backend/v3/api`
 - Owner: `sdkwork-notary`
-- Dependency SDKs: `sdkwork-appbase-backend-sdk`, `sdkwork-commerce-backend-sdk`, `sdkwork-drive-backend-sdk`
+- Dependency SDKs: `sdkwork-iam-backend-sdk`, `sdkwork-commerce-backend-sdk`, `sdkwork-drive-backend-sdk`
 - TypeScript package root: `@sdkwork/notary-backend-sdk`
 - Package entry: `sdkwork-notary-backend-sdk-typescript/src/index.ts`
 - Composed facade: `sdkwork-notary-backend-sdk-typescript/composed/index.ts`

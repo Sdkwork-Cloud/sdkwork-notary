@@ -19,11 +19,23 @@ declare module '@sdkwork/notary-app-sdk' {
     };
   }
 
+  export interface DriveAppSdkPort {
+    [resource: string]: {
+      [action: string]: (...args: unknown[]) => Promise<unknown>;
+    };
+  }
+
+  export interface AppbaseAppSdkPort {
+    [resource: string]: {
+      [action: string]: (...args: unknown[]) => Promise<unknown>;
+    };
+  }
+
   export interface CreateNotaryApiOptions {
     notary: unknown;
-    drive: unknown;
+    drive: DriveAppSdkPort;
     commerce?: unknown;
-    appbase: unknown;
+    appbase: AppbaseAppSdkPort;
   }
 
   export type NotaryComposedApi = {

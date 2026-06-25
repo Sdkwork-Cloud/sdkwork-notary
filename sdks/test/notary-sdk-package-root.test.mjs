@@ -26,7 +26,7 @@ const packageRoots = [
     factory: "createNotaryAppClient",
     configType: "SdkworkAppConfig",
     dependencies: [
-      "@sdkwork/appbase-app-sdk",
+      "@sdkwork/iam-app-sdk",
       "@sdkwork/commerce-app-sdk",
       "@sdkwork/drive-app-sdk",
     ],
@@ -41,7 +41,7 @@ const packageRoots = [
     factory: "createNotaryBackendClient",
     configType: "SdkworkBackendConfig",
     dependencies: [
-      "@sdkwork/appbase-backend-sdk",
+      "@sdkwork/iam-backend-sdk",
       "@sdkwork/commerce-backend-sdk",
       "@sdkwork/drive-backend-sdk",
     ],

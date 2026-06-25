@@ -60,7 +60,7 @@
     ],
     "routeManifest": null,
     "sdkClients": [
-      "sdkwork-appbase-app-sdk",
+      "sdkwork-iam-app-sdk",
       "sdkwork-commerce-app-sdk",
       "sdkwork-drive-app-sdk"
     ],

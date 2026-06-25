@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.33.0",
   "description": "SDKWork Notary PC browser application.",
   "scripts": {
-    "dev": "vite",
+    "dev": "node ../../../sdkwork-iam/scripts/dev/run-pc-renderer-dev-with-bootstrap.mjs -- vite",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",

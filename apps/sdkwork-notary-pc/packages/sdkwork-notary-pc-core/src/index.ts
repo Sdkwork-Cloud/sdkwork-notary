@@ -30,6 +30,7 @@ export type { NotaryPcSdkPorts } from './sdkPorts';
 
 export { createNotaryAccessService } from './notaryAccessService';
 export type { NotaryAccessService, NotaryAccessState } from './notaryAccessService';
+export { notaryPcAccessService } from './notaryPcAccessService';
 
 export {
   applyNotaryPcSessionTokens,

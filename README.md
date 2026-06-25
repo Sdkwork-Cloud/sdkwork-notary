@@ -41,8 +41,8 @@ All operations are dual-token protected and carry SDKWork owner, authority, perm
 
 Dependency SDKs are declared explicitly:
 
-- App: `sdkwork-appbase-app-sdk`, `sdkwork-commerce-app-sdk`, `sdkwork-drive-app-sdk`
-- Backend: `sdkwork-appbase-backend-sdk`, `sdkwork-commerce-backend-sdk`, `sdkwork-drive-backend-sdk`
+- App: `sdkwork-iam-app-sdk`, `sdkwork-commerce-app-sdk`, `sdkwork-drive-app-sdk`
+- Backend: `sdkwork-iam-backend-sdk`, `sdkwork-commerce-backend-sdk`, `sdkwork-drive-backend-sdk`
 
 The TypeScript package roots and composed facades are authored outside `generated/server-openapi`:
 
