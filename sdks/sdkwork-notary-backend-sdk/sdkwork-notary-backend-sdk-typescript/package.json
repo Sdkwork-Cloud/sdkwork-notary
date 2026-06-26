@@ -35,15 +35,11 @@
   },
   "peerDependencies": {
     "@sdkwork/iam-backend-sdk": "workspace:*",
-    "@sdkwork/commerce-backend-sdk": "workspace:*",
     "@sdkwork/drive-backend-sdk": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@sdkwork/iam-backend-sdk": {
       "optional": false
-    },
-    "@sdkwork/commerce-backend-sdk": {
-      "optional": true
     },
     "@sdkwork/drive-backend-sdk": {
       "optional": false

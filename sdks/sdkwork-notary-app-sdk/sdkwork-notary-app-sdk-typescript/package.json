@@ -35,14 +35,18 @@
   },
   "peerDependencies": {
     "@sdkwork/iam-app-sdk": "workspace:*",
-    "@sdkwork/commerce-app-sdk": "workspace:*",
+    "@sdkwork/catalog-app-sdk": "workspace:*",
+    "@sdkwork/order-app-sdk": "workspace:*",
     "@sdkwork/drive-app-sdk": "workspace:*"
   },
   "peerDependenciesMeta": {
     "@sdkwork/iam-app-sdk": {
       "optional": false
     },
-    "@sdkwork/commerce-app-sdk": {
+    "@sdkwork/catalog-app-sdk": {
+      "optional": true
+    },
+    "@sdkwork/order-app-sdk": {
       "optional": true
     },
     "@sdkwork/drive-app-sdk": {

@@ -1,0 +1,30 @@
+[package]
+name = "sdkwork-notary-embedded-bootstrap"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+description = "Embedded notary application bootstrap for unified-process platform consumers."
+
+[lib]
+name = "sdkwork_notary_embedded_bootstrap"
+path = "src/lib.rs"
+
+[dependencies]
+async-trait = "0.1.89"
+axum.workspace = true
+dotenvy = "0.15"
+sdkwork-commerce-contract-service = { path = "../../../sdkwork-account/crates/sdkwork-commerce-contract-service" }
+sdkwork-commerce-order-repository-sqlx = { path = "../../../sdkwork-order/crates/sdkwork-commerce-order-repository-sqlx" }
+sdkwork-commerce-order-service = { path = "../../../sdkwork-order/crates/sdkwork-commerce-order-service" }
+sdkwork-database-config.workspace = true
+sdkwork-database-sqlx.workspace = true
+sdkwork-drive-workspace-service = { path = "../../../sdkwork-drive/crates/sdkwork-drive-workspace-service" }
+sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
+sdkwork-notary-case-repository-sqlx = { path = "../sdkwork-notary-case-repository-sqlx" }
+sdkwork-notary-case-service = { path = "../sdkwork-notary-case-service" }
+sdkwork-notary-database-host = { path = "../sdkwork-notary-database-host" }
+sdkwork-routes-notary-app-api = { path = "../sdkwork-routes-notary-app-api" }
+sdkwork-routes-notary-backend-api = { path = "../sdkwork-routes-notary-backend-api" }
+sdkwork-utils-rust.workspace = true
+sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio", "sqlite", "postgres", "any"] }
+tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
