@@ -52,22 +52,6 @@
       }
     },
     {
-      "workspace": "sdkwork-commerce-backend-sdk",
-      "role": "commerce-backend-management-capability",
-      "required": true,
-      "dependencyMode": "consumer-sdk",
-      "apiPrefix": "/backend/v3/api",
-      "apiAuthority": "sdkwork-commerce.backend",
-      "generatedTransportImportPolicy": "forbidden",
-      "packageByLanguage": {
-        "typescript": "@sdkwork/commerce-backend-sdk",
-        "rust": "sdkwork-commerce-backend-sdk",
-        "java": "com.sdkwork:sdkwork-commerce-backend-sdk",
-        "python": "sdkwork-commerce-backend-sdk",
-        "go": "github.com/sdkwork/sdkwork-commerce-backend-sdk"
-      }
-    },
-    {
       "workspace": "sdkwork-drive-backend-sdk",
       "role": "drive-backend-management-capability",
       "required": true,

@@ -78,7 +78,7 @@ Expected: OpenAPI assertions pass, SDK/facade assertions still fail until later 
 
 - [ ] **Step 1: Implement SDK metadata**
 
-Declare `sdkwork-appbase-*`, `sdkwork-commerce-*`, and `sdkwork-drive-*` as dependency SDKs.
+Declare `sdkwork-appbase-*`, commerce T1 `sdkwork-catalog-*` / `sdkwork-order-*`, and `sdkwork-drive-*` as dependency SDKs.
 
 - [ ] **Step 2: Implement composed facades**
 

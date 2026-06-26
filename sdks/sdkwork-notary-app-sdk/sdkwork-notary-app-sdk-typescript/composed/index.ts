@@ -110,7 +110,7 @@ export interface DriveAppSdkPort {
   };
 }
 
-export interface CommerceAppSdkPort {
+export interface CommerceT1AppSdkPort {
   checkout?: {
     create(input: unknown): Promise<unknown>;
   };
@@ -137,7 +137,7 @@ export interface AppbaseAppSdkPort {
 export interface CreateNotaryApiOptions {
   notary: NotaryAppSdkPort;
   drive: DriveAppSdkPort;
-  commerce?: CommerceAppSdkPort;
+  commerce?: CommerceT1AppSdkPort;
   appbase: AppbaseAppSdkPort;
 }
 

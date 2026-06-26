@@ -141,7 +141,8 @@ const sdkFamilies = [
     apiPrefix: "/app/v3/api",
     dependencies: [
       ["sdkwork-iam-app-sdk", "sdkwork-iam-app-api"],
-      ["sdkwork-commerce-app-sdk", "sdkwork-commerce.app"],
+      ["sdkwork-catalog-app-sdk", "sdkwork-catalog-app-api"],
+      ["sdkwork-order-app-sdk", "sdkwork-order-app-api"],
       ["sdkwork-drive-app-sdk", "sdkwork-drive.app"],
     ],
   },
@@ -153,7 +154,6 @@ const sdkFamilies = [
     apiPrefix: "/backend/v3/api",
     dependencies: [
       ["sdkwork-iam-backend-sdk", "sdkwork-iam-backend-api"],
-      ["sdkwork-commerce-backend-sdk", "sdkwork-commerce.backend"],
       ["sdkwork-drive-backend-sdk", "sdkwork-drive.backend"],
     ],
   },

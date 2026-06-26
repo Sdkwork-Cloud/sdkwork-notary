@@ -27,7 +27,8 @@ const packageRoots = [
     configType: "SdkworkAppConfig",
     dependencies: [
       "@sdkwork/iam-app-sdk",
-      "@sdkwork/commerce-app-sdk",
+      "@sdkwork/catalog-app-sdk",
+      "@sdkwork/order-app-sdk",
       "@sdkwork/drive-app-sdk",
     ],
   },
@@ -42,7 +43,6 @@ const packageRoots = [
     configType: "SdkworkBackendConfig",
     dependencies: [
       "@sdkwork/iam-backend-sdk",
-      "@sdkwork/commerce-backend-sdk",
       "@sdkwork/drive-backend-sdk",
     ],
   },
@@ -78,18 +78,31 @@ test("notary TypeScript SDK package roots expose generated clients and composed 
     assert.equal(
       packageJson.peerDependenciesMeta[sdkPackage.dependencies[0]].optional,
       false,
-      `${sdkPackage.packageName} must require appbase dependency SDK peer`,
+      `${sdkPackage.packageName} must require IAM dependency SDK peer`,
     );
-    assert.equal(
-      packageJson.peerDependenciesMeta[sdkPackage.dependencies[2]].optional,
-      false,
-      `${sdkPackage.packageName} must require drive dependency SDK peer`,
-    );
-    assert.equal(
-      packageJson.peerDependenciesMeta[sdkPackage.dependencies[1]].optional,
-      true,
-      `${sdkPackage.packageName} must keep commerce dependency SDK peer optional for composed runtime-owned order creation`,
-    );
+    if (sdkPackage.packageName === '@sdkwork/notary-app-sdk') {
+      assert.equal(
+        packageJson.peerDependenciesMeta[sdkPackage.dependencies[3]].optional,
+        false,
+        `${sdkPackage.packageName} must require drive dependency SDK peer`,
+      );
+      assert.equal(
+        packageJson.peerDependenciesMeta[sdkPackage.dependencies[1]].optional,
+        true,
+        `${sdkPackage.packageName} must keep catalog dependency SDK peer optional for composed runtime-owned SKU lookup`,
+      );
+      assert.equal(
+        packageJson.peerDependenciesMeta[sdkPackage.dependencies[2]].optional,
+        true,
+        `${sdkPackage.packageName} must keep order dependency SDK peer optional for composed runtime-owned order creation`,
+      );
+    } else {
+      assert.equal(
+        packageJson.peerDependenciesMeta[sdkPackage.dependencies[1]].optional,
+        false,
+        `${sdkPackage.packageName} must require drive dependency SDK peer`,
+      );
+    }
 
     const tsconfig = readJson(tsconfigPath);
     assert(tsconfig.include.includes("src/**/*.ts"));
@@ -129,7 +142,7 @@ test("notary app composed facade accepts real Drive SDK upload results", () => {
   assert(source.includes("resolveDriveUploadNodeId"));
   assert(source.includes("uploadSession"));
   assert(source.includes("uploadItem"));
-  assert(source.includes("commerce?: CommerceAppSdkPort"));
+  assert(source.includes("commerce?: CommerceT1AppSdkPort"));
   assert(source.includes("driveNodeId"));
   assert(source.includes("nodeId"));
   assert(source.includes("drive.nodes.files.create"));

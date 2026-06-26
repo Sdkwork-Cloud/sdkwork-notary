@@ -5,7 +5,7 @@ User-facing SDK family for Notary workflows.
 - API authority: `sdkwork-notary.app`
 - API prefix: `/app/v3/api`
 - Owner: `sdkwork-notary`
-- Dependency SDKs: `sdkwork-iam-app-sdk`, `sdkwork-commerce-app-sdk`, `sdkwork-drive-app-sdk`
+- Dependency SDKs: `sdkwork-iam-app-sdk`, `sdkwork-catalog-app-sdk`, `sdkwork-order-app-sdk`, `sdkwork-drive-app-sdk`
 - TypeScript package root: `@sdkwork/notary-app-sdk`
 - Package entry: `sdkwork-notary-app-sdk-typescript/src/index.ts`
 - Composed facade: `sdkwork-notary-app-sdk-typescript/composed/index.ts`

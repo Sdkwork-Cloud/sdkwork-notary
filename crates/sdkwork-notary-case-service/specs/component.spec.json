@@ -61,7 +61,8 @@
     "routeManifest": null,
     "sdkClients": [
       "sdkwork-iam-app-sdk",
-      "sdkwork-commerce-app-sdk",
+      "sdkwork-catalog-app-sdk",
+      "sdkwork-order-app-sdk",
       "sdkwork-drive-app-sdk"
     ],
     "events": ["notary.case.submitted"],
