@@ -32,7 +32,7 @@ pnpm dev:browser
 | `application.backend-http` | application | Notary Backend SDK (`/backend/v3/api/notary`) |
 | `platform.api-gateway` | platform | Appbase, Commerce, Drive SDKs via `sdkwork-api-cloud-gateway` |
 
-`sdkwork-notary` is a domain library. It declares topology authority and profile env, but host applications wire `sdkwork-router-notary-app-api` and `sdkwork-router-notary-backend-api` into their own HTTP servers.
+`sdkwork-notary` is a domain library. It declares topology authority and profile env, but host applications wire `sdkwork-routes-notary-app-api` and `sdkwork-routes-notary-backend-api` into their own HTTP servers.
 
 Loader: `scripts/lib/notary-topology.mjs` → `@sdkwork/app-topology`.
 

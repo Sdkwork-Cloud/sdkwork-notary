@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "sdkwork.route.manifest",
-  "packageName": "sdkwork-router-notary-app-api",
+  "packageName": "sdkwork-routes-notary-app-api",
   "surface": "app-api",
   "owner": "sdkwork-notary",
   "domain": "notary",
@@ -10,8 +10,8 @@
   "sdkFamily": "sdkwork-notary-app-sdk",
   "prefix": "/app/v3/api",
   "source": {
-    "crateRoot": "crates/sdkwork-router-notary-app-api",
-    "crateImport": "sdkwork_router_notary_app_api"
+    "crateRoot": "crates/sdkwork-routes-notary-app-api",
+    "crateImport": "sdkwork_routes_notary_app_api"
   },
   "routes": [
     {
@@ -29,7 +29,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "retrieve_access"
       },
       "schemas": {
@@ -42,7 +42,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -62,7 +62,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "accept_case"
       },
       "schemas": {
@@ -75,7 +75,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -95,7 +95,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "create_assignment"
       },
       "schemas": {
@@ -108,7 +108,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -128,7 +128,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "complete_case"
       },
       "schemas": {
@@ -141,7 +141,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -161,7 +161,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "create_case"
       },
       "schemas": {
@@ -174,7 +174,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -194,7 +194,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "create_download_package"
       },
       "schemas": {
@@ -207,7 +207,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -227,7 +227,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "list_case_events"
       },
       "schemas": {
@@ -240,7 +240,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -260,7 +260,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "create_case_file"
       },
       "schemas": {
@@ -273,7 +273,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -293,7 +293,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "list_case_files"
       },
       "schemas": {
@@ -306,7 +306,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -326,7 +326,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "list_cases"
       },
       "schemas": {
@@ -339,7 +339,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -359,7 +359,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "create_party"
       },
       "schemas": {
@@ -372,7 +372,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -392,7 +392,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "delete_party"
       },
       "schemas": {
@@ -405,7 +405,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -425,7 +425,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "list_parties"
       },
       "schemas": {
@@ -438,7 +438,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -458,7 +458,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "create_party_signature_invite"
       },
       "schemas": {
@@ -471,7 +471,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -491,7 +491,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "attach_party_signature"
       },
       "schemas": {
@@ -504,7 +504,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -524,7 +524,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "update_party"
       },
       "schemas": {
@@ -537,7 +537,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -557,7 +557,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "create_party_video_invite"
       },
       "schemas": {
@@ -570,7 +570,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -590,7 +590,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "reject_case"
       },
       "schemas": {
@@ -603,7 +603,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -623,7 +623,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "retrieve_case"
       },
       "schemas": {
@@ -636,7 +636,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -656,7 +656,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "update_case"
       },
       "schemas": {
@@ -669,7 +669,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -689,7 +689,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "retrieve_dashboard_statistics"
       },
       "schemas": {
@@ -702,7 +702,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -722,7 +722,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "list_matters"
       },
       "schemas": {
@@ -735,7 +735,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -755,7 +755,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "retrieve_monthly_report"
       },
       "schemas": {
@@ -768,7 +768,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"
@@ -788,7 +788,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_app_api::handlers",
+        "module": "sdkwork_routes_notary_app_api::handlers",
         "name": "list_staff"
       },
       "schemas": {
@@ -801,7 +801,7 @@
         "apiAuthority": "sdkwork-notary-app-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-app-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "app-api"

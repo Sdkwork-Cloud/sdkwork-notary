@@ -18,7 +18,7 @@ Generated TypeScript transport SDKs live under `sdks/sdkwork-notary-app-sdk` and
 
 Rust route dispatchers:
 
-- `crates/sdkwork-router-notary-app-api`
-- `crates/sdkwork-router-notary-backend-api`
+- `crates/sdkwork-routes-notary-app-api`
+- `crates/sdkwork-routes-notary-backend-api`
 
 Both dispatch to `sdkwork-notary-case-service` over explicit Appbase, Commerce, Drive, and Notary repository ports.

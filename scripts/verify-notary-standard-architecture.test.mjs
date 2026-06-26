@@ -45,19 +45,19 @@ const API_INPUTS = [
 
 const ROUTE_MANIFESTS = [
   {
-    file: 'sdks/_route-manifests/app-api/sdkwork-router-notary-app-api.route-manifest.json',
+    file: 'sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json',
     apiSurface: 'app-api',
   },
   {
-    file: 'sdks/_route-manifests/backend-api/sdkwork-router-notary-backend-api.route-manifest.json',
+    file: 'sdks/_route-manifests/backend-api/sdkwork-routes-notary-backend-api.route-manifest.json',
     apiSurface: 'backend-api',
   },
 ];
 
 const WEB_FRAMEWORK_CRATES = [
-  'crates/sdkwork-router-notary-app-api/Cargo.toml',
-  'crates/sdkwork-router-notary-backend-api/Cargo.toml',
-  'crates/sdkwork-router-notary-http-auth/Cargo.toml',
+  'crates/sdkwork-routes-notary-app-api/Cargo.toml',
+  'crates/sdkwork-routes-notary-backend-api/Cargo.toml',
+  'crates/sdkwork-routes-notary-http-auth/Cargo.toml',
 ];
 
 function read(relativePath) {
@@ -113,7 +113,7 @@ test('integrates sdkwork-web-framework in HTTP route crates', () => {
     assert.match(cargo, /sdkwork-web-/);
   }
 
-  const httpAuthLayer = read('crates/sdkwork-router-notary-http-auth/src/layer.rs');
+  const httpAuthLayer = read('crates/sdkwork-routes-notary-http-auth/src/layer.rs');
   assert.match(httpAuthLayer, /build_web_framework_layer/);
   assert.match(httpAuthLayer, /with_web_request_context/);
 });
@@ -282,11 +282,11 @@ test('domain library root declares sdkwork.app.config.json', () => {
   assert.equal(manifest.devApp.sourceRoot, 'apps/sdkwork-notary-h5');
 });
 
-test('Rust HTTP crates follow sdkwork-router-notary-* naming', () => {
+test('Rust HTTP crates follow sdkwork-routes-notary-* naming', () => {
   const expectedMembers = [
-    'crates/sdkwork-router-notary-app-api',
-    'crates/sdkwork-router-notary-backend-api',
-    'crates/sdkwork-router-notary-http-auth',
+    'crates/sdkwork-routes-notary-app-api',
+    'crates/sdkwork-routes-notary-backend-api',
+    'crates/sdkwork-routes-notary-http-auth',
     'crates/sdkwork-notary-case-contract',
     'crates/sdkwork-notary-case-service',
     'crates/sdkwork-notary-case-repository-sqlx',
@@ -301,12 +301,12 @@ test('Rust HTTP crates follow sdkwork-router-notary-* naming', () => {
 
 test('route crate component specs reference canonical route manifest files', () => {
   assert.equal(
-    readJson('crates/sdkwork-router-notary-app-api/specs/component.spec.json').contracts.routeManifest,
-    '../../../sdks/_route-manifests/app-api/sdkwork-router-notary-app-api.route-manifest.json',
+    readJson('crates/sdkwork-routes-notary-app-api/specs/component.spec.json').contracts.routeManifest,
+    '../../../sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json',
   );
   assert.equal(
-    readJson('crates/sdkwork-router-notary-backend-api/specs/component.spec.json').contracts.routeManifest,
-    '../../../sdks/_route-manifests/backend-api/sdkwork-router-notary-backend-api.route-manifest.json',
+    readJson('crates/sdkwork-routes-notary-backend-api/specs/component.spec.json').contracts.routeManifest,
+    '../../../sdks/_route-manifests/backend-api/sdkwork-routes-notary-backend-api.route-manifest.json',
   );
 });
 
@@ -353,15 +353,15 @@ test('database seed manifest wires bootstrap common seed', () => {
 
 test('route and service component specs reference security and observability standards', () => {
   const observabilityRequired = new Set([
-    'sdkwork-router-notary-app-api',
-    'sdkwork-router-notary-backend-api',
+    'sdkwork-routes-notary-app-api',
+    'sdkwork-routes-notary-backend-api',
     'sdkwork-notary-case-service',
   ]);
 
   for (const specPath of [
-    'crates/sdkwork-router-notary-app-api/specs/component.spec.json',
-    'crates/sdkwork-router-notary-backend-api/specs/component.spec.json',
-    'crates/sdkwork-router-notary-http-auth/specs/component.spec.json',
+    'crates/sdkwork-routes-notary-app-api/specs/component.spec.json',
+    'crates/sdkwork-routes-notary-backend-api/specs/component.spec.json',
+    'crates/sdkwork-routes-notary-http-auth/specs/component.spec.json',
     'crates/sdkwork-notary-case-service/specs/component.spec.json',
     'crates/sdkwork-notary-case-contract/specs/component.spec.json',
     'crates/sdkwork-notary-case-repository-sqlx/specs/component.spec.json',
@@ -402,7 +402,7 @@ test('notary runtime enforces operation permission map and production membership
   assert.match(permissions, /require_operation_permission/);
   assert.match(permissions, /OPERATION_PERMISSIONS/);
 
-  const context = read('crates/sdkwork-router-notary-http-auth/src/context.rs');
+  const context = read('crates/sdkwork-routes-notary-http-auth/src/context.rs');
   assert.match(context, /allows_dev_synthetic_membership/);
   assert.match(context, /permission_scopes/);
   assert.match(context, /extract_permission_scopes/);

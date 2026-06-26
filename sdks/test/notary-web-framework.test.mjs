@@ -12,20 +12,20 @@ function readText(relativePath) {
 }
 
 const routeCrates = [
-  "crates/sdkwork-router-notary-app-api",
-  "crates/sdkwork-router-notary-backend-api",
+  "crates/sdkwork-routes-notary-app-api",
+  "crates/sdkwork-routes-notary-backend-api",
 ];
 
 test("notary route crates integrate sdkwork-web-framework", () => {
   const workspaceManifest = readText("Cargo.toml");
   assert(workspaceManifest.includes("sdkwork-web-core"));
   assert(workspaceManifest.includes("sdkwork-web-axum"));
-  assert(workspaceManifest.includes("sdkwork-router-notary-http-auth"));
+  assert(workspaceManifest.includes("sdkwork-routes-notary-http-auth"));
 
   for (const crateRoot of routeCrates) {
     const cargo = readText(path.join(crateRoot, "Cargo.toml"));
     assert(cargo.includes("sdkwork-web-core"));
-    assert(cargo.includes("sdkwork-router-notary-http-auth"));
+    assert(cargo.includes("sdkwork-routes-notary-http-auth"));
 
     const handlers = readText(path.join(crateRoot, "src/handlers.rs"));
     const routes = readText(path.join(crateRoot, "src/routes.rs"));
@@ -38,7 +38,7 @@ test("notary route crates integrate sdkwork-web-framework", () => {
     assert(manifest.includes("HttpRouteManifest"));
   }
 
-  const httpAuth = readText("crates/sdkwork-router-notary-http-auth/src/layer.rs");
+  const httpAuth = readText("crates/sdkwork-routes-notary-http-auth/src/layer.rs");
   assert(httpAuth.includes("build_web_framework_layer"));
   assert(httpAuth.includes("with_web_request_context"));
 });
@@ -46,7 +46,7 @@ test("notary route crates integrate sdkwork-web-framework", () => {
 test("notary route crate component specs declare web framework standard", () => {
   for (const crateRoot of [
     ...routeCrates,
-    "crates/sdkwork-router-notary-http-auth",
+    "crates/sdkwork-routes-notary-http-auth",
   ]) {
     const spec = JSON.parse(readText(path.join(crateRoot, "specs/component.spec.json")));
     assert(

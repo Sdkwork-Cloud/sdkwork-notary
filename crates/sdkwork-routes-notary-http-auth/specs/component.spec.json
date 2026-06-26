@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "sdkwork-routes-notary-http-auth",
+    "displayName": "SDKWork Router Notary HTTP Auth",
+    "version": "0.1.0",
+    "type": "rust-support-crate",
+    "root": "sdkwork-notary/crates/sdkwork-routes-notary-http-auth",
+    "domain": "notary",
+    "capability": "notary",
+    "surface": "shared",
+    "languages": ["rust"],
+    "generated": false,
+    "manifests": ["Cargo.toml"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "WEB_FRAMEWORK_SPEC.md",
+      "path": "../../../../sdkwork-specs/WEB_FRAMEWORK_SPEC.md",
+      "purpose": "sdkwork-web-framework request context and interceptor integration."
+    },
+    {
+      "file": "RUST_CODE_SPEC.md",
+      "path": "../../../../sdkwork-specs/RUST_CODE_SPEC.md",
+      "purpose": "Rust crate structure and verification rules."
+    },
+    {
+      "file": "SECURITY_SPEC.md",
+      "path": "../../../../sdkwork-specs/SECURITY_SPEC.md",
+      "purpose": "Request principal extraction, membership resolution, and fail-closed production guards."
+    },
+    {
+      "file": "IAM_SPEC.md",
+      "path": "../../../../sdkwork-specs/IAM_SPEC.md",
+      "purpose": "Permission scope propagation from web principal into notary runtime context."
+    }
+  ],
+  "contracts": {
+    "publicExports": ["sdkwork_routes_notary_http_auth::*"],
+    "runtimeEntrypoints": ["with_dual_token_request_context"],
+    "sdkClients": [],
+    "dependencyApiSurfaces": []
+  },
+  "verification": {
+    "commands": ["cargo test --workspace --target-dir target-codex-test"]
+  }
+}

@@ -72,8 +72,8 @@ The runtime layer implements the main notary workflow without owning dependency 
 
 Route runtime services are implemented for both app and backend route crates, so the generated route layers can dispatch directly to `sdkwork-notary-case-service` ports:
 
-- `crates/sdkwork-router-notary-app-api`
-- `crates/sdkwork-router-notary-backend-api`
+- `crates/sdkwork-routes-notary-app-api`
+- `crates/sdkwork-routes-notary-backend-api`
 
 ## Chat PC Integration
 
@@ -139,3 +139,6 @@ pnpm test:rust
 - [docs/product/prd/PRD.md](docs/product/prd/PRD.md)
 - [docs/architecture/tech/TECH_ARCHITECTURE.md](docs/architecture/tech/TECH_ARCHITECTURE.md)
 
+## Application Roots
+
+- [apps directory index](apps/README.md)

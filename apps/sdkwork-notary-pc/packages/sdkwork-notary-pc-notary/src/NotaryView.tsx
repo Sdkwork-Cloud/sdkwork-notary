@@ -1,6 +1,6 @@
-import './i18n';
+import i18n, { subscribeNotaryI18nFromHost, syncNotaryI18nFromHost } from './i18n';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { I18nextProvider, useTranslation } from 'react-i18next';
 import { PenTool } from 'lucide-react';
 import type { NotaryDocument, NotaryTask, Party } from '@sdkwork/notary-pc-commons';
 import { notarySanitizeLinkHref, notaryToast, useNotaryPcHost } from '@sdkwork/notary-pc-commons';
@@ -39,6 +39,18 @@ const EMPTY_STATS: NotaryStats = {
 };
 
 export const NotaryView: React.FC = () => {
+  syncNotaryI18nFromHost();
+
+  useEffect(() => subscribeNotaryI18nFromHost(), []);
+
+  return (
+    <I18nextProvider i18n={i18n}>
+      <NotaryViewContent />
+    </I18nextProvider>
+  );
+};
+
+const NotaryViewContent: React.FC = () => {
   const { t } = useTranslation('notary');
   const { CallOverlay, MediaViewer } = useNotaryPcHost();
 

@@ -9,8 +9,8 @@ const workspaceRoot = path.resolve(testDir, "..", "..");
 
 const routeCrates = [
   {
-    root: "crates/sdkwork-router-notary-app-api",
-    packageName: "sdkwork-router-notary-app-api",
+    root: "crates/sdkwork-routes-notary-app-api",
+    packageName: "sdkwork-routes-notary-app-api",
     builder: "build_sdkwork_notary_app_api_router",
     manifestFn: "sdkwork_notary_app_api_route_manifest",
     surface: "app-api",
@@ -32,8 +32,8 @@ const routeCrates = [
     ],
   },
   {
-    root: "crates/sdkwork-router-notary-backend-api",
-    packageName: "sdkwork-router-notary-backend-api",
+    root: "crates/sdkwork-routes-notary-backend-api",
+    packageName: "sdkwork-routes-notary-backend-api",
     builder: "build_sdkwork_notary_backend_api_router",
     manifestFn: "sdkwork_notary_backend_api_route_manifest",
     surface: "backend-api",
@@ -107,7 +107,7 @@ test("notary Rust route crates are workspace members with standard component spe
     assert.equal(spec.kind, "sdkwork.component.spec");
     assert.equal(spec.component.name, routeCrate.packageName);
     assert.equal(spec.component.type, "rust-route-crate");
-    assert.equal(spec.contracts.routeManifest, `../../../sdks/_route-manifests/${routeCrate.surface}/sdkwork-router-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`);
+    assert.equal(spec.contracts.routeManifest, `../../../sdks/_route-manifests/${routeCrate.surface}/sdkwork-routes-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`);
     assert(spec.contracts.runtimeEntrypoints.includes(routeCrate.builder));
   }
 });
@@ -158,7 +158,7 @@ test("notary route crates expose executable routers and deterministic route mani
 test("notary canonical route manifests stay aligned with embedded crate manifests", () => {
   for (const routeCrate of routeCrates) {
     const manifestFile = readJson(
-      `sdks/_route-manifests/${routeCrate.surface}/sdkwork-router-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`,
+      `sdks/_route-manifests/${routeCrate.surface}/sdkwork-routes-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`,
     );
     const embedded = JSON.parse(
       readText(path.join(routeCrate.root, "src/manifest.rs")).match(
@@ -181,7 +181,7 @@ test("notary canonical route manifests stay aligned with embedded crate manifest
 test("notary route manifests mirror OpenAPI auth and permission metadata", () => {
   for (const routeCrate of routeCrates) {
     const manifestFile = readJson(
-      `sdks/_route-manifests/${routeCrate.surface}/sdkwork-router-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`,
+      `sdks/_route-manifests/${routeCrate.surface}/sdkwork-routes-${routeCrate.surface === "app-api" ? "notary-app-api" : "notary-backend-api"}.route-manifest.json`,
     );
     const openapi = readJson(routeCrate.openapi);
     const operationsById = new Map(

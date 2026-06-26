@@ -79,8 +79,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -166,8 +166,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/organization_profiles/{organizationProfileId}": {
@@ -234,8 +234,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "patch": {
         "tags": [
@@ -330,8 +330,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/matters": {
@@ -397,8 +397,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -484,8 +484,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/matters/{skuId}": {
@@ -572,8 +572,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/cases": {
@@ -642,8 +642,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/cases/{caseId}": {
@@ -710,8 +710,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/cases/{caseId}/assignments": {
@@ -798,8 +798,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/cases/{caseId}/assignments/{assignmentId}": {
@@ -869,8 +869,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/staff": {
@@ -939,8 +939,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     },
     "/backend/v3/api/notary/reports/case_summary": {
@@ -1003,8 +1003,8 @@
         "x-sdkwork-request-context": "WebRequestContext",
         "x-sdkwork-api-surface": "backend-api",
         "x-sdkwork-auth-mode": "dual-token",
-        "x-sdkwork-source-route-crate": "sdkwork-router-notary-backend-api",
-        "x-sdkwork-source": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-backend-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       }
     }
   },

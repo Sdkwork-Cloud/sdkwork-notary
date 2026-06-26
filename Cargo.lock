@@ -1731,14 +1731,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-router-notary-app-api"
+name = "sdkwork-routes-notary-app-api"
 version = "0.1.0"
 dependencies = [
  "async-trait",
  "axum",
  "sdkwork-notary-case-contract",
  "sdkwork-notary-case-service",
- "sdkwork-router-notary-http-auth",
+ "sdkwork-routes-notary-http-auth",
  "sdkwork-web-contract",
  "sdkwork-web-core",
  "serde_json",
@@ -1746,14 +1746,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-router-notary-backend-api"
+name = "sdkwork-routes-notary-backend-api"
 version = "0.1.0"
 dependencies = [
  "async-trait",
  "axum",
  "sdkwork-notary-case-contract",
  "sdkwork-notary-case-service",
- "sdkwork-router-notary-http-auth",
+ "sdkwork-routes-notary-http-auth",
  "sdkwork-web-contract",
  "sdkwork-web-core",
  "serde_json",
@@ -1761,7 +1761,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sdkwork-router-notary-http-auth"
+name = "sdkwork-routes-notary-http-auth"
 version = "0.1.0"
 dependencies = [
  "axum",

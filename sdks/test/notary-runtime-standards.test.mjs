@@ -55,9 +55,9 @@ test("notary Rust runtime crates declare SDKWork component metadata", () => {
     "sdkwork-notary-case-service",
     "sdkwork-notary-case-repository-sqlx",
     "sdkwork-notary-database-host",
-    "sdkwork-router-notary-http-auth",
-    "sdkwork-router-notary-app-api",
-    "sdkwork-router-notary-backend-api",
+    "sdkwork-routes-notary-http-auth",
+    "sdkwork-routes-notary-app-api",
+    "sdkwork-routes-notary-backend-api",
   ]) {
     const root = path.join("crates", crateName);
     assert(existsSync(path.join(workspaceRoot, root, "README.md")), `${crateName} needs README`);
@@ -75,9 +75,9 @@ test("notary Rust runtime crates declare SDKWork component metadata", () => {
       assert(spec.canonicalSpecs.some((entry) => entry.file === "DATABASE_SPEC.md"));
     } else if (crateName === "sdkwork-notary-database-host") {
       assert(spec.canonicalSpecs.some((entry) => entry.file === "DATABASE_FRAMEWORK_SPEC.md"));
-    } else if (crateName === "sdkwork-router-notary-http-auth") {
+    } else if (crateName === "sdkwork-routes-notary-http-auth") {
       assert(spec.canonicalSpecs.some((entry) => entry.file === "WEB_FRAMEWORK_SPEC.md"));
-    } else if (crateName.startsWith("sdkwork-router-notary-")) {
+    } else if (crateName.startsWith("sdkwork-routes-notary-")) {
       assert(spec.canonicalSpecs.some((entry) => entry.file === "WEB_FRAMEWORK_SPEC.md"));
       assert(spec.canonicalSpecs.some((entry) => entry.file === "WEB_BACKEND_SPEC.md"));
       assert(spec.canonicalSpecs.some((entry) => entry.file === "API_SPEC.md"));

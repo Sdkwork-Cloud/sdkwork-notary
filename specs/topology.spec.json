@@ -99,12 +99,12 @@
   },
   "components": {
     "appApiRouter": {
-      "crate": "sdkwork-router-notary-app-api",
-      "library": "sdkwork_router_notary_app_api"
+      "crate": "sdkwork-routes-notary-app-api",
+      "library": "sdkwork_routes_notary_app_api"
     },
     "backendApiRouter": {
-      "crate": "sdkwork-router-notary-backend-api",
-      "library": "sdkwork_router_notary_backend_api"
+      "crate": "sdkwork-routes-notary-backend-api",
+      "library": "sdkwork_routes_notary_backend_api"
     },
     "cloudGateway": {
       "crate": "sdkwork-api-cloud-gateway-api-server",
@@ -170,7 +170,7 @@
       "self-hosted.split-services.production",
       "cloud-hosted.split-services.production"
     ],
-    "notes": "sdkwork-notary is a domain library. Host applications wire sdkwork-router-notary-* route crates and load profile env from this repository."
+    "notes": "sdkwork-notary is a domain library. Host applications wire sdkwork-routes-notary-* route crates and load profile env from this repository."
   },
   "packaging": {
     "cloudConfigFiles": [

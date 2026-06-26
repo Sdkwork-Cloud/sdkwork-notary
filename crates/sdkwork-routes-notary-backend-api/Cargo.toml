@@ -1,0 +1,23 @@
+[package]
+name = "sdkwork-routes-notary-backend-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "sdkwork_routes_notary_backend_api"
+
+[dependencies]
+async-trait = "0.1.89"
+axum.workspace = true
+serde_json = "1.0"
+sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
+sdkwork-notary-case-service = { path = "../sdkwork-notary-case-service" }
+sdkwork-routes-notary-http-auth = { path = "../sdkwork-routes-notary-http-auth" }
+sdkwork-web-contract.workspace = true
+sdkwork-web-core.workspace = true
+tokio = { version = "1.52", features = ["sync"] }
+
+[dev-dependencies]
+sdkwork-routes-notary-http-auth = { path = "../sdkwork-routes-notary-http-auth" }
+tokio = { version = "1.52", features = ["macros", "rt-multi-thread", "sync"] }

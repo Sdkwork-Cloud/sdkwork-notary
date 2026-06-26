@@ -1,0 +1,40 @@
+{
+  "kind": "sdkwork.gateway.assembly",
+  "schemaVersion": 1,
+  "applicationCode": "notary",
+  "packageName": "sdkwork-notary-gateway-assembly",
+  "crateDir": "crates/sdkwork-notary-gateway-assembly",
+  "generatedAt": "2026-06-25T13:08:05.582Z",
+  "routeCrates": [
+    {
+      "packageName": "sdkwork-routes-notary-app-api",
+      "memberDir": "crates/sdkwork-routes-notary-app-api",
+      "libName": "sdkwork_routes_notary_app_api",
+      "surface": "app-api",
+      "pathPrefix": null,
+      "mountOrder": 0,
+      "hasGatewayMount": true,
+      "hasGatewayRouteManifest": true
+    },
+    {
+      "packageName": "sdkwork-routes-notary-backend-api",
+      "memberDir": "crates/sdkwork-routes-notary-backend-api",
+      "libName": "sdkwork_routes_notary_backend_api",
+      "surface": "backend-api",
+      "pathPrefix": null,
+      "mountOrder": 1,
+      "hasGatewayMount": true,
+      "hasGatewayRouteManifest": true
+    },
+    {
+      "packageName": "sdkwork-routes-notary-http-auth",
+      "memberDir": "crates/sdkwork-routes-notary-http-auth",
+      "libName": "sdkwork_routes_notary_http_auth",
+      "surface": "unknown",
+      "pathPrefix": null,
+      "mountOrder": 2,
+      "hasGatewayMount": true,
+      "hasGatewayRouteManifest": false
+    }
+  ]
+}

@@ -59,7 +59,7 @@ function printHelp() {
 Topology-aware Notary dev entry. Loads configs/topology profile env via @sdkwork/app-topology.
 
 This repository ships route/runtime libraries only. Host applications wire
-sdkwork-router-notary-* crates and consume the resolved profile env below.
+sdkwork-routes-notary-* crates and consume the resolved profile env below.
 
 Options:
   --deployment-profile <standalone|cloud>           Default: standalone

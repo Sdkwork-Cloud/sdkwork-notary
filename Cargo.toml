@@ -1,13 +1,14 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/sdkwork-notary-gateway-assembly",
   "crates/sdkwork-notary-database-host",
   "crates/sdkwork-notary-case-contract",
   "crates/sdkwork-notary-case-service",
   "crates/sdkwork-notary-case-repository-sqlx",
-  "crates/sdkwork-router-notary-http-auth",
-  "crates/sdkwork-router-notary-app-api",
-  "crates/sdkwork-router-notary-backend-api",
+  "crates/sdkwork-routes-notary-http-auth",
+  "crates/sdkwork-routes-notary-app-api",
+  "crates/sdkwork-routes-notary-backend-api",
 ]
 
 [workspace.package]

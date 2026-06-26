@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "sdkwork.route.manifest",
-  "packageName": "sdkwork-router-notary-backend-api",
+  "packageName": "sdkwork-routes-notary-backend-api",
   "surface": "backend-api",
   "owner": "sdkwork-notary",
   "domain": "notary",
@@ -10,8 +10,8 @@
   "sdkFamily": "sdkwork-notary-backend-sdk",
   "prefix": "/backend/v3/api",
   "source": {
-    "crateRoot": "crates/sdkwork-router-notary-backend-api",
-    "crateImport": "sdkwork_router_notary_backend_api"
+    "crateRoot": "crates/sdkwork-routes-notary-backend-api",
+    "crateImport": "sdkwork_routes_notary_backend_api"
   },
   "routes": [
     {
@@ -29,7 +29,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "create_assignment"
       },
       "schemas": {
@@ -42,7 +42,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -62,7 +62,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "delete_assignment"
       },
       "schemas": {
@@ -75,7 +75,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -95,7 +95,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "list_cases"
       },
       "schemas": {
@@ -108,7 +108,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -128,7 +128,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "retrieve_case"
       },
       "schemas": {
@@ -141,7 +141,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -161,7 +161,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "create_matter"
       },
       "schemas": {
@@ -174,7 +174,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -194,7 +194,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "list_matters"
       },
       "schemas": {
@@ -207,7 +207,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -227,7 +227,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "update_matter"
       },
       "schemas": {
@@ -240,7 +240,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -260,7 +260,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "create_organization_profile"
       },
       "schemas": {
@@ -273,7 +273,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -293,7 +293,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "list_organization_profiles"
       },
       "schemas": {
@@ -306,7 +306,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -326,7 +326,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "retrieve_organization_profile"
       },
       "schemas": {
@@ -339,7 +339,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -359,7 +359,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "update_organization_profile"
       },
       "schemas": {
@@ -372,7 +372,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -392,7 +392,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "retrieve_case_summary"
       },
       "schemas": {
@@ -405,7 +405,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"
@@ -425,7 +425,7 @@
         "dataScope": "organization"
       },
       "handler": {
-        "module": "sdkwork_router_notary_backend_api::handlers",
+        "module": "sdkwork_routes_notary_backend_api::handlers",
         "name": "list_staff"
       },
       "schemas": {
@@ -438,7 +438,7 @@
         "apiAuthority": "sdkwork-notary-backend-api"
       },
       "source": {
-        "file": "crates/sdkwork-router-notary-backend-api/src/handlers.rs"
+        "file": "crates/sdkwork-routes-notary-backend-api/src/handlers.rs"
       },
       "requestContext": "WebRequestContext",
       "apiSurface": "backend-api"

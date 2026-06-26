@@ -10,11 +10,11 @@ const ROOT = process.cwd();
 
 const ROUTE_MANIFESTS = [
   {
-    file: 'sdks/_route-manifests/app-api/sdkwork-router-notary-app-api.route-manifest.json',
+    file: 'sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json',
     apiSurface: 'app-api',
   },
   {
-    file: 'sdks/_route-manifests/backend-api/sdkwork-router-notary-backend-api.route-manifest.json',
+    file: 'sdks/_route-manifests/backend-api/sdkwork-routes-notary-backend-api.route-manifest.json',
     apiSurface: 'backend-api',
   },
 ];
@@ -24,25 +24,25 @@ const OPENAPI_FILES = [
     file: 'apis/app-api/notary/notary-app-api.openapi.json',
     apiSurface: 'app-api',
     manifestFile:
-      'sdks/_route-manifests/app-api/sdkwork-router-notary-app-api.route-manifest.json',
+      'sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json',
   },
   {
     file: 'apis/backend-api/notary/notary-backend-api.openapi.json',
     apiSurface: 'backend-api',
     manifestFile:
-      'sdks/_route-manifests/backend-api/sdkwork-router-notary-backend-api.route-manifest.json',
+      'sdks/_route-manifests/backend-api/sdkwork-routes-notary-backend-api.route-manifest.json',
   },
   {
     file: 'generated/openapi/notary-app-api.openapi.json',
     apiSurface: 'app-api',
     manifestFile:
-      'sdks/_route-manifests/app-api/sdkwork-router-notary-app-api.route-manifest.json',
+      'sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json',
   },
   {
     file: 'generated/openapi/notary-backend-api.openapi.json',
     apiSurface: 'backend-api',
     manifestFile:
-      'sdks/_route-manifests/backend-api/sdkwork-router-notary-backend-api.route-manifest.json',
+      'sdks/_route-manifests/backend-api/sdkwork-routes-notary-backend-api.route-manifest.json',
   },
 ];
 

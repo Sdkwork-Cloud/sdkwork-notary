@@ -1,29 +1,40 @@
-# Applications
+# apps/
 
-`sdkwork-notary` is primarily a **contract-first domain library** repository. It owns notary OpenAPI authorities, TypeScript SDK families, Rust route crates, and SQLx persistence.
+Application: sdkwork-notary
+Status: active
+Owner: SDKWork maintainers
+Specs: APPLICATION_SPEC.md, SDKWORK_WORKSPACE_SPEC.md
 
-## H5 application root
+## Primary App Surface
 
-The phone-first mobile client lives at `apps/sdkwork-notary-h5/` and follows `sdkwork-specs/APP_H5_ARCHITECTURE_SPEC.md`.
+The repository root is the primary runnable app surface.
+The repository root `sdkwork.app.config.json` governs the primary application manifest.
 
-- Root `src/` stays thin: bootstrap, auth gate, route assembly, and mobile shell only.
-- Business screens and services live in `packages/sdkwork-notary-h5-*`.
-- UI flows call `@sdkwork/notary-app-sdk` composed APIs through `sdkwork-notary-h5-core`.
+## Directory Index
 
-Run locally from the repository root:
+| Directory | Surface role | Runnable | Purpose | Entry |
+| --- | --- | --- | --- | --- |
+| sdkwork-notary-h5 | h5 | yes | SDKWork Notary h5 application root. | `sdkwork-notary-h5/` |
+| sdkwork-notary-pc | pc | yes | SDKWork Notary PC pc application root. | `sdkwork-notary-pc/` |
+
+## Allowed Content
+
+- Selected language/architecture application roots with `README.md`, `AGENTS.md`, `.sdkwork/`, and `specs/` when authored packages exist.
+- Architecture-local `packages/`, `config/`, `src/`, `lib/`, `App/`, or `entry/` directories required by the owning architecture standard.
+
+## Forbidden Content
+
+- Repository-root API contracts, generated SDK workspaces, Rust crates, or deployment descriptors moved under `apps/`.
+- Runtime secrets, user-private state, generated SDK transport output, or cross-application copied business logic.
+
+## Related Specs
+
+- `../sdkwork-specs/APPLICATION_SPEC.md`
+- `../sdkwork-specs/SDKWORK_WORKSPACE_SPEC.md`
+- `../sdkwork-specs/APP_CLIENT_ARCHITECTURE_ALIGNMENT_SPEC.md`
+
+## Verification
 
 ```bash
-pnpm dev:browser
+node ../sdkwork-specs/tools/check-apps-directory-index.mjs --root .
 ```
-
-Or from the H5 app root:
-
-```bash
-cd apps/sdkwork-notary-h5
-pnpm install
-pnpm dev
-```
-
-## Host integration
-
-Other host applications (for example IM PC) can still wire `sdkwork-router-notary-*` route crates and consume `sdkwork-notary-*` SDK families directly. Catalog and release metadata for the domain library remain at the repository root in `sdkwork.app.config.json`.

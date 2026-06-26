@@ -116,6 +116,7 @@ test('notary pc root keeps thin bootstrap and host-port based notary package', (
   const notaryService = read('packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts');
   const notaryRoutes = read('packages/sdkwork-notary-pc-shell/src/notaryRoutes.tsx');
   const notaryI18n = read('packages/sdkwork-notary-pc-notary/src/i18n/index.ts');
+  const notaryView = read('packages/sdkwork-notary-pc-notary/src/NotaryView.tsx');
   const host = read('packages/sdkwork-notary-pc-commons/src/host/notaryPcHost.ts');
   const core = read('packages/sdkwork-notary-pc-core/src/index.ts');
 
@@ -158,8 +159,10 @@ test('notary pc root keeps thin bootstrap and host-port based notary package', (
   assert(host.includes('configureNotaryPcHost'));
   assert(notaryService.includes('createNotaryPcService'));
   assert(notaryService.includes('getConfiguredNotaryAppSdkClient'));
-  assert(notaryI18n.includes('getNotaryPcHost().onLanguageChange'));
-  assert(notaryI18n.includes('resolveInitialLanguage'));
+  assert(notaryI18n.includes('resolveNotaryHostLanguage'));
+  assert(notaryI18n.includes('syncNotaryI18nFromHost'));
+  assert(notaryView.includes('I18nextProvider'));
+  assert(notaryView.includes('syncNotaryI18nFromHost'));
 
   for (const forbidden of ['fetch(', 'axios', 'Authorization', 'Access-Token', 'picsum.photos']) {
     assert(!notaryService.includes(forbidden), `NotaryService must not include ${forbidden}`);

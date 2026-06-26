@@ -223,8 +223,8 @@ function assertDualTokenOperation(operation, pathKey, apiSurface) {
   assert.equal(
     operation["x-sdkwork-source-route-crate"],
     apiSurface === "app-api"
-      ? "sdkwork-router-notary-app-api"
-      : "sdkwork-router-notary-backend-api",
+      ? "sdkwork-routes-notary-app-api"
+      : "sdkwork-routes-notary-backend-api",
     `${pathKey} must declare x-sdkwork-source-route-crate`,
   );
   assert(
