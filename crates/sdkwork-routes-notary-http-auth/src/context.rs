@@ -141,9 +141,9 @@ mod tests {
     #[test]
     fn resolves_explicit_organization_membership_scope() {
         let principal = WebRequestPrincipal::builder()
-            .tenant_id("tenant-1")
+            .tenant_id("100001")
             .organization_id(Some("org-1".to_owned()))
-            .user_id("user-1")
+            .user_id("1")
             .app_id("app-1")
             .data_scope(vec!["organization_membership:mem-123".to_owned()])
             .build();
@@ -157,7 +157,7 @@ mod tests {
     #[test]
     fn derives_stable_local_membership_when_organization_present() {
         let principal = WebRequestPrincipal::builder()
-            .tenant_id("tenant-1")
+            .tenant_id("100001")
             .organization_id(Some("org_notary_dev".to_owned()))
             .login_scope(WebLoginScope::Organization)
             .user_id("contract-test-user-001")
@@ -173,8 +173,8 @@ mod tests {
     #[test]
     fn leaves_membership_absent_without_organization_context() {
         let principal = WebRequestPrincipal::builder()
-            .tenant_id("tenant-1")
-            .user_id("user-1")
+            .tenant_id("100001")
+            .user_id("1")
             .app_id("app-1")
             .build();
 
@@ -195,15 +195,15 @@ mod tests {
         assert_eq!(context.app_id, crate::test_support::TEST_APP_ID);
         assert_eq!(
             context.membership_id,
-            Some("orgmem_org_1_user_1".to_owned()),
+            Some("orgmem_org_1_1".to_owned()),
         );
     }
 
     #[test]
     fn extracts_notary_permission_scopes_from_principal() {
         let principal = WebRequestPrincipal::builder()
-            .tenant_id("tenant-1")
-            .user_id("user-1")
+            .tenant_id("100001")
+            .user_id("1")
             .app_id("app-1")
             .permission_scope(vec![
                 "notary.cases.read".to_owned(),
@@ -224,9 +224,9 @@ mod tests {
         std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "production");
 
         let principal = WebRequestPrincipal::builder()
-            .tenant_id("tenant-1")
+            .tenant_id("100001")
             .organization_id(Some("org-1".to_owned()))
-            .user_id("user-1")
+            .user_id("1")
             .app_id("app-1")
             .build();
 

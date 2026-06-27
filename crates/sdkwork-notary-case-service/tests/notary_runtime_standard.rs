@@ -85,7 +85,7 @@ fn runtime_contract_declares_commerce_drive_iam_and_notary_storage_ports() {
 async fn opening_notary_business_creates_notary_drive_space_before_profile() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-owner".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -130,7 +130,7 @@ async fn opening_notary_business_creates_notary_drive_space_before_profile() {
 async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -178,7 +178,7 @@ async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
         created.primary_notary_membership_id,
         Some("member-notary-1".to_string())
     );
-    assert_eq!(created.primary_notary_user_id, Some("user-1".to_string()));
+    assert_eq!(created.primary_notary_user_id, Some("1".to_string()));
     assert_eq!(
         created.primary_notary_name,
         Some("Notary Staff".to_string())
@@ -214,7 +214,7 @@ async fn creating_case_reuses_sku_order_item_and_creates_notary_drive_folder() {
 async fn creating_case_compensates_when_party_insert_fails() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -286,7 +286,7 @@ async fn creating_case_compensates_when_party_insert_fails() {
 async fn creating_case_uses_frontend_drive_folder_name_when_provided() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -381,7 +381,7 @@ async fn creating_case_rejects_users_without_notary_business_access() {
 async fn creating_case_replays_existing_idempotency_key_without_duplicate_side_effects() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -512,7 +512,7 @@ async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() 
         applicant_name: "张三网络科技".to_string(),
         primary_notary_name: Some("李明".to_string()),
         primary_notary_membership_id: Some("member-notary-1".to_string()),
-        primary_notary_user_id: Some("user-1".to_string()),
+        primary_notary_user_id: Some("1".to_string()),
         status: NotaryCaseStatus::Processing,
         order_id: "order-1".to_string(),
         order_item_id: "item-1".to_string(),
@@ -556,7 +556,7 @@ async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() 
 async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -658,7 +658,7 @@ async fn app_operation_dispatcher_returns_frontend_case_details_from_notary_and_
             case_id: "case-1".to_string(),
             event_type: "notary.case.submitted".to_string(),
             event_title: "Case submitted".to_string(),
-            actor_user_id: Some("user-1".to_string()),
+            actor_user_id: Some("1".to_string()),
             occurred_at: "2026-06-10 10:00".to_string(),
         });
 
@@ -731,7 +731,7 @@ async fn app_operation_dispatcher_forwards_openapi_filters_to_repository_and_dri
             case_id: "case-1".to_string(),
             event_type: "notary.case.submitted".to_string(),
             event_title: "Case submitted".to_string(),
-            actor_user_id: Some("user-1".to_string()),
+            actor_user_id: Some("1".to_string()),
             occurred_at: "2026-06-10 10:00".to_string(),
         });
 
@@ -1057,7 +1057,7 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
     let mut appbase = RecordingAppbase::default()
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-owner".to_string(),
-            user_id: "user-1".to_string(),
+            user_id: "1".to_string(),
             organization_id: "org-1".to_string(),
             display_name: "Owner".to_string(),
             enterprise_verified: true,
@@ -1068,7 +1068,7 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
         })
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-notary-1".to_string(),
-            user_id: "user-1".to_string(),
+            user_id: "1".to_string(),
             organization_id: "org-1".to_string(),
             display_name: "李明".to_string(),
             enterprise_verified: true,
@@ -1178,7 +1178,7 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
 async fn app_operation_dispatcher_returns_access_and_sku_backed_matters() {
     let mut appbase = RecordingAppbase::default().with_member(AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -1249,7 +1249,7 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
     let mut appbase = RecordingAppbase::default()
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-notary-1".to_string(),
-            user_id: "user-1".to_string(),
+            user_id: "1".to_string(),
             organization_id: "org-1".to_string(),
             display_name: "李明".to_string(),
             enterprise_verified: true,
@@ -1325,7 +1325,7 @@ async fn app_operation_dispatcher_lists_notary_staff_and_assigns_selected_member
 
     assert_eq!(assignment["caseId"], "case-1");
     assert_eq!(assignment["organizationMembershipId"], "member-notary-1");
-    assert_eq!(assignment["userId"], "user-1");
+    assert_eq!(assignment["userId"], "1");
     assert_eq!(assignment["assignmentRole"], "primary_notary");
     assert_eq!(
         repository.events(),
@@ -1341,7 +1341,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
     let mut appbase = RecordingAppbase::default()
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-owner".to_string(),
-            user_id: "user-1".to_string(),
+            user_id: "1".to_string(),
             organization_id: "org-1".to_string(),
             display_name: "Owner".to_string(),
             enterprise_verified: true,
@@ -1352,7 +1352,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         })
         .with_member(AppbaseOrganizationMember {
             membership_id: "member-notary-1".to_string(),
-            user_id: "user-1".to_string(),
+            user_id: "1".to_string(),
             organization_id: "org-1".to_string(),
             display_name: "李明".to_string(),
             enterprise_verified: true,
@@ -1542,9 +1542,9 @@ async fn app_operation_dispatcher_rejects_missing_operation_permission() {
 
 fn runtime_context() -> NotaryRuntimeContext {
     NotaryRuntimeContext {
-        tenant_id: "tenant-1".to_string(),
+        tenant_id: "100001".to_string(),
         organization_id: Some("org-1".to_string()),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         membership_id: Some("member-notary-1".to_string()),
         session_id: "session-1".to_string(),
         app_id: "sdkwork-im-pc".to_string(),
@@ -1555,7 +1555,7 @@ fn runtime_context() -> NotaryRuntimeContext {
 fn notary_staff_member() -> AppbaseOrganizationMember {
     AppbaseOrganizationMember {
         membership_id: "member-notary-1".to_string(),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         organization_id: "org-1".to_string(),
         display_name: "Notary Staff".to_string(),
         enterprise_verified: true,
@@ -1584,7 +1584,7 @@ fn sample_case_record(case_id: &str) -> NotaryCaseRecord {
         title: "Electronic contract preservation".to_string(),
         applicant_name: "Zhang San Network".to_string(),
         primary_notary_membership_id: Some("member-notary-1".to_string()),
-        primary_notary_user_id: Some("user-1".to_string()),
+        primary_notary_user_id: Some("1".to_string()),
         primary_notary_name: Some("Li Ming".to_string()),
         status: NotaryCaseStatus::Processing,
         order_id: "order-1".to_string(),

@@ -44,9 +44,9 @@ async fn backend_runtime_service_dispatches_route_operations_to_notary_runtime()
 
 fn request_context() -> NotaryRequestContext {
     NotaryRequestContext {
-        tenant_id: "tenant-1".to_string(),
+        tenant_id: "100001".to_string(),
         organization_id: Some("org-1".to_string()),
-        user_id: "user-1".to_string(),
+        user_id: "1".to_string(),
         membership_id: Some("member-admin-1".to_string()),
         session_id: "session-1".to_string(),
         app_id: "sdkwork-admin".to_string(),
@@ -64,7 +64,7 @@ impl RecordingAppbase {
         Self {
             members: vec![AppbaseOrganizationMember {
                 membership_id: "member-admin-1".to_string(),
-                user_id: "user-1".to_string(),
+                user_id: "1".to_string(),
                 organization_id: "org-1".to_string(),
                 display_name: "Admin".to_string(),
                 enterprise_verified: true,
