@@ -3,9 +3,9 @@ use sdkwork_web_core::{
     WebTransportFacts,
 };
 
-pub const TEST_TENANT_ID: &str = "tenant-1";
+pub const TEST_TENANT_ID: &str = "100001";
 pub const TEST_ORGANIZATION_ID: &str = "org-1";
-pub const TEST_USER_ID: &str = "user-1";
+pub const TEST_USER_ID: &str = "1";
 pub const TEST_SESSION_ID: &str = "session-1";
 pub const TEST_APP_ID: &str = "sdkwork-im-pc";
 
@@ -30,6 +30,7 @@ pub fn test_web_request_context() -> WebRequestContext {
             access_token_present: true,
             api_key_present: false,
             oauth_bearer_present: false,
+            agent_token_present: false,
         },
         locale: None,
         client_kind: None,

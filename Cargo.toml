@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "crates/sdkwork-notary-gateway-assembly",
+    "crates/sdkwork-notary-embedded-bootstrap",
   "crates/sdkwork-notary-database-host",
   "crates/sdkwork-notary-case-contract",
   "crates/sdkwork-notary-case-service",

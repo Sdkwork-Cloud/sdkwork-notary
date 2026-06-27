@@ -115,14 +115,22 @@ where
 
     let app_service: Arc<dyn NotaryAppApiServicePort> = Arc::new(NotaryAppRuntimeService::new(
         IamSqlxAppbasePort::new(iam_pool.clone(), runtime.development_mode),
-        CommerceOrderPort::new(commerce_pool.clone()),
+        CommerceOrderPort::new(
+            commerce_pool.clone(),
+            runtime.tenant_id.as_str(),
+            runtime.operator_user_id.as_str(),
+        ),
         app_drive,
         app_repository,
     ));
     let backend_service: Arc<dyn NotaryBackendApiServicePort> = Arc::new(
         NotaryBackendRuntimeService::new(
             IamSqlxAppbasePort::new(iam_pool, runtime.development_mode),
-            CommerceOrderPort::new(commerce_pool),
+            CommerceOrderPort::new(
+                commerce_pool,
+                runtime.tenant_id.as_str(),
+                runtime.operator_user_id.as_str(),
+            ),
             backend_drive,
             backend_repository,
         ),

@@ -13,3 +13,7 @@ target-codex-test/
 
 .DS_Store
 Thumbs.db
+
+# SDKWork local runtime state
+.runtime/
+**/.runtime/

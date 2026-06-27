@@ -107,7 +107,7 @@
       "library": "sdkwork_routes_notary_backend_api"
     },
     "cloudGateway": {
-      "crate": "sdkwork-api-cloud-gateway-api-server",
+      "crate": "sdkwork-api-cloud-gateway",
       "binary": "sdkwork-api-cloud-gateway",
       "repository": "sdkwork-api-cloud-gateway"
     }
@@ -126,7 +126,7 @@
         "processes": [
           {
             "id": "platform.api-gateway",
-            "crate": "sdkwork-api-cloud-gateway-api-server",
+            "crate": "sdkwork-api-cloud-gateway",
             "binary": "sdkwork-api-cloud-gateway",
             "repository": "sdkwork-api-cloud-gateway",
             "required": false
@@ -140,7 +140,7 @@
         "processes": [
           {
             "id": "platform.api-gateway",
-            "crate": "sdkwork-api-cloud-gateway-api-server",
+            "crate": "sdkwork-api-cloud-gateway",
             "binary": "sdkwork-api-cloud-gateway",
             "repository": "sdkwork-api-cloud-gateway",
             "required": false

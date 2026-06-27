@@ -11,7 +11,7 @@ use sqlx::SqlitePool;
 #[tokio::test]
 async fn sqlite_repository_persists_profile_case_parties_and_events_without_dependency_tables() {
     let pool = migrated_pool().await;
-    let repository = SqliteNotaryCaseRepository::new(pool.clone(), "tenant-1", "user-1");
+    let repository = SqliteNotaryCaseRepository::new(pool.clone(), "100001", "1");
 
     let profile = repository
         .upsert_organization_profile("org-1", "drive-space-1", "notary")

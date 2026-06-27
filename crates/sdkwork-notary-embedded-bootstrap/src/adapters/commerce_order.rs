@@ -23,10 +23,16 @@ enum OrderStore {
 pub struct CommerceOrderPort {
     store: OrderStore,
     query_pool: DatabasePool,
+    tenant_id: String,
+    owner_user_id: String,
 }
 
 impl CommerceOrderPort {
-    pub fn new(pool: DatabasePool) -> Self {
+    pub fn new(
+        pool: DatabasePool,
+        tenant_id: impl Into<String>,
+        owner_user_id: impl Into<String>,
+    ) -> Self {
         let store = match &pool {
             DatabasePool::Sqlite(sqlite_pool, _) => {
                 OrderStore::Sqlite(SqliteCommerceOrderStore::new(sqlite_pool.clone()))
@@ -38,6 +44,8 @@ impl CommerceOrderPort {
         Self {
             store,
             query_pool: pool,
+            tenant_id: tenant_id.into(),
+            owner_user_id: owner_user_id.into(),
         }
     }
 }
@@ -53,9 +61,9 @@ impl CommercePort for CommerceOrderPort {
         let request_no = format!("notary-{}", slug(&command.idempotency_key));
         let session_idempotency = format!("{}-session", command.idempotency_key);
         let session_command = CreateCheckoutSessionCommand::new(
-            command.tenant_id.as_str(),
+            self.tenant_id.as_str(),
             Some(command.organization_id.as_str()),
-            command.owner_user_id.as_str(),
+            self.owner_user_id.as_str(),
             "CNY",
             vec![line],
             request_no.as_str(),
@@ -75,9 +83,9 @@ impl CommercePort for CommerceOrderPort {
         };
 
         let quote_command = CreateCheckoutQuoteCommand::new(
-            command.tenant_id.as_str(),
+            self.tenant_id.as_str(),
             Some(command.organization_id.as_str()),
-            command.owner_user_id.as_str(),
+            self.owner_user_id.as_str(),
             session.checkout_session_id.as_str(),
             request_no.as_str(),
             format!("{}-quote", command.idempotency_key).as_str(),
@@ -100,9 +108,9 @@ impl CommercePort for CommerceOrderPort {
         }
 
         let order_command = CreateOwnerOrderCommand::new(
-            command.tenant_id.as_str(),
+            self.tenant_id.as_str(),
             Some(command.organization_id.as_str()),
-            command.owner_user_id.as_str(),
+            self.owner_user_id.as_str(),
             session.checkout_session_id.as_str(),
             request_no.as_str(),
             command.idempotency_key.as_str(),
@@ -121,7 +129,7 @@ impl CommercePort for CommerceOrderPort {
         };
 
         let (order_item_id, currency_code) =
-            load_order_item(&self.query_pool, &command.tenant_id, &outcome.order_id).await?;
+            load_order_item(&self.query_pool, self.tenant_id.as_str(), &outcome.order_id).await?;
 
         Ok(CommerceOrderReference {
             order_id: outcome.order_id,

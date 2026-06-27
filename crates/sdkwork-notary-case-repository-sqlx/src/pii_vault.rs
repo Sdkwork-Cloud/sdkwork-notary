@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn pii_vault_round_trips_sensitive_values() {
         let _guard = ENV_TEST_LOCK.lock().expect("env test lock");
-        let vault = PiiVault::for_tenant("tenant-1").expect("vault");
+        let vault = PiiVault::for_tenant("100001").expect("vault");
         let encrypted = vault.encrypt("110101199001011234").expect("encrypt");
         assert!(encrypted.starts_with("notary-vault:v1:"));
         let decrypted = vault.decrypt(&encrypted).expect("decrypt");
@@ -116,7 +116,7 @@ mod tests {
         std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "production");
         std::env::remove_var("NOTARY_PII_VAULT_KEY");
 
-        match PiiVault::for_tenant("tenant-1") {
+        match PiiVault::for_tenant("100001") {
             Ok(_) => panic!("production vault must fail without NOTARY_PII_VAULT_KEY"),
             Err(error) => assert!(error.message().contains("NOTARY_PII_VAULT_KEY is required")),
         }
