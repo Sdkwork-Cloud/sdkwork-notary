@@ -21,6 +21,6 @@ pub fn gateway_route_manifest() -> HttpRouteManifest {
     notary_backend_api_http_route_manifest()
 }
 
-pub fn gateway_mount(service: Arc<dyn NotaryBackendApiServicePort>,) -> Router {
+pub fn gateway_mount(service: Arc<dyn NotaryBackendApiServicePort>) -> Router {
     build_sdkwork_notary_backend_api_router(service)
 }

@@ -72,5 +72,13 @@ declare module '@sdkwork/auth-pc-react' {
     viewportMode?: string;
   }
 
+  export interface SdkworkSessionAuthBrowserRootProps {
+    authLoginPath?: string;
+    children: ReactNode;
+    copy?: Record<string, string>;
+    onBeforeLoginRedirect?: (detail: unknown) => void;
+  }
+
   export const SdkworkIamAuthRoutes: ComponentType<SdkworkIamAuthRoutesProps>;
+  export const SdkworkSessionAuthBrowserRoot: ComponentType<SdkworkSessionAuthBrowserRootProps>;
 }

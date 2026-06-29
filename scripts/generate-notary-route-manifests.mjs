@@ -47,10 +47,17 @@ const SURFACES = [
 
 const HTTP_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete', 'head', 'options']);
 
+function snakeSegmentToCamel(segment) {
+  return segment.replace(/_([a-z])/g, (_inner, letter) => letter.toUpperCase());
+}
+
 function toOpenApiPath(axumPath) {
-  return axumPath.replace(/:([a-z0-9_]+)/g, (_match, segment) => {
-    const camel = segment.replace(/_([a-z])/g, (_inner, letter) => letter.toUpperCase());
-    return `{${camel}}`;
+  const withColonParams = axumPath.replace(/:([a-z0-9_]+)/g, (_match, segment) => {
+    return `{${snakeSegmentToCamel(segment)}}`;
+  });
+
+  return withColonParams.replace(/\{([a-z0-9_]+)\}/g, (_match, segment) => {
+    return `{${snakeSegmentToCamel(segment)}}`;
   });
 }
 
@@ -167,7 +174,8 @@ function compactRoutesForEmbeddedManifest(routes) {
 }
 
 async function writeEmbeddedManifest(surface, manifest) {
-  const manifestSource = await readFile(path.join(ROOT, surface.manifestRs), 'utf8');
+  const manifestPath = path.join(ROOT, surface.manifestRs);
+  const manifestSource = await readFile(manifestPath, 'utf8');
   const embedded = JSON.stringify(
     {
       schemaVersion: manifest.schemaVersion,
@@ -186,17 +194,26 @@ async function writeEmbeddedManifest(surface, manifest) {
     2,
   );
 
-  const replacement = `pub fn ${surface.manifestFn}() -> &'static str {\n    r#"${embedded}\n"#\n}`;
-  const updated = manifestSource.replace(
-    new RegExp(`pub fn ${surface.manifestFn}\\(\\) -> &'static str \\{[\\s\\S]*?\\n\\}`, 'm'),
-    replacement,
-  );
-
-  if (updated === manifestSource) {
-    throw new Error(`Failed to update embedded manifest in ${surface.manifestRs}`);
+  const functionHeader = `pub fn ${surface.manifestFn}() -> &'static str {`;
+  const functionStart = manifestSource.indexOf(functionHeader);
+  if (functionStart === -1) {
+    throw new Error(`Missing ${surface.manifestFn} in ${surface.manifestRs}`);
   }
 
-  await writeFile(path.join(ROOT, surface.manifestRs), updated, 'utf8');
+  const rawStringStart = manifestSource.indexOf('r#"', functionStart);
+  const rawStringEnd = manifestSource.indexOf('"#', rawStringStart + 3);
+  const functionEnd = manifestSource.indexOf('\n}', rawStringEnd);
+  if (rawStringStart === -1 || rawStringEnd === -1 || functionEnd === -1) {
+    throw new Error(`Malformed embedded manifest function in ${surface.manifestRs}`);
+  }
+
+  const replacement = `${functionHeader}\n    r#"${embedded}\n"#\n}`;
+  const updated =
+    manifestSource.slice(0, functionStart)
+    + replacement
+    + manifestSource.slice(functionEnd + 2);
+
+  await writeFile(manifestPath, updated, 'utf8');
 }
 
 async function main() {

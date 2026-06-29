@@ -12,17 +12,9 @@ const defaultImPcRoot = path.resolve(workspaceRoot, "..", "sdkwork-im", "apps", 
 
 export const imPcRoot = process.env.SDKWORK_IM_PC_ROOT
   ? path.resolve(process.env.SDKWORK_IM_PC_ROOT)
-  : process.env.SDKWORK_CHAT_PC_ROOT
-    ? path.resolve(process.env.SDKWORK_CHAT_PC_ROOT)
-    : defaultImPcRoot;
-
-/** @deprecated Use imPcRoot. Kept for existing contract tests. */
-export const chatPcRoot = imPcRoot;
+  : defaultImPcRoot;
 
 export const imPcAvailable = existsSync(path.join(imPcRoot, "package.json"));
-
-/** @deprecated Use imPcAvailable. */
-export const chatPcAvailable = imPcAvailable;
 
 export function imPcTest(name, fn) {
   if (!imPcAvailable) {
@@ -34,9 +26,4 @@ export function imPcTest(name, fn) {
     return;
   }
   test(name, fn);
-}
-
-/** @deprecated Use imPcTest. */
-export function chatPcTest(name, fn) {
-  imPcTest(name, fn);
 }

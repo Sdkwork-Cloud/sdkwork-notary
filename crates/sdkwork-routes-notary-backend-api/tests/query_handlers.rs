@@ -23,31 +23,29 @@ async fn backend_list_handlers_forward_query_filters_to_service_body() {
         State(state.clone()),
         app_ctx.clone(),
         Query(BTreeMap::from([
-            ("organization_id".to_string(), "org-1".to_string()),
+            ("organization_id".to_string(), "200001".to_string()),
             ("status".to_string(), "PROCESSING".to_string()),
             ("q".to_string(), "contract".to_string()),
             ("page_size".to_string(), "25".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let _ = handlers::list_staff(
         State(state.clone()),
         app_ctx.clone(),
         Query(BTreeMap::from([
-            ("organization_id".to_string(), "org-1".to_string()),
+            ("organization_id".to_string(), "200001".to_string()),
             ("staff_role".to_string(), "notary".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let _ = handlers::retrieve_case_summary(
         State(state),
         app_ctx,
         Query(BTreeMap::from([
-            ("organization_id".to_string(), "org-1".to_string()),
+            ("organization_id".to_string(), "200001".to_string()),
             (
                 "created_after".to_string(),
                 "2026-06-01T00:00:00Z".to_string(),
@@ -58,22 +56,21 @@ async fn backend_list_handlers_forward_query_filters_to_service_body() {
             ),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let calls = service.calls.lock().unwrap();
     assert_eq!(calls[0].operation_id, "notary.cases.management.list");
-    assert_eq!(calls[0].body["organization_id"], "org-1");
+    assert_eq!(calls[0].body["organization_id"], "200001");
     assert_eq!(calls[0].body["status"], "PROCESSING");
     assert_eq!(calls[0].body["q"], "contract");
     assert_eq!(calls[0].body["page_size"], "25");
 
     assert_eq!(calls[1].operation_id, "notary.staff.list");
-    assert_eq!(calls[1].body["organization_id"], "org-1");
+    assert_eq!(calls[1].body["organization_id"], "200001");
     assert_eq!(calls[1].body["staff_role"], "notary");
 
     assert_eq!(calls[2].operation_id, "notary.reports.caseSummary.retrieve");
-    assert_eq!(calls[2].body["organization_id"], "org-1");
+    assert_eq!(calls[2].body["organization_id"], "200001");
     assert_eq!(calls[2].body["created_after"], "2026-06-01T00:00:00Z");
     assert_eq!(calls[2].body["created_before"], "2026-06-10T23:59:59Z");
 }
@@ -88,32 +85,30 @@ async fn backend_profile_and_matter_list_handlers_forward_query_filters_to_servi
         State(state.clone()),
         app_ctx.clone(),
         Query(BTreeMap::from([
-            ("organization_id".to_string(), "org-1".to_string()),
+            ("organization_id".to_string(), "200001".to_string()),
             ("page_size".to_string(), "10".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let _ = handlers::list_matters(
         State(state),
         app_ctx,
         Query(BTreeMap::from([
-            ("organization_id".to_string(), "org-1".to_string()),
+            ("organization_id".to_string(), "200001".to_string()),
             ("q".to_string(), "contract".to_string()),
             ("page_size".to_string(), "20".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let calls = service.calls.lock().unwrap();
     assert_eq!(calls[0].operation_id, "notary.organizationProfiles.list");
-    assert_eq!(calls[0].body["organization_id"], "org-1");
+    assert_eq!(calls[0].body["organization_id"], "200001");
     assert_eq!(calls[0].body["page_size"], "10");
 
     assert_eq!(calls[1].operation_id, "notary.matters.management.list");
-    assert_eq!(calls[1].body["organization_id"], "org-1");
+    assert_eq!(calls[1].body["organization_id"], "200001");
     assert_eq!(calls[1].body["q"], "contract");
     assert_eq!(calls[1].body["page_size"], "20");
 }

@@ -23,12 +23,12 @@ const routeCrates = [
       "/app/v3/api/notary/matters",
       "/app/v3/api/notary/staff",
       "/app/v3/api/notary/cases",
-      "/app/v3/api/notary/cases/:case_id",
-      "/app/v3/api/notary/cases/:case_id/assignments",
-      "/app/v3/api/notary/cases/:case_id/files",
-      "/app/v3/api/notary/cases/:case_id/events",
-      "/app/v3/api/notary/cases/:case_id/parties/:party_id/video_invites",
-      "/app/v3/api/notary/cases/:case_id/parties/:party_id/signature_invites",
+      "/app/v3/api/notary/cases/{case_id}",
+      "/app/v3/api/notary/cases/{case_id}/assignments",
+      "/app/v3/api/notary/cases/{case_id}/files",
+      "/app/v3/api/notary/cases/{case_id}/events",
+      "/app/v3/api/notary/cases/{case_id}/parties/{party_id}/video_invites",
+      "/app/v3/api/notary/cases/{case_id}/parties/{party_id}/signature_invites",
     ],
   },
   {
@@ -59,6 +59,14 @@ function readJson(relativePath) {
   return JSON.parse(readText(relativePath));
 }
 
+function workspaceMembers(manifest) {
+  const match = manifest.match(/members\s*=\s*\[([\s\S]*?)\]/);
+  if (!match) {
+    return [];
+  }
+  return [...match[1].matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
+}
+
 function openApiOperations(relativePath) {
   const openapi = readJson(relativePath);
   const operations = [];
@@ -84,8 +92,12 @@ test("notary Rust route crates are workspace members with standard component spe
       workspaceManifest.includes(`"${routeCrate.root}"`),
       `${routeCrate.packageName} must be a Cargo workspace member`,
     );
-    assert(!workspaceManifest.includes("packages/native-rust"));
-    assert(!workspaceManifest.includes("sdkwork-routes-notary"));
+    const members = workspaceMembers(workspaceManifest);
+    assert(!members.some((member) => member.includes("packages/native-rust")));
+    assert(
+      !members.includes("crates/sdkwork-routes-notary"),
+      "legacy monolithic sdkwork-routes-notary crate must not be a workspace member",
+    );
     for (const relativePath of [
       "Cargo.toml",
       "README.md",

@@ -73,31 +73,22 @@ function writePersistedSessionRawValue(value: string | null): void {
 
 function readPersistedTokens(): AuthTokens | undefined {
   const raw = readPersistedSessionRawValue();
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as NotaryPcSession;
-      if (parsed.accessToken || parsed.authToken) {
-        return {
-          accessToken: parsed.accessToken,
-          authToken: parsed.authToken,
-        };
-      }
-    } catch {
-      // Fall through to legacy token keys.
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as NotaryPcSession;
+    if (!parsed.accessToken && !parsed.authToken) {
+      return undefined;
     }
-  }
-
-  if (typeof window === 'undefined') {
+    return {
+      accessToken: parsed.accessToken,
+      authToken: parsed.authToken,
+    };
+  } catch {
     return undefined;
   }
-
-  const accessToken = window.sessionStorage.getItem(ACCESS_TOKEN_KEY) ?? undefined;
-  const authToken = window.sessionStorage.getItem(AUTH_TOKEN_KEY) ?? undefined;
-  if (!accessToken && !authToken) {
-    return undefined;
-  }
-
-  return { accessToken, authToken };
 }
 
 function readInitialTokens(): AuthTokens | undefined {

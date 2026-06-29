@@ -9,17 +9,41 @@
     "protocol": "http",
     "packageName": "sdkwork-notary-app-sdk-generated-typescript"
   },
-  "changeFingerprint": "fc8962ee5b28f56b914a3e2d658b313a89b4be0497d10d83e815e32fc1d41b63",
+  "changeFingerprint": "e47f3bb698b3357d8c984951c38242a8c2a2bffd774742712f6d4c3dc0805210",
   "changes": {
     "createdGeneratedFiles": [
-      "src/types/monthly-report.ts",
-      "src/types/notary-statistics.ts"
+      "src/types/notary-access-retrieve-response.ts",
+      "src/types/notary-cases-assignments-create-response201.ts",
+      "src/types/notary-cases-create-response201.ts",
+      "src/types/notary-cases-download-packages-create-response201.ts",
+      "src/types/notary-cases-events-list-response.ts",
+      "src/types/notary-cases-files-create-response201.ts",
+      "src/types/notary-cases-files-list-response.ts",
+      "src/types/notary-cases-list-response.ts",
+      "src/types/notary-cases-parties-create-response201.ts",
+      "src/types/notary-cases-parties-list-response.ts",
+      "src/types/notary-cases-parties-signature-invites-create-response201.ts",
+      "src/types/notary-cases-parties-video-invites-create-response201.ts",
+      "src/types/notary-dashboard-statistics-retrieve-response.ts",
+      "src/types/notary-matters-list-response.ts",
+      "src/types/notary-reports-monthly-retrieve-response.ts",
+      "src/types/notary-staff-list-response.ts",
+      "src/types/sdk-work-api-response.ts",
+      "src/types/sdk-work-command-data.ts",
+      "src/types/sdk-work-command-response.ts",
+      "src/types/sdk-work-list-response.ts",
+      "src/types/sdk-work-page-data.ts",
+      "src/types/sdk-work-platform-error-code.ts",
+      "src/types/sdk-work-resource-data.ts",
+      "src/types/sdk-work-resource-response.ts"
     ],
     "updatedGeneratedFiles": [
-      "README.md",
       "src/api/notary.ts",
       "src/http/client.ts",
-      "src/types/index.ts"
+      "src/types/field-error.ts",
+      "src/types/index.ts",
+      "src/types/page-info.ts",
+      "src/types/problem-detail.ts"
     ],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
@@ -30,6 +54,7 @@
       "CHANGELOG.md",
       "LICENSE",
       "package.json",
+      "README.md",
       "sdkwork-sdk.json",
       "src/api/base.ts",
       "src/api/index.ts",
@@ -48,7 +73,7 @@
       "src/types/create-party-signature-invite-request.ts",
       "src/types/create-party-signature-request.ts",
       "src/types/create-party-video-invite-request.ts",
-      "src/types/field-error.ts",
+      "src/types/monthly-report.ts",
       "src/types/notary-access.ts",
       "src/types/notary-case-assignment.ts",
       "src/types/notary-case-command-request.ts",
@@ -64,11 +89,10 @@
       "src/types/notary-party-list.ts",
       "src/types/notary-staff-member-page.ts",
       "src/types/notary-staff-member.ts",
-      "src/types/page-info.ts",
+      "src/types/notary-statistics.ts",
       "src/types/party-signature-invite.ts",
       "src/types/party-video-invite.ts",
       "src/types/party.ts",
-      "src/types/problem-detail.ts",
       "src/types/reject-notary-case-request.ts",
       "src/types/timeline-event-list.ts",
       "src/types/timeline-event.ts",
@@ -82,17 +106,14 @@
       "custom/build-runtime.mjs",
       "custom/README.md"
     ],
-    "backedUpFiles": [
-      "src/http/client.ts"
-    ]
+    "backedUpFiles": []
   },
   "impact": {
     "schemaVersion": 1,
     "areas": [
       "api-surface",
       "models",
-      "runtime",
-      "documentation"
+      "runtime"
     ],
     "details": [
       {
@@ -105,9 +126,34 @@
       {
         "area": "models",
         "paths": [
+          "src/types/field-error.ts",
           "src/types/index.ts",
-          "src/types/monthly-report.ts",
-          "src/types/notary-statistics.ts"
+          "src/types/notary-access-retrieve-response.ts",
+          "src/types/notary-cases-assignments-create-response201.ts",
+          "src/types/notary-cases-create-response201.ts",
+          "src/types/notary-cases-download-packages-create-response201.ts",
+          "src/types/notary-cases-events-list-response.ts",
+          "src/types/notary-cases-files-create-response201.ts",
+          "src/types/notary-cases-files-list-response.ts",
+          "src/types/notary-cases-list-response.ts",
+          "src/types/notary-cases-parties-create-response201.ts",
+          "src/types/notary-cases-parties-list-response.ts",
+          "src/types/notary-cases-parties-signature-invites-create-response201.ts",
+          "src/types/notary-cases-parties-video-invites-create-response201.ts",
+          "src/types/notary-dashboard-statistics-retrieve-response.ts",
+          "src/types/notary-matters-list-response.ts",
+          "src/types/notary-reports-monthly-retrieve-response.ts",
+          "src/types/notary-staff-list-response.ts",
+          "src/types/page-info.ts",
+          "src/types/problem-detail.ts",
+          "src/types/sdk-work-api-response.ts",
+          "src/types/sdk-work-command-data.ts",
+          "src/types/sdk-work-command-response.ts",
+          "src/types/sdk-work-list-response.ts",
+          "src/types/sdk-work-page-data.ts",
+          "src/types/sdk-work-platform-error-code.ts",
+          "src/types/sdk-work-resource-data.ts",
+          "src/types/sdk-work-resource-response.ts"
         ]
       },
       {
@@ -115,27 +161,21 @@
         "paths": [
           "src/http/client.ts"
         ]
-      },
-      {
-        "area": "documentation",
-        "paths": [
-          "README.md"
-        ]
       }
     ],
     "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, runtime, documentation. Verification is required."
+    "summary": "Detected impact areas: api-surface, models, runtime. Verification is required."
   },
   "verificationPlan": {
     "shouldRun": true,
     "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, runtime, documentation. Verification is required. Run the required verification commands now against the generated SDK output.",
+    "summary": "Detected impact areas: api-surface, models, runtime. Verification is required. Run the required verification commands now against the generated SDK output.",
     "steps": [
       {
         "id": "check",
         "title": "Unified package check",
         "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime, documentation.",
+        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-notary\\sdks\\sdkwork-notary-app-sdk\\sdkwork-notary-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -153,7 +193,7 @@
         "id": "build",
         "title": "Unified package build",
         "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, runtime, documentation.",
+        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, runtime.",
         "workingDirectory": "E:\\sdkwork-space\\sdkwork-notary\\sdks\\sdkwork-notary-app-sdk\\sdkwork-notary-app-sdk-typescript\\generated\\server-openapi",
         "command": "node",
         "args": [
@@ -171,14 +211,12 @@
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "high",
+    "riskLevel": "medium",
     "nextAction": "verify",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
     "summary": "Changes have been applied. Run the required verification plan now.",
     "reasons": [
-      "backed-up-generated-files",
-      "manual-review-required",
       "verification-required"
     ]
   },

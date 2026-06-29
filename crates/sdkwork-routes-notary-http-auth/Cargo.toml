@@ -11,5 +11,8 @@ name = "sdkwork_routes_notary_http_auth"
 axum.workspace = true
 http.workspace = true
 sdkwork-iam-web-adapter.workspace = true
+sdkwork-utils-rust.workspace = true
 sdkwork-web-axum.workspace = true
 sdkwork-web-core.workspace = true
+serde_json = "1.0"
+tokio = { version = "1.52", features = ["macros", "rt"] }

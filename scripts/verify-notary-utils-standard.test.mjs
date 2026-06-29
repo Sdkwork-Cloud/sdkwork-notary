@@ -25,7 +25,7 @@ test('declares sdkwork-utils workspace dependency and release checkout', () => {
 
 test('service and contract validation use sdkwork-utils-rust is_blank', () => {
   const serviceSource = read('crates/sdkwork-notary-case-service/src/service.rs');
-  assert.match(serviceSource, /use sdkwork_utils_rust::is_blank;/);
+  assert.match(serviceSource, /sdkwork_utils_rust::\{[^}]*\bis_blank\b/);
   assert.match(serviceSource, /is_blank\(Some\(context\.tenant_id\.as_str\(\)\)\)/);
   assert.match(serviceSource, /add_minutes/);
   assert.doesNotMatch(serviceSource, /\.trim\(\)\.is_empty\(\)/);

@@ -4,7 +4,7 @@ use sdkwork_notary_case_contract::{
     now_compact_date, now_iso8601, NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus,
     NotaryRuntimeContext, NotaryServiceContract, NotaryServiceError,
 };
-use sdkwork_utils_rust::is_blank;
+use sdkwork_utils_rust::{is_blank, PageInfo, PageMode};
 use serde_json::{json, Value};
 
 use crate::{
@@ -13,11 +13,12 @@ use crate::{
     CommerceMatterListQuery, CommerceMatterRecord, CommerceMatterUpdateCommand,
     DriveCreateDownloadPackageCommand, DriveCreateFolderCommand, DriveCreateMonthlyReportCommand,
     DriveCreatePartySignatureInviteCommand, DriveCreatePartyVideoInviteCommand,
-    DriveCreateSpaceCommand, DriveDownloadPackageReference, DriveListNodesQuery,
-    DriveNodeReference, NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord,
-    NotaryCaseEventListQuery, NotaryCaseEventRecord, NotaryCaseListPage, NotaryCaseListQuery,
-    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand,
-    NotaryPartyRecord, NotaryPartyUpdateCommand, NotaryRuntimePorts, NOTARY_CASE_REPOSITORY_PORT,
+    DriveCreateSpaceCommand, DriveDownloadPackageReference, DriveListNodesPage,
+    DriveListNodesQuery, DriveNodeReference, DriveRegisterCaseFileCommand,
+    NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListQuery,
+    NotaryCaseEventRecord, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseUpdateCommand,
+    NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand, NotaryPartyRecord,
+    NotaryPartyUpdateCommand, NotaryRuntimePorts, NOTARY_CASE_REPOSITORY_PORT,
     NOTARY_COMMERCE_PORT, NOTARY_DRIVE_PORT, NOTARY_IAM_PORT,
 };
 
@@ -308,6 +309,7 @@ pub async fn list_case_files(
             cursor: None,
         })
         .await
+        .map(|page| page.items)
 }
 
 pub async fn handle_notary_app_operation(
@@ -365,9 +367,10 @@ pub async fn handle_notary_app_operation(
                     .iter()
                     .map(case_record_to_value)
                     .collect::<Vec<_>>(),
-                "pageInfo": {
-                    "hasMore": page.has_more
-                }
+                "pageInfo": cursor_page_info(
+                    page.has_more,
+                    page.items.last().map(|record| record.case_id.as_str()),
+                )
             }))
         }
         "notary.cases.retrieve" => {
@@ -445,7 +448,8 @@ pub async fn handle_notary_app_operation(
                 "items": parties
                     .iter()
                     .map(party_record_to_value)
-                    .collect::<Vec<_>>()
+                    .collect::<Vec<_>>(),
+                "pageInfo": cursor_page_info(false, None),
             }))
         }
         "notary.cases.parties.create" => {
@@ -543,7 +547,7 @@ pub async fn handle_notary_app_operation(
         "notary.cases.files.list" => {
             let case_id = path_param(&path_params, "caseId")?;
             let record = load_case_for_context(context, ports, case_id).await?;
-            let files = ports
+            let file_page = ports
                 .drive
                 .list_nodes(DriveListNodesQuery {
                     space_id: record.drive_space_id.clone(),
@@ -555,18 +559,32 @@ pub async fn handle_notary_app_operation(
                 })
                 .await?;
             Ok(json!({
-                "items": files
+                "items": file_page
+                    .items
                     .iter()
                     .map(|file| drive_node_to_document_value(file, &record))
                     .collect::<Vec<_>>(),
-                "pageInfo": {
-                    "hasMore": false
-                }
+                "pageInfo": drive_list_page_info(&file_page)
             }))
         }
         "notary.cases.files.create" => {
             let case_id = path_param(&path_params, "caseId")?;
             let record = load_case_for_staff_mutation(context, ports, case_id).await?;
+            let node_id = string_field(&body, &["driveNodeId", "drive_node_id", "nodeId"])
+                .ok_or_else(|| NotaryServiceError::validation("driveNodeId is required"))?;
+            let category =
+                string_field(&body, &["category"]).unwrap_or_else(|| "evidence".to_string());
+            let review_status = string_field(&body, &["reviewStatus", "review_status", "status"])
+                .unwrap_or_else(|| "pending".to_string());
+            ports
+                .drive
+                .register_case_file(DriveRegisterCaseFileCommand {
+                    space_id: record.drive_space_id.clone(),
+                    node_id: node_id.clone(),
+                    category,
+                    review_status,
+                })
+                .await?;
             let document = file_create_to_document_value(&body, &record)?;
             ports
                 .repository
@@ -624,9 +642,10 @@ pub async fn handle_notary_app_operation(
                     .iter()
                     .map(event_record_to_value)
                     .collect::<Vec<_>>(),
-                "pageInfo": {
-                    "hasMore": page.has_more
-                }
+                "pageInfo": cursor_page_info(
+                    page.has_more,
+                    page.items.last().map(|event| event.event_id.as_str()),
+                )
             }))
         }
         _ => Err(NotaryServiceError::provider_unavailable(format!(
@@ -724,9 +743,7 @@ pub async fn handle_notary_backend_operation(
                     .iter()
                     .map(|profile| organization_profile_to_value(profile, context))
                     .collect::<Vec<_>>(),
-                "pageInfo": {
-                    "hasMore": false
-                }
+                "pageInfo": cursor_page_info(false, None),
             }))
         }
         "notary.organizationProfiles.retrieve" => {
@@ -787,9 +804,10 @@ pub async fn handle_notary_backend_operation(
             let page = list_backend_cases(context, &body, ports).await?;
             Ok(json!({
                 "items": page.items.iter().map(case_record_to_value).collect::<Vec<_>>(),
-                "pageInfo": {
-                    "hasMore": page.has_more
-                }
+                "pageInfo": cursor_page_info(
+                    page.has_more,
+                    page.items.last().map(|record| record.case_id.as_str()),
+                )
             }))
         }
         "notary.cases.management.retrieve" => {
@@ -910,7 +928,11 @@ async fn list_notary_staff(
         .appbase
         .list_organization_members(&organization_id)
         .await?;
-    let items = members
+    let page_size = page_size_field(body, &["pageSize", "page_size"], 50);
+    let offset = string_field(body, &["cursor"])
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(0);
+    let filtered: Vec<_> = members
         .iter()
         .filter(|member| member.enterprise_verified && member.notary_enabled)
         .filter(|member| {
@@ -918,14 +940,24 @@ async fn list_notary_staff(
                 member_notary_staff_role(member).as_deref() == Some(role.as_str())
             })
         })
-        .map(staff_member_to_value)
+        .collect();
+    let page_size = page_size as usize;
+    let window: Vec<_> = filtered
+        .iter()
+        .skip(offset)
+        .take(page_size.saturating_add(1))
+        .collect();
+    let has_more = window.len() > page_size;
+    let items = window
+        .into_iter()
+        .take(page_size)
+        .map(|member| staff_member_to_value(member))
         .collect::<Vec<_>>();
+    let next_cursor = has_more.then(|| (offset + page_size).to_string());
 
     Ok(json!({
         "items": items,
-        "pageInfo": {
-            "hasMore": false
-        }
+        "pageInfo": offset_page_info(has_more, next_cursor.as_deref()),
     }))
 }
 
@@ -985,6 +1017,10 @@ async fn list_notary_matters(
     ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     validate_context(context)?;
+    let page_size = page_size_field(body, &["pageSize", "page_size"], 20);
+    let offset = string_field(body, &["cursor"])
+        .and_then(|value| value.parse::<i64>().ok())
+        .unwrap_or(0);
     let matters = ports
         .commerce
         .list_notary_matters(CommerceMatterListQuery {
@@ -992,17 +1028,20 @@ async fn list_notary_matters(
                 .or_else(|| context.organization_id.clone()),
             search_term: string_field(body, &["q", "searchTerm", "search_term"]),
             status: string_field(body, &["status"]),
-            page_size: page_size_field(body, &["pageSize", "page_size"], 20),
+            page_size: page_size.saturating_add(1),
+            offset,
         })
         .await?;
+    let has_more = matters.len() as i64 > page_size;
+    let items = matters
+        .into_iter()
+        .take(page_size as usize)
+        .map(|matter| matter_record_to_value(&matter))
+        .collect::<Vec<_>>();
+    let next_cursor = has_more.then(|| (offset + page_size).to_string());
     Ok(json!({
-        "items": matters
-            .iter()
-            .map(matter_record_to_value)
-            .collect::<Vec<_>>(),
-        "pageInfo": {
-            "hasMore": false
-        }
+        "items": items,
+        "pageInfo": offset_page_info(has_more, next_cursor.as_deref()),
     }))
 }
 
@@ -1765,25 +1804,8 @@ async fn case_detail_to_value(
     ports: &NotaryRuntimePorts<'_>,
 ) -> Result<Value, NotaryServiceError> {
     let parties = ports.repository.list_parties(&record.case_id).await?;
-    let events = ports
-        .repository
-        .list_events(NotaryCaseEventListQuery {
-            case_id: record.case_id.clone(),
-            page_size: 50,
-            cursor: None,
-        })
-        .await?;
-    let files = ports
-        .drive
-        .list_nodes(DriveListNodesQuery {
-            space_id: record.drive_space_id.clone(),
-            space_type: record.drive_space_type.clone(),
-            parent_node_id: record.drive_folder_node_id.clone(),
-            category: None,
-            page_size: 50,
-            cursor: None,
-        })
-        .await?;
+    let events = list_all_case_events(&record.case_id, ports).await?;
+    let files = list_all_case_drive_files(record, ports).await?;
     let mut value = case_record_to_value(record);
     if let Some(object) = value.as_object_mut() {
         object.insert(
@@ -1801,10 +1823,67 @@ async fn case_detail_to_value(
         );
         object.insert(
             "timeline".to_string(),
-            Value::Array(events.items.iter().map(event_record_to_value).collect()),
+            Value::Array(events.iter().map(event_record_to_value).collect()),
         );
     }
     Ok(value)
+}
+
+async fn list_all_case_drive_files(
+    record: &NotaryCaseRecord,
+    ports: &NotaryRuntimePorts<'_>,
+) -> Result<Vec<DriveNodeReference>, NotaryServiceError> {
+    let mut items = Vec::new();
+    let mut cursor = None;
+    loop {
+        let page = ports
+            .drive
+            .list_nodes(DriveListNodesQuery {
+                space_id: record.drive_space_id.clone(),
+                space_type: record.drive_space_type.clone(),
+                parent_node_id: record.drive_folder_node_id.clone(),
+                category: None,
+                page_size: MAX_PAGE_SIZE,
+                cursor: cursor.clone(),
+            })
+            .await?;
+        if page.items.is_empty() && !page.has_more {
+            break;
+        }
+        items.extend(page.items);
+        if !page.has_more {
+            break;
+        }
+        cursor = page.next_cursor;
+    }
+    Ok(items)
+}
+
+async fn list_all_case_events(
+    case_id: &str,
+    ports: &NotaryRuntimePorts<'_>,
+) -> Result<Vec<NotaryCaseEventRecord>, NotaryServiceError> {
+    let mut items = Vec::new();
+    let mut cursor = None;
+    loop {
+        let page = ports
+            .repository
+            .list_events(NotaryCaseEventListQuery {
+                case_id: case_id.to_string(),
+                page_size: MAX_PAGE_SIZE,
+                cursor: cursor.clone(),
+            })
+            .await?;
+        if page.items.is_empty() && !page.has_more {
+            break;
+        }
+        items.extend(page.items);
+        if !page.has_more {
+            break;
+        }
+        cursor = items.last().map(|event| event.event_id.clone());
+    }
+    Ok(items)
 }
 
 fn party_record_to_value(party: &NotaryPartyRecord) -> Value {
@@ -1861,6 +1940,43 @@ fn download_package_to_value(package: &DriveDownloadPackageReference) -> Value {
         value["downloadUrl"] = json!(download_url);
     }
     value
+}
+
+fn page_info_json(page_info: PageInfo) -> Value {
+    serde_json::to_value(page_info).unwrap_or_else(|_| {
+        json!({
+            "mode": "cursor",
+            "hasMore": false
+        })
+    })
+}
+
+fn cursor_page_info(has_more: bool, next_cursor: Option<&str>) -> Value {
+    page_info_json(PageInfo {
+        mode: PageMode::Cursor,
+        page: None,
+        page_size: None,
+        total_items: None,
+        total_pages: None,
+        next_cursor: next_cursor.map(str::to_string),
+        has_more: Some(has_more),
+    })
+}
+
+fn offset_page_info(has_more: bool, next_cursor: Option<&str>) -> Value {
+    page_info_json(PageInfo {
+        mode: PageMode::Offset,
+        page: None,
+        page_size: None,
+        total_items: None,
+        total_pages: None,
+        next_cursor: next_cursor.map(str::to_string),
+        has_more: Some(has_more),
+    })
+}
+
+fn drive_list_page_info(page: &DriveListNodesPage) -> Value {
+    offset_page_info(page.has_more, page.next_cursor.as_deref())
 }
 
 fn drive_node_to_document_value(node: &DriveNodeReference, record: &NotaryCaseRecord) -> Value {

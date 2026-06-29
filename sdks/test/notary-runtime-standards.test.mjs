@@ -186,7 +186,7 @@ test("workspace verification includes contract tests and Rust runtime tests", ()
   assert(packageManifest.scripts.verify.includes("build:desktop"));
   assert.equal(
     packageManifest.scripts["api:materialize"],
-    "node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs && node scripts/generate-notary-route-manifests.mjs",
+    "node scripts/sync-notary-openapi-authorities.mjs && node scripts/generate-notary-route-manifests.mjs && node scripts/sync-notary-api-framework-metadata.mjs",
   );
   assert.ok(packageManifest.scripts["dev:browser"]);
 

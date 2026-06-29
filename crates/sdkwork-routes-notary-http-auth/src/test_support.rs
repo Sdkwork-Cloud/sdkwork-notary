@@ -4,7 +4,7 @@ use sdkwork_web_core::{
 };
 
 pub const TEST_TENANT_ID: &str = "100001";
-pub const TEST_ORGANIZATION_ID: &str = "org-1";
+pub const TEST_ORGANIZATION_ID: &str = "200001";
 pub const TEST_USER_ID: &str = "1";
 pub const TEST_SESSION_ID: &str = "session-1";
 pub const TEST_APP_ID: &str = "sdkwork-im-pc";

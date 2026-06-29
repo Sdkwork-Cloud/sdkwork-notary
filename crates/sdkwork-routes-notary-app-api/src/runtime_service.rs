@@ -101,9 +101,5 @@ fn route_error_from_runtime(error: NotaryServiceError) -> NotaryRouteError {
         "storage" | "unknown" => StatusCode::INTERNAL_SERVER_ERROR,
         _ => StatusCode::INTERNAL_SERVER_ERROR,
     };
-    NotaryRouteError {
-        status,
-        code: error.code(),
-        message: error.message().to_string(),
-    }
+    NotaryRouteError::from_wire(status, error.code(), error.message())
 }

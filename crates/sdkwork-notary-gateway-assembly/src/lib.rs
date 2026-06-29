@@ -23,3 +23,7 @@ pub async fn assemble_application_router() -> Result<ApplicationAssembly, String
 pub fn assembly_route_count() -> usize {
     generated::ROUTE_CRATE_COUNT
 }
+
+pub fn assembly_route_crates() -> &'static [&'static str] {
+    generated::ROUTE_CRATE_PACKAGES
+}

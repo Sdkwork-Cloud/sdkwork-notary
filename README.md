@@ -64,18 +64,18 @@ The runtime layer implements the main notary workflow without owning dependency 
 
 - app access retrieval checks the current Appbase Organization member, enterprise verification, notary enablement, organization profile status, and `drive_space_type='notary'` before returning menu visibility and notary permissions;
 - opening notary business validates Appbase Organization membership, enterprise verification, notary enablement, and role/position authority before creating the Drive `space_type='notary'` space and upserting `notary_organization_profile`;
-- notary matter listing and backend matter management delegate to Commerce SKU/SPU ports; one notary product is represented as one SKU and no local notary matter table is created;
+- notary matter listing and backend matter management delegate to Commerce SKU/SPU ports (`fulfillment_type='notary'`); embedded bootstrap reads `commerce_product_sku` directly with offset pagination;
 - creating a notary case validates the notary staff member, creates a Commerce order/order item from a notary `sku_id`, creates the Drive case folder, persists `notary_case`, persists parties, and appends the submitted timeline event;
-- case updates, status commands, party add/update/delete, party signature attachment, file registration, download package requests, and timeline events are exposed through the app runtime dispatcher;
+- case updates, status commands, party add/update/delete, party signature attachment, file registration (Drive node properties `notary.category` / `notary.review_status`), download package requests, and timeline events are exposed through the app runtime dispatcher;
 - backend organization profile update, case management list/retrieve, staff list, assignment create/release, and case summary operations are exposed through the backend runtime dispatcher;
-- listing case files loads the case and calls Drive by denormalized `drive_space_type`, `drive_space_id`, and `drive_folder_node_id`, avoiding cross-domain online joins.
+- listing case files loads the case and calls Drive by denormalized `drive_space_type`, `drive_space_id`, and `drive_folder_node_id` with offset pagination and category filtering, avoiding cross-domain online joins.
 
 Route runtime services are implemented for both app and backend route crates, so the generated route layers can dispatch directly to `sdkwork-notary-case-service` ports:
 
 - `crates/sdkwork-routes-notary-app-api`
 - `crates/sdkwork-routes-notary-backend-api`
 
-## Chat PC Integration
+## IM PC Integration
 
 The frontend notary capability package lives in this repository:
 
@@ -89,7 +89,7 @@ SDKWork IM PC integrates the package directly:
 
 The IM app root includes `@sdkwork/notary-app-sdk` and `@sdkwork/notary-pc-notary` as workspace dependencies. IM core constructs the generated Notary App SDK client with the shared TokenManager, while `sdkwork-notary-pc-notary` owns the UI and service facade over `createNotaryApi`.
 
-The obsolete `integrations/sdkwork-chat-pc/` fork and `sdkwork-im-pc-notary` package were removed. Contract tests `sdks/test/notary-chat-pc-real-app-integration.test.mjs` and `apps/sdkwork-notary-pc/src/__tests__/pc-architecture.contract.test.mjs` verify the notary-owned PC package, IM integration wiring, and absence of duplicate notary forks.
+Contract tests `sdks/test/notary-im-pc-real-app-integration.test.mjs` and `apps/sdkwork-notary-pc/src/__tests__/pc-architecture.contract.test.mjs` verify the notary-owned PC package and IM integration wiring.
 
 Standalone PC client commands from the repository root:
 
@@ -117,7 +117,6 @@ Run from this repository root:
 ```powershell
 pnpm dev
 pnpm verify
-pnpm api:materialize
 pnpm api:materialize
 pnpm sdk:generate
 ```

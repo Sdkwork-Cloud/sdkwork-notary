@@ -21,7 +21,7 @@ pub fn build_sdkwork_notary_backend_api_router(
             get(handlers::list_organization_profiles).post(handlers::create_organization_profile),
         )
         .route(
-            "/backend/v3/api/notary/organization_profiles/:organization_profile_id",
+            "/backend/v3/api/notary/organization_profiles/{organization_profile_id}",
             get(handlers::retrieve_organization_profile)
                 .patch(handlers::update_organization_profile),
         )
@@ -30,20 +30,20 @@ pub fn build_sdkwork_notary_backend_api_router(
             get(handlers::list_matters).post(handlers::create_matter),
         )
         .route(
-            "/backend/v3/api/notary/matters/:sku_id",
+            "/backend/v3/api/notary/matters/{sku_id}",
             patch(handlers::update_matter),
         )
         .route("/backend/v3/api/notary/cases", get(handlers::list_cases))
         .route(
-            "/backend/v3/api/notary/cases/:case_id",
+            "/backend/v3/api/notary/cases/{case_id}",
             get(handlers::retrieve_case),
         )
         .route(
-            "/backend/v3/api/notary/cases/:case_id/assignments",
+            "/backend/v3/api/notary/cases/{case_id}/assignments",
             post(handlers::create_assignment),
         )
         .route(
-            "/backend/v3/api/notary/cases/:case_id/assignments/:assignment_id",
+            "/backend/v3/api/notary/cases/{case_id}/assignments/{assignment_id}",
             delete(handlers::delete_assignment),
         )
         .route("/backend/v3/api/notary/staff", get(handlers::list_staff))

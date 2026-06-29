@@ -142,7 +142,7 @@ mod tests {
     fn resolves_explicit_organization_membership_scope() {
         let principal = WebRequestPrincipal::builder()
             .tenant_id("100001")
-            .organization_id(Some("org-1".to_owned()))
+            .organization_id(Some("200001".to_owned()))
             .user_id("1")
             .app_id("app-1")
             .data_scope(vec!["organization_membership:mem-123".to_owned()])
@@ -156,6 +156,11 @@ mod tests {
 
     #[test]
     fn derives_stable_local_membership_when_organization_present() {
+        let _guard = ENV_TEST_LOCK.lock().expect("env test lock");
+        let previous_notary = std::env::var("SDKWORK_NOTARY_ENVIRONMENT").ok();
+        let previous_sdkwork = std::env::var("SDKWORK_ENVIRONMENT").ok();
+        std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "development");
+
         let principal = WebRequestPrincipal::builder()
             .tenant_id("100001")
             .organization_id(Some("org_notary_dev".to_owned()))
@@ -168,6 +173,17 @@ mod tests {
             resolve_membership_id(&principal),
             Some("orgmem_org_notary_dev_contract_test_user_001".to_owned())
         );
+
+        if let Some(value) = previous_notary {
+            std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", value);
+        } else {
+            std::env::remove_var("SDKWORK_NOTARY_ENVIRONMENT");
+        }
+        if let Some(value) = previous_sdkwork {
+            std::env::set_var("SDKWORK_ENVIRONMENT", value);
+        } else {
+            std::env::remove_var("SDKWORK_ENVIRONMENT");
+        }
     }
 
     #[test]
@@ -183,6 +199,11 @@ mod tests {
 
     #[test]
     fn maps_web_request_context_into_notary_context() {
+        let _guard = ENV_TEST_LOCK.lock().expect("env test lock");
+        let previous_notary = std::env::var("SDKWORK_NOTARY_ENVIRONMENT").ok();
+        let previous_sdkwork = std::env::var("SDKWORK_ENVIRONMENT").ok();
+        std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", "development");
+
         let app_ctx = crate::test_support::test_web_request_context();
         let context = notary_request_context_from_web(&app_ctx).expect("context");
         assert_eq!(context.tenant_id, crate::test_support::TEST_TENANT_ID);
@@ -193,10 +214,18 @@ mod tests {
         assert_eq!(context.user_id, crate::test_support::TEST_USER_ID);
         assert_eq!(context.session_id, crate::test_support::TEST_SESSION_ID);
         assert_eq!(context.app_id, crate::test_support::TEST_APP_ID);
-        assert_eq!(
-            context.membership_id,
-            Some("orgmem_org_1_1".to_owned()),
-        );
+        assert_eq!(context.membership_id, Some("orgmem_200001_1".to_owned()),);
+
+        if let Some(value) = previous_notary {
+            std::env::set_var("SDKWORK_NOTARY_ENVIRONMENT", value);
+        } else {
+            std::env::remove_var("SDKWORK_NOTARY_ENVIRONMENT");
+        }
+        if let Some(value) = previous_sdkwork {
+            std::env::set_var("SDKWORK_ENVIRONMENT", value);
+        } else {
+            std::env::remove_var("SDKWORK_ENVIRONMENT");
+        }
     }
 
     #[test]
@@ -225,7 +254,7 @@ mod tests {
 
         let principal = WebRequestPrincipal::builder()
             .tenant_id("100001")
-            .organization_id(Some("org-1".to_owned()))
+            .organization_id(Some("200001".to_owned()))
             .user_id("1")
             .app_id("app-1")
             .build();

@@ -6,17 +6,17 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = path.resolve(testDir, "..", "..");
-import { chatPcTest, notaryPcRoot } from "./helpers/chat-pc-root.mjs";
+import { imPcRoot, imPcTest, notaryPcRoot } from "./helpers/im-pc-root.mjs";
 
 function readText(relativePath) {
   return readFileSync(path.join(workspaceRoot, relativePath), "utf8");
 }
 
 function readChatPcText(relativePath) {
-  return readFileSync(path.join(chatPcRoot, relativePath), "utf8");
+  return readFileSync(path.join(imPcRoot, relativePath), "utf8");
 }
 
-test("app composed notary API exposes high-level workflow methods for chat-pc integration", () => {
+test("app composed notary API exposes high-level workflow methods for IM PC integration", () => {
   const source = readText(
     "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
   );
@@ -236,7 +236,7 @@ test("app composed assignCase delegates to app notary assignment resource", asyn
   assert.equal(result.assignmentRole, "primary_notary");
 });
 
-chatPcTest("real chat-pc notary service consumes the composed workflow facade instead of raw resources", () => {
+imPcTest("real IM PC notary service consumes the composed workflow facade instead of raw resources", () => {
   const source = readFileSync(
     path.join(notaryPcRoot, "packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts"),
     "utf8",

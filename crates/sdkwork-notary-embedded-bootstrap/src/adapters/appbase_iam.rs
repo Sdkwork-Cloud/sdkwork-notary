@@ -27,7 +27,8 @@ impl AppbasePort for IamSqlxAppbasePort {
     ) -> Result<Option<AppbaseOrganizationMember>, NotaryServiceError> {
         match &self.pool {
             DatabasePool::Sqlite(pool, _) => {
-                load_member_sqlite(pool, organization_id, membership_id, self.development_mode).await
+                load_member_sqlite(pool, organization_id, membership_id, self.development_mode)
+                    .await
             }
             DatabasePool::Postgres(pool, _) => {
                 load_member_postgres(pool, organization_id, membership_id, self.development_mode)
@@ -133,7 +134,8 @@ async fn list_members_sqlite(
             .flatten()
             .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| user_id.clone());
-        let verification_status: String = row.try_get("verification_status").map_err(storage_error)?;
+        let verification_status: String =
+            row.try_get("verification_status").map_err(storage_error)?;
         let roles = load_roles_sqlite(pool, &tenant_id, &membership_id).await?;
         let positions = load_positions_sqlite(pool, &tenant_id, &membership_id).await?;
         let departments = load_departments_sqlite(pool, &tenant_id, &membership_id).await?;
@@ -234,7 +236,8 @@ async fn list_members_postgres(
             .flatten()
             .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| user_id.clone());
-        let verification_status: String = row.try_get("verification_status").map_err(storage_error)?;
+        let verification_status: String =
+            row.try_get("verification_status").map_err(storage_error)?;
         let roles = load_roles_postgres(pool, &tenant_id, &membership_id).await?;
         let positions = load_positions_postgres(pool, &tenant_id, &membership_id).await?;
         let departments = load_departments_postgres(pool, &tenant_id, &membership_id).await?;
@@ -271,12 +274,7 @@ fn build_member(
             && (roles.iter().any(|role| {
                 matches!(
                     role.as_str(),
-                    "notary"
-                        | "notary_admin"
-                        | "assistant"
-                        | "reviewer"
-                        | "approver"
-                        | "owner"
+                    "notary" | "notary_admin" | "assistant" | "reviewer" | "approver" | "owner"
                 )
             }) || positions.iter().any(|position| {
                 position.contains("公证") || position.eq_ignore_ascii_case("notary")

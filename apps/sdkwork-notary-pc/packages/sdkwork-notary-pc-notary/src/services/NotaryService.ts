@@ -83,12 +83,12 @@ const FALLBACK_APPLICANT_NAME = 'unknown_applicant';
 const FALLBACK_CASE_TITLE_SUFFIX = 'notary_case';
 
 const DEFAULT_SKU_IDS_BY_TYPE: Record<string, string> = {
-  '电子合同存证': 'sku-notary-electronic-contract',
-  '知识产权确权公证': 'sku-notary-ipr',
-  '电子证据固化': 'sku-notary-evidence',
-  '商业秘密确权': 'sku-notary-trade-secret',
-  '抽奖过程摇号公证': 'sku-notary-lottery',
-  '遗嘱公证': 'sku-notary-will',
+  '锟斤拷锟接猴拷同锟斤拷证': 'sku-notary-electronic-contract',
+  '知识锟斤拷权确权锟斤拷证': 'sku-notary-ipr',
+  '锟斤拷锟斤拷证锟捷固伙拷': 'sku-notary-evidence',
+  '锟斤拷业锟斤拷锟斤拷确权': 'sku-notary-trade-secret',
+  '锟介奖锟斤拷锟斤拷摇锟脚癸拷证': 'sku-notary-lottery',
+  '锟斤拷锟斤拷锟斤拷证': 'sku-notary-will',
   'Electronic Contract Preservation': 'sku-notary-electronic-contract',
   'Intellectual Property Confirmation': 'sku-notary-ipr',
   'Electronic Evidence Preservation': 'sku-notary-evidence',
@@ -863,7 +863,7 @@ function buildIdempotencyKey(data: Partial<NotaryTask>): string {
   ]
     .filter(Boolean)
     .join(':');
-  return `notary-chat-pc:${seed || Date.now().toString(36)}`;
+  return `notary-pc:${seed || Date.now().toString(36)}`;
 }
 
 function firstPartyName(parties: Party[] | undefined): string | undefined {

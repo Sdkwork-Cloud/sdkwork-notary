@@ -92,11 +92,8 @@ async fn build_notary_router<Repository>(
     backend_repository: Repository,
 ) -> Result<Router, String>
 where
-    Repository: sdkwork_notary_case_service::NotaryCaseRepositoryPort
-        + Clone
-        + Send
-        + Sync
-        + 'static,
+    Repository:
+        sdkwork_notary_case_service::NotaryCaseRepositoryPort + Clone + Send + Sync + 'static,
 {
     let app_drive = DriveWorkspacePort::new(
         drive_pool.clone(),
@@ -123,8 +120,8 @@ where
         app_drive,
         app_repository,
     ));
-    let backend_service: Arc<dyn NotaryBackendApiServicePort> = Arc::new(
-        NotaryBackendRuntimeService::new(
+    let backend_service: Arc<dyn NotaryBackendApiServicePort> =
+        Arc::new(NotaryBackendRuntimeService::new(
             IamSqlxAppbasePort::new(iam_pool, runtime.development_mode),
             CommerceOrderPort::new(
                 commerce_pool,
@@ -133,11 +130,13 @@ where
             ),
             backend_drive,
             backend_repository,
-        ),
-    );
+        ));
 
-    Ok(sdkwork_routes_notary_app_api::gateway_mount(app_service)
-        .merge(sdkwork_routes_notary_backend_api::gateway_mount(backend_service)))
+    Ok(
+        sdkwork_routes_notary_app_api::gateway_mount(app_service).merge(
+            sdkwork_routes_notary_backend_api::gateway_mount(backend_service),
+        ),
+    )
 }
 
 #[derive(Clone, Debug)]
