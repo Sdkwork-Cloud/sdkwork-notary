@@ -1,7 +1,7 @@
 import { backendApiPath } from './paths';
 import type { HttpClient } from '../http/client';
 
-import type { CreateCaseAssignmentRequest, CreateNotaryMatterRequest, CreateNotaryOrganizationProfileRequest, NotaryCase, NotaryCaseAssignment, NotaryCasePage, NotaryCaseStatus, NotaryCaseSummary, NotaryMatter, NotaryMatterPage, NotaryOrganizationProfile, NotaryOrganizationProfilePage, NotaryStaffMemberPage, UpdateNotaryMatterRequest, UpdateNotaryOrganizationProfileRequest } from '../types';
+import type { CreateCaseAssignmentRequest, CreateNotaryMatterRequest, CreateNotaryOrganizationProfileRequest, NotaryCasesAssignmentsCreateResponse201, NotaryCasesManagementListResponse, NotaryCasesManagementRetrieveResponse, NotaryCaseStatus, NotaryMattersCreateResponse201, NotaryMattersManagementListResponse, NotaryOrganizationProfilesCreateResponse201, NotaryOrganizationProfilesListResponse, NotaryReportsCaseSummaryRetrieveResponse, NotaryStaffListResponse, UpdateNotaryMatterRequest, UpdateNotaryOrganizationProfileRequest } from '../types';
 
 
 export interface NotaryReportsCaseSummaryRetrieveParams {
@@ -19,13 +19,13 @@ export class NotaryReportsCaseSummaryApi {
 
 
 /** Retrieve notary case summary report */
-  async retrieve(params?: NotaryReportsCaseSummaryRetrieveParams): Promise<NotaryCaseSummary> {
+  async retrieve(params?: NotaryReportsCaseSummaryRetrieveParams): Promise<NotaryReportsCaseSummaryRetrieveResponse> {
     const query = buildQueryString([
       { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
       { name: 'created_after', value: params?.createdAfter, style: 'form', explode: true, allowReserved: false },
       { name: 'created_before', value: params?.createdBefore, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<NotaryCaseSummary>(appendQueryString(backendApiPath(`/notary/reports/case_summary`), query));
+    return this.client.get<NotaryReportsCaseSummaryRetrieveResponse>(appendQueryString(backendApiPath(`/notary/reports/case_summary`), query));
   }
 }
 
@@ -57,7 +57,7 @@ export class NotaryStaffApi {
 
 
 /** List IAM organization members enabled for notary business */
-  async list(params?: NotaryStaffListParams): Promise<NotaryStaffMemberPage> {
+  async list(params?: NotaryStaffListParams): Promise<NotaryStaffListResponse> {
     const query = buildQueryString([
       { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
@@ -65,7 +65,7 @@ export class NotaryStaffApi {
       { name: 'q', value: params?.q, style: 'form', explode: true, allowReserved: false },
       { name: 'staff_role', value: params?.staffRole, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<NotaryStaffMemberPage>(appendQueryString(backendApiPath(`/notary/staff`), query));
+    return this.client.get<NotaryStaffListResponse>(appendQueryString(backendApiPath(`/notary/staff`), query));
   }
 }
 
@@ -78,8 +78,8 @@ export class NotaryCasesAssignmentsApi {
 
 
 /** Assign an IAM organization member to a notary case */
-  async create(caseId: string, body: CreateCaseAssignmentRequest): Promise<NotaryCaseAssignment> {
-    return this.client.post<NotaryCaseAssignment>(backendApiPath(`/notary/cases/${serializePathParameter(caseId, { name: 'caseId', style: 'simple', explode: false })}/assignments`), body, undefined, undefined, 'application/json');
+  async create(caseId: string, body: CreateCaseAssignmentRequest): Promise<NotaryCasesAssignmentsCreateResponse201> {
+    return this.client.post<NotaryCasesAssignmentsCreateResponse201>(backendApiPath(`/notary/cases/${serializePathParameter(caseId, { name: 'caseId', style: 'simple', explode: false })}/assignments`), body, undefined, undefined, 'application/json');
   }
 
 /** Release a case assignment */
@@ -105,7 +105,7 @@ export class NotaryCasesManagementApi {
 
 
 /** List notary cases for operators */
-  async list(params?: NotaryCasesManagementListParams): Promise<NotaryCasePage> {
+  async list(params?: NotaryCasesManagementListParams): Promise<NotaryCasesManagementListResponse> {
     const query = buildQueryString([
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
@@ -113,12 +113,12 @@ export class NotaryCasesManagementApi {
       { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
       { name: 'status', value: params?.status, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<NotaryCasePage>(appendQueryString(backendApiPath(`/notary/cases`), query));
+    return this.client.get<NotaryCasesManagementListResponse>(appendQueryString(backendApiPath(`/notary/cases`), query));
   }
 
 /** Retrieve operator notary case detail */
-  async retrieve(caseId: string): Promise<NotaryCase> {
-    return this.client.get<NotaryCase>(backendApiPath(`/notary/cases/${serializePathParameter(caseId, { name: 'caseId', style: 'simple', explode: false })}`));
+  async retrieve(caseId: string): Promise<NotaryCasesManagementRetrieveResponse> {
+    return this.client.get<NotaryCasesManagementRetrieveResponse>(backendApiPath(`/notary/cases/${serializePathParameter(caseId, { name: 'caseId', style: 'simple', explode: false })}`));
   }
 }
 
@@ -151,14 +151,14 @@ export class NotaryMattersManagementApi {
 
 
 /** List SKU-backed notary matters */
-  async list(params?: NotaryMattersManagementListParams): Promise<NotaryMatterPage> {
+  async list(params?: NotaryMattersManagementListParams): Promise<NotaryMattersManagementListResponse> {
     const query = buildQueryString([
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
       { name: 'q', value: params?.q, style: 'form', explode: true, allowReserved: false },
       { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<NotaryMatterPage>(appendQueryString(backendApiPath(`/notary/matters`), query));
+    return this.client.get<NotaryMattersManagementListResponse>(appendQueryString(backendApiPath(`/notary/matters`), query));
   }
 }
 
@@ -177,19 +177,19 @@ export class NotaryMattersApi {
 
 
 /** Create a notary matter by creating one Commerce SPU with one SKU */
-  async create(body: CreateNotaryMatterRequest, params: NotaryMattersCreateParams): Promise<NotaryMatter> {
+  async create(body: CreateNotaryMatterRequest, params: NotaryMattersCreateParams): Promise<NotaryMattersCreateResponse201> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
       },
       {}
     );
-    return this.client.post<NotaryMatter>(backendApiPath(`/notary/matters`), body, undefined, requestHeaders, 'application/json');
+    return this.client.post<NotaryMattersCreateResponse201>(backendApiPath(`/notary/matters`), body, undefined, requestHeaders, 'application/json');
   }
 
 /** Update a SKU-backed notary matter */
-  async update(skuId: string, body: UpdateNotaryMatterRequest): Promise<NotaryMatter> {
-    return this.client.patch<NotaryMatter>(backendApiPath(`/notary/matters/${serializePathParameter(skuId, { name: 'skuId', style: 'simple', explode: false })}`), body, undefined, undefined, 'application/json');
+  async update(skuId: string, body: UpdateNotaryMatterRequest): Promise<NotaryMattersCreateResponse201> {
+    return this.client.patch<NotaryMattersCreateResponse201>(backendApiPath(`/notary/matters/${serializePathParameter(skuId, { name: 'skuId', style: 'simple', explode: false })}`), body, undefined, undefined, 'application/json');
   }
 }
 
@@ -212,34 +212,34 @@ export class NotaryOrganizationProfilesApi {
 
 
 /** List notary organization profiles */
-  async list(params?: NotaryOrganizationProfilesListParams): Promise<NotaryOrganizationProfilePage> {
+  async list(params?: NotaryOrganizationProfilesListParams): Promise<NotaryOrganizationProfilesListResponse> {
     const query = buildQueryString([
       { name: 'page_size', value: params?.pageSize, style: 'form', explode: true, allowReserved: false },
       { name: 'cursor', value: params?.cursor, style: 'form', explode: true, allowReserved: false },
       { name: 'organization_id', value: params?.organizationId, style: 'form', explode: true, allowReserved: false },
     ]);
-    return this.client.get<NotaryOrganizationProfilePage>(appendQueryString(backendApiPath(`/notary/organization_profiles`), query));
+    return this.client.get<NotaryOrganizationProfilesListResponse>(appendQueryString(backendApiPath(`/notary/organization_profiles`), query));
   }
 
 /** Open notary business for an enterprise-verified organization */
-  async create(body: CreateNotaryOrganizationProfileRequest, params: NotaryOrganizationProfilesCreateParams): Promise<NotaryOrganizationProfile> {
+  async create(body: CreateNotaryOrganizationProfileRequest, params: NotaryOrganizationProfilesCreateParams): Promise<NotaryOrganizationProfilesCreateResponse201> {
     const requestHeaders = buildRequestHeaders(
       {
         'Idempotency-Key': { value: params.idempotencyKey, style: 'simple', explode: false },
       },
       {}
     );
-    return this.client.post<NotaryOrganizationProfile>(backendApiPath(`/notary/organization_profiles`), body, undefined, requestHeaders, 'application/json');
+    return this.client.post<NotaryOrganizationProfilesCreateResponse201>(backendApiPath(`/notary/organization_profiles`), body, undefined, requestHeaders, 'application/json');
   }
 
 /** Retrieve a notary organization profile */
-  async retrieve(organizationProfileId: string): Promise<NotaryOrganizationProfile> {
-    return this.client.get<NotaryOrganizationProfile>(backendApiPath(`/notary/organization_profiles/${serializePathParameter(organizationProfileId, { name: 'organizationProfileId', style: 'simple', explode: false })}`));
+  async retrieve(organizationProfileId: string): Promise<NotaryOrganizationProfilesCreateResponse201> {
+    return this.client.get<NotaryOrganizationProfilesCreateResponse201>(backendApiPath(`/notary/organization_profiles/${serializePathParameter(organizationProfileId, { name: 'organizationProfileId', style: 'simple', explode: false })}`));
   }
 
 /** Update notary organization profile settings or status */
-  async update(organizationProfileId: string, body: UpdateNotaryOrganizationProfileRequest): Promise<NotaryOrganizationProfile> {
-    return this.client.patch<NotaryOrganizationProfile>(backendApiPath(`/notary/organization_profiles/${serializePathParameter(organizationProfileId, { name: 'organizationProfileId', style: 'simple', explode: false })}`), body, undefined, undefined, 'application/json');
+  async update(organizationProfileId: string, body: UpdateNotaryOrganizationProfileRequest): Promise<NotaryOrganizationProfilesCreateResponse201> {
+    return this.client.patch<NotaryOrganizationProfilesCreateResponse201>(backendApiPath(`/notary/organization_profiles/${serializePathParameter(organizationProfileId, { name: 'organizationProfileId', style: 'simple', explode: false })}`), body, undefined, undefined, 'application/json');
   }
 }
 

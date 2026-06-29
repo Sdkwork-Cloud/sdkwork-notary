@@ -30,7 +30,7 @@ This repository is a **contract-first domain library** governed by `sdkwork-spec
 | Standard path | Notary decision |
 | --- | --- |
 | `apps/sdkwork-notary-h5/` | H5 mobile client root (`APP_H5_ARCHITECTURE_SPEC.md`) |
-| `apps/sdkwork-notary/` (legacy) | Domain library catalog identity remains at root `sdkwork.app.config.json` |
+| `apps/sdkwork-notary-pc/` | PC desktop client root (`APP_PC_ARCHITECTURE_SPEC.md`) |
 | `services/*-standalone-gateway` | Route crates are consumed by host gateways, not a local API server |
 | RPC / `sdkwork-discovery` | No gRPC services yet; discovery deferred until RPC is introduced |
 

@@ -60,7 +60,7 @@
     },
     {
       "path": "src/api/notary.ts",
-      "sha256": "92d571b19f6fef2e35593a6727d845b83d0a952e1b90eb59457e126d532b6002"
+      "sha256": "ce98343f1d95008d51b8f0fa13a33aff352f7c64cb103e6022b42cf9dd305b1f"
     },
     {
       "path": "src/api/paths.ts",
@@ -72,7 +72,7 @@
     },
     {
       "path": "src/http/client.ts",
-      "sha256": "e1026e5587705492dcf32bf25ebb2584d5645b11a1046db92e9d4808f4b3edc0"
+      "sha256": "1d339275acee6ec54660a32eb9effcc718ebf0992c5e9bfdb80a3452e0702137"
     },
     {
       "path": "src/http/index.ts",
@@ -103,8 +103,12 @@
       "sha256": "06306250585f04764949b9ee6f00ddb188f42f0964ce4ee30bfc69dcbec0240f"
     },
     {
+      "path": "src/types/field-error.ts",
+      "sha256": "df70e331e6bff0817bc35428286fa8de5d7274ab83a6c60d7184759bf680a088"
+    },
+    {
       "path": "src/types/index.ts",
-      "sha256": "6531d69280f4a8b05aa5403ace589129385536ef20f66e27c70a9ec2e0130433"
+      "sha256": "e1cc08532ad7ae1b7e7ad5a1b901c203bd11a493fc701ec24cae6b24a1626cbf"
     },
     {
       "path": "src/types/notary-case-assignment.ts",
@@ -127,6 +131,18 @@
       "sha256": "5e472f7864584ddab4e733d75d8d8c15c1fb62559af73172187960eb95b64c5c"
     },
     {
+      "path": "src/types/notary-cases-assignments-create-response201.ts",
+      "sha256": "193ddd2e8b2712d6ee8966d338a73d07397ee7310f07d93b64052eedd0efb4e7"
+    },
+    {
+      "path": "src/types/notary-cases-management-list-response.ts",
+      "sha256": "01fe9b0b886b84387e8c55fdc73b58d000ff99431ed907ea7e5add5f970f9df7"
+    },
+    {
+      "path": "src/types/notary-cases-management-retrieve-response.ts",
+      "sha256": "734bf3da85fbdf09e6944c8ee1fc0f76ff55aab587c59a2b08df01d96e8195fd"
+    },
+    {
       "path": "src/types/notary-matter-page.ts",
       "sha256": "6580b3e45c93eefc13115b0cfd2ee10685c098b97948da5f33edded21ed25fdd"
     },
@@ -135,12 +151,36 @@
       "sha256": "a81e075b73c56bcab3d5d43a16c389d50ce1e1bb94067ec4943fbced4502015e"
     },
     {
+      "path": "src/types/notary-matters-create-response201.ts",
+      "sha256": "c37356952f6635355387d8ccbb7ad894c416d30d664c3b65e4fa1093ad5ac5b7"
+    },
+    {
+      "path": "src/types/notary-matters-management-list-response.ts",
+      "sha256": "f2f34b8d99dd4448a07374bcd055d3ca20ecd8ef0df9ef80432321897a9ade53"
+    },
+    {
       "path": "src/types/notary-organization-profile-page.ts",
       "sha256": "d3f746556e254470ff1453f04e9241c302d3fd8ba1cae9c2a85554905f1d8093"
     },
     {
       "path": "src/types/notary-organization-profile.ts",
       "sha256": "db1fec20b0fdb07a05e6545476cde2c096e0557e2b76bfd806135317acce1300"
+    },
+    {
+      "path": "src/types/notary-organization-profiles-create-response201.ts",
+      "sha256": "2af76ae3b2f8d6513d869ebf3c97f2893b3400570fd4ecaa242ba672a80224d7"
+    },
+    {
+      "path": "src/types/notary-organization-profiles-list-response.ts",
+      "sha256": "9594d091ad2d731b16bea98dc7b797e92669e68239b537f4c6d963256e4e20f5"
+    },
+    {
+      "path": "src/types/notary-reports-case-summary-retrieve-response.ts",
+      "sha256": "0e48f41acc2bed626f382aaf881778d16f355e844d021d3220464e322a77e4c7"
+    },
+    {
+      "path": "src/types/notary-staff-list-response.ts",
+      "sha256": "579694150f024a399a6882b0f2987352e418b6892dd3475d3156014b05d6f4dc"
     },
     {
       "path": "src/types/notary-staff-member-page.ts",
@@ -152,11 +192,43 @@
     },
     {
       "path": "src/types/page-info.ts",
-      "sha256": "8c708d699c5cab3536f6dc6b0057b41bce834ec1c7082befab0932db3e2d7e57"
+      "sha256": "0bf2b44313bc24851eb9ffb6063c1b9eb043e1e5721c8ace8882a3cfa21c932a"
     },
     {
       "path": "src/types/problem-detail.ts",
-      "sha256": "a24530000bd9db9c1bb9690e3b3dcda80a606a79f0f276a9c4a572bed43201d9"
+      "sha256": "deca621176487754cbfa2012aa3eab046131ced5829ddf7cff64de692f8bcb0e"
+    },
+    {
+      "path": "src/types/sdk-work-api-response.ts",
+      "sha256": "79cef2c8e584ba8b8e96c6c77ccf6bda087b0c68cbed63cb97d5fb1ff3e47e1a"
+    },
+    {
+      "path": "src/types/sdk-work-command-data.ts",
+      "sha256": "a875c230e70650e636ac09c1af57ae8ea0f512a89dd21482bb9e6292bb6bad5a"
+    },
+    {
+      "path": "src/types/sdk-work-command-response.ts",
+      "sha256": "36f82aede9b7b352a9b57545705da4003816785c7913fb2436df633f5c2e8447"
+    },
+    {
+      "path": "src/types/sdk-work-list-response.ts",
+      "sha256": "eeb07e413d7e912345eda1cb1093e8e6abfe9b42d8350482f7b580138c7936c5"
+    },
+    {
+      "path": "src/types/sdk-work-page-data.ts",
+      "sha256": "b9f6e60cc3bc39eed4cdf6029a401cc88b6001e4f4c72703487f478001024743"
+    },
+    {
+      "path": "src/types/sdk-work-platform-error-code.ts",
+      "sha256": "f5e30be72be3d1aebd8200627bfac368f10cdd69d2271d24e6b4a2d7edf97fb7"
+    },
+    {
+      "path": "src/types/sdk-work-resource-data.ts",
+      "sha256": "f5a027b000a19c08d5b2560ae47fea43c83f4c5d7e85ad37faafe1e9177459cd"
+    },
+    {
+      "path": "src/types/sdk-work-resource-response.ts",
+      "sha256": "89c05f5549bef773335245f56f61ca1a6959978726799391d584a6bd25d12fdc"
     },
     {
       "path": "src/types/update-notary-matter-request.ts",

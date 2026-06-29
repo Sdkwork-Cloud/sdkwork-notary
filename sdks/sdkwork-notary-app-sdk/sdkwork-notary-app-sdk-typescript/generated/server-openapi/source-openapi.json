@@ -64,7 +64,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/matters": {
@@ -123,7 +128,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases": {
@@ -188,7 +198,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -270,7 +285,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}": {
@@ -333,7 +353,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "patch": {
         "tags": [
@@ -424,7 +449,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/acceptances": {
@@ -490,7 +520,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/rejections": {
@@ -573,7 +608,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/completions": {
@@ -656,7 +696,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties": {
@@ -719,7 +764,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -800,7 +850,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}": {
@@ -886,7 +941,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "delete": {
         "tags": [
@@ -950,7 +1010,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/signatures": {
@@ -1036,7 +1101,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/video_invites": {
@@ -1122,7 +1192,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/parties/{partyId}/signature_invites": {
@@ -1208,7 +1283,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/files": {
@@ -1280,7 +1360,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       },
       "post": {
         "tags": [
@@ -1361,7 +1446,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/download_packages": {
@@ -1444,7 +1534,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/events": {
@@ -1513,7 +1608,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/staff": {
@@ -1575,7 +1675,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/cases/{caseId}/assignments": {
@@ -1658,7 +1763,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/dashboard/statistics": {
@@ -1707,7 +1817,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     },
     "/app/v3/api/notary/reports/monthly": {
@@ -1784,7 +1899,12 @@
               }
             }
           }
-        }
+        },
+        "x-sdkwork-request-context": "WebRequestContext",
+        "x-sdkwork-api-surface": "app-api",
+        "x-sdkwork-auth-mode": "dual-token",
+        "x-sdkwork-source-route-crate": "sdkwork-routes-notary-app-api",
+        "x-sdkwork-source": "crates/sdkwork-routes-notary-app-api/src/handlers.rs"
       }
     }
   },
@@ -1925,7 +2045,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryAccess"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/NotaryAccess"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -1935,7 +2083,43 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryMatterPage"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items",
+                        "pageInfo"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/NotaryMatter"
+                          }
+                        },
+                        "pageInfo": {
+                          "$ref": "#/components/schemas/PageInfo"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -1945,7 +2129,43 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryCasePage"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items",
+                        "pageInfo"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/NotaryCase"
+                          }
+                        },
+                        "pageInfo": {
+                          "$ref": "#/components/schemas/PageInfo"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -1955,7 +2175,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryCase"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/NotaryCase"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -1965,7 +2213,43 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryPartyList"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items",
+                        "pageInfo"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Party"
+                          }
+                        },
+                        "pageInfo": {
+                          "$ref": "#/components/schemas/PageInfo"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -1975,7 +2259,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Party"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/Party"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -1985,7 +2297,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/PartyVideoInvite"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/PartyVideoInvite"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -1995,7 +2335,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/PartySignatureInvite"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/PartySignatureInvite"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2005,7 +2373,43 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryDocumentList"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items",
+                        "pageInfo"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/NotaryDocument"
+                          }
+                        },
+                        "pageInfo": {
+                          "$ref": "#/components/schemas/PageInfo"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2015,7 +2419,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryDocument"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/NotaryDocument"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2025,7 +2457,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryDownloadPackage"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/NotaryDownloadPackage"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2035,7 +2495,43 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/TimelineEventList"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items",
+                        "pageInfo"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/TimelineEvent"
+                          }
+                        },
+                        "pageInfo": {
+                          "$ref": "#/components/schemas/PageInfo"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2045,7 +2541,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryCaseAssignment"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/NotaryCaseAssignment"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2055,7 +2579,43 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryStaffMemberPage"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "items",
+                        "pageInfo"
+                      ],
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/NotaryStaffMember"
+                          }
+                        },
+                        "pageInfo": {
+                          "$ref": "#/components/schemas/PageInfo"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2065,7 +2625,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/NotaryStatistics"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/NotaryStatistics"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2075,7 +2663,35 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/MonthlyReport"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/SdkWorkApiResponse"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "item"
+                      ],
+                      "properties": {
+                        "item": {
+                          "$ref": "#/components/schemas/MonthlyReport"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
             }
           }
         }
@@ -2088,28 +2704,38 @@
         "required": [
           "type",
           "title",
-          "status"
+          "status",
+          "code",
+          "traceId"
         ],
         "properties": {
           "type": {
-            "type": "string"
+            "type": "string",
+            "format": "uri-reference"
           },
           "title": {
             "type": "string"
           },
           "status": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599
           },
           "detail": {
             "type": "string"
           },
+          "instance": {
+            "type": "string"
+          },
           "code": {
-            "type": "string"
+            "$ref": "#/components/schemas/SdkWorkPlatformErrorCode"
           },
-          "requestId": {
-            "type": "string"
+          "traceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Server-owned request correlation id."
           },
-          "fields": {
+          "errors": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FieldError"
@@ -2132,7 +2758,10 @@
             "type": "string"
           },
           "code": {
-            "type": "string"
+            "type": "integer",
+            "format": "int32",
+            "minimum": 40011,
+            "maximum": 40099
           }
         }
       },
@@ -2140,11 +2769,38 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "hasMore"
+          "mode"
         ],
         "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "offset",
+              "cursor"
+            ]
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "totalItems": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "totalPages": {
+            "type": "integer",
+            "minimum": 0
+          },
           "nextCursor": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "hasMore": {
             "type": "boolean"
@@ -3440,6 +4096,149 @@
             "description": "Number of cases included in the report"
           }
         }
+      },
+      "SdkWorkApiResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "data",
+          "traceId"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [
+              0
+            ],
+            "default": 0,
+            "minimum": 0,
+            "maximum": 0
+          },
+          "data": {
+            "description": "Operation-specific payload typed per response schema."
+          },
+          "traceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Server-owned request correlation id."
+          }
+        }
+      },
+      "SdkWorkResourceData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "item"
+        ],
+        "properties": {
+          "item": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Typed domain resource for the operation."
+          }
+        }
+      },
+      "SdkWorkPageData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "pageInfo"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "pageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        }
+      },
+      "SdkWorkCommandData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "accepted"
+        ],
+        "properties": {
+          "accepted": {
+            "type": "boolean",
+            "const": true
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "SdkWorkPlatformErrorCode": {
+        "type": "integer",
+        "format": "int32",
+        "minimum": 40001,
+        "maximum": 79999,
+        "description": "Platform or domain error code per API_SPEC.md §15.3."
+      },
+      "SdkWorkResourceResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SdkWorkApiResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/SdkWorkResourceData"
+              }
+            }
+          }
+        ]
+      },
+      "SdkWorkListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SdkWorkApiResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/SdkWorkPageData"
+              }
+            }
+          }
+        ]
+      },
+      "SdkWorkCommandResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SdkWorkApiResponse"
+          },
+          {
+            "type": "object",
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/SdkWorkCommandData"
+              }
+            }
+          }
+        ]
       }
     }
   }

@@ -1,18 +1,17 @@
 use async_trait::async_trait;
-use sdkwork_commerce_contract_service::CommerceServiceError;
-use sdkwork_commerce_order_repository_sqlx::{
-    PostgresCommerceOrderStore, SqliteCommerceOrderStore,
-};
-use sdkwork_commerce_order_service::{
-    CheckoutLineInput, CreateCheckoutQuoteCommand, CreateCheckoutSessionCommand,
-    CreateOwnerOrderCommand,
-};
+use sdkwork_contract_service::CommerceServiceError;
 use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_notary_case_contract::NotaryServiceError;
 use sdkwork_notary_case_service::{
     CommerceCreateOrderCommand, CommerceMatterCommand, CommerceMatterListQuery,
     CommerceMatterRecord, CommerceMatterUpdateCommand, CommerceOrderReference, CommercePort,
 };
+use sdkwork_order_repository_sqlx::{PostgresCommerceOrderStore, SqliteCommerceOrderStore};
+use sdkwork_order_service::{
+    CheckoutLineInput, CreateCheckoutQuoteCommand, CreateCheckoutSessionCommand,
+    CreateOwnerOrderCommand,
+};
+use serde_json::Value;
 use sqlx::Row;
 
 enum OrderStore {
@@ -56,8 +55,8 @@ impl CommercePort for CommerceOrderPort {
         &self,
         command: CommerceCreateOrderCommand,
     ) -> Result<CommerceOrderReference, NotaryServiceError> {
-        let line = CheckoutLineInput::new(command.sku_id.as_str(), 1)
-            .map_err(map_commerce_validation)?;
+        let line =
+            CheckoutLineInput::new(command.sku_id.as_str(), 1).map_err(map_commerce_validation)?;
         let request_no = format!("notary-{}", slug(&command.idempotency_key));
         let session_idempotency = format!("{}-session", command.idempotency_key);
         let session_command = CreateCheckoutSessionCommand::new(
@@ -152,8 +151,32 @@ impl CommercePort for CommerceOrderPort {
         &self,
         query: CommerceMatterListQuery,
     ) -> Result<Vec<CommerceMatterRecord>, NotaryServiceError> {
-        let _ = query;
-        Ok(Vec::new())
+        let limit = query.page_size.max(0);
+        let offset = query.offset.max(0);
+        match &self.query_pool {
+            DatabasePool::Sqlite(pool, _) => {
+                list_notary_matters_sqlite(
+                    pool,
+                    self.tenant_id.as_str(),
+                    query.search_term.as_deref(),
+                    query.status.as_deref(),
+                    limit,
+                    offset,
+                )
+                .await
+            }
+            DatabasePool::Postgres(pool, _) => {
+                list_notary_matters_postgres(
+                    pool,
+                    self.tenant_id.as_str(),
+                    query.search_term.as_deref(),
+                    query.status.as_deref(),
+                    limit,
+                    offset,
+                )
+                .await
+            }
+        }
     }
 
     async fn create_notary_matter(
@@ -175,6 +198,138 @@ impl CommercePort for CommerceOrderPort {
     }
 }
 
+async fn list_notary_matters_sqlite(
+    pool: &sqlx::SqlitePool,
+    tenant_id: &str,
+    search_term: Option<&str>,
+    status: Option<&str>,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<CommerceMatterRecord>, NotaryServiceError> {
+    let rows = sqlx::query(
+        r#"
+        SELECT id,
+               COALESCE(spu_id, '') AS spu_id,
+               COALESCE(sku_no, id) AS sku_no,
+               COALESCE(NULLIF(title, ''), name, id) AS title,
+               CAST(price_amount AS TEXT) AS price_amount,
+               CAST(COALESCE(original_price_amount, price_amount) AS TEXT) AS original_price_amount,
+               COALESCE(currency_code, 'CNY') AS currency_code,
+               COALESCE(status, 'active') AS status,
+               COALESCE(spec_json, '{}') AS spec_json
+        FROM commerce_product_sku
+        WHERE tenant_id = ?1
+          AND LOWER(COALESCE(fulfillment_type, '')) = 'notary'
+          AND (?2 IS NULL OR LOWER(COALESCE(status, '')) = LOWER(?2))
+          AND (
+              ?3 IS NULL
+              OR LOWER(COALESCE(NULLIF(title, ''), name, id)) LIKE '%' || LOWER(?3) || '%'
+          )
+        ORDER BY updated_at DESC, id DESC
+        LIMIT ?4 OFFSET ?5
+        "#,
+    )
+    .bind(tenant_id)
+    .bind(status)
+    .bind(search_term)
+    .bind(limit)
+    .bind(offset)
+    .fetch_all(pool)
+    .await
+    .map_err(storage_error)?;
+
+    rows.iter().map(matter_record_from_sqlite_row).collect()
+}
+
+async fn list_notary_matters_postgres(
+    pool: &sqlx::PgPool,
+    tenant_id: &str,
+    search_term: Option<&str>,
+    status: Option<&str>,
+    limit: i64,
+    offset: i64,
+) -> Result<Vec<CommerceMatterRecord>, NotaryServiceError> {
+    let rows = sqlx::query(
+        r#"
+        SELECT id,
+               COALESCE(spu_id, '') AS spu_id,
+               COALESCE(sku_no, id) AS sku_no,
+               COALESCE(NULLIF(title, ''), name, id) AS title,
+               CAST(price_amount AS TEXT) AS price_amount,
+               CAST(COALESCE(original_price_amount, price_amount) AS TEXT) AS original_price_amount,
+               COALESCE(currency_code, 'CNY') AS currency_code,
+               COALESCE(status, 'active') AS status,
+               COALESCE(spec_json, '{}') AS spec_json
+        FROM commerce_product_sku
+        WHERE tenant_id = $1
+          AND LOWER(COALESCE(fulfillment_type, '')) = 'notary'
+          AND ($2::text IS NULL OR LOWER(COALESCE(status, '')) = LOWER($2))
+          AND (
+              $3::text IS NULL
+              OR LOWER(COALESCE(NULLIF(title, ''), name, id)) LIKE '%' || LOWER($3) || '%'
+          )
+        ORDER BY updated_at DESC, id DESC
+        LIMIT $4 OFFSET $5
+        "#,
+    )
+    .bind(tenant_id)
+    .bind(status)
+    .bind(search_term)
+    .bind(limit)
+    .bind(offset)
+    .fetch_all(pool)
+    .await
+    .map_err(storage_error)?;
+
+    rows.iter().map(matter_record_from_postgres_row).collect()
+}
+
+fn matter_record_from_sqlite_row(
+    row: &sqlx::sqlite::SqliteRow,
+) -> Result<CommerceMatterRecord, NotaryServiceError> {
+    let spec_raw: String = row.try_get("spec_json").map_err(storage_error)?;
+    let spec =
+        serde_json::from_str(&spec_raw).unwrap_or_else(|_| Value::Object(Default::default()));
+    Ok(CommerceMatterRecord {
+        sku_id: row.try_get("id").map_err(storage_error)?,
+        spu_id: row.try_get("spu_id").map_err(storage_error)?,
+        sku_no: row.try_get("sku_no").map_err(storage_error)?,
+        title: row.try_get("title").map_err(storage_error)?,
+        description: None,
+        price_amount: row.try_get("price_amount").map_err(storage_error)?,
+        original_price_amount: Some(
+            row.try_get("original_price_amount")
+                .map_err(storage_error)?,
+        ),
+        currency_code: row.try_get("currency_code").map_err(storage_error)?,
+        status: row.try_get("status").map_err(storage_error)?,
+        spec,
+    })
+}
+
+fn matter_record_from_postgres_row(
+    row: &sqlx::postgres::PgRow,
+) -> Result<CommerceMatterRecord, NotaryServiceError> {
+    let spec_raw: String = row.try_get("spec_json").map_err(storage_error)?;
+    let spec =
+        serde_json::from_str(&spec_raw).unwrap_or_else(|_| Value::Object(Default::default()));
+    Ok(CommerceMatterRecord {
+        sku_id: row.try_get("id").map_err(storage_error)?,
+        spu_id: row.try_get("spu_id").map_err(storage_error)?,
+        sku_no: row.try_get("sku_no").map_err(storage_error)?,
+        title: row.try_get("title").map_err(storage_error)?,
+        description: None,
+        price_amount: row.try_get("price_amount").map_err(storage_error)?,
+        original_price_amount: Some(
+            row.try_get("original_price_amount")
+                .map_err(storage_error)?,
+        ),
+        currency_code: row.try_get("currency_code").map_err(storage_error)?,
+        status: row.try_get("status").map_err(storage_error)?,
+        spec,
+    })
+}
+
 async fn load_order_item(
     pool: &DatabasePool,
     tenant_id: &str,
@@ -192,9 +347,7 @@ async fn load_order_item(
             .await
             .map_err(storage_error)?
             .ok_or_else(|| {
-                NotaryServiceError::not_found(
-                    "commerce order item was not created for notary case",
-                )
+                NotaryServiceError::not_found("commerce order item was not created for notary case")
             })?;
             Ok((
                 row.try_get("id").map_err(storage_error)?,
@@ -212,9 +365,7 @@ async fn load_order_item(
             .await
             .map_err(storage_error)?
             .ok_or_else(|| {
-                NotaryServiceError::not_found(
-                    "commerce order item was not created for notary case",
-                )
+                NotaryServiceError::not_found("commerce order item was not created for notary case")
             })?;
             Ok((
                 row.try_get("id").map_err(storage_error)?,

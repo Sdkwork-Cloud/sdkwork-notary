@@ -48,6 +48,7 @@ pub struct CommerceMatterListQuery {
     pub search_term: Option<String>,
     pub status: Option<String>,
     pub page_size: i64,
+    pub offset: i64,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -131,6 +132,24 @@ pub struct DriveNodeReference {
     pub category: String,
     pub size_label: String,
     pub status: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DriveListNodesPage {
+    pub items: Vec<DriveNodeReference>,
+    pub has_more: bool,
+    pub next_cursor: Option<String>,
+}
+
+pub const NOTARY_FILE_CATEGORY_PROPERTY: &str = "notary.category";
+pub const NOTARY_FILE_REVIEW_STATUS_PROPERTY: &str = "notary.review_status";
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DriveRegisterCaseFileCommand {
+    pub space_id: String,
+    pub node_id: String,
+    pub category: String,
+    pub review_status: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -408,7 +427,15 @@ pub trait DrivePort: Send + Sync {
     async fn list_nodes(
         &self,
         query: DriveListNodesQuery,
-    ) -> Result<Vec<DriveNodeReference>, NotaryServiceError>;
+    ) -> Result<DriveListNodesPage, NotaryServiceError>;
+
+    async fn register_case_file(
+        &self,
+        command: DriveRegisterCaseFileCommand,
+    ) -> Result<(), NotaryServiceError> {
+        let _ = command;
+        Ok(())
+    }
 
     async fn create_download_package(
         &self,

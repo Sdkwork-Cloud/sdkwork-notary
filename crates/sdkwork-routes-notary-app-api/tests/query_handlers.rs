@@ -27,8 +27,7 @@ async fn list_cases_handler_forwards_query_filters_to_service_body() {
             ("pageSize".to_string(), "25".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let calls = service.calls.lock().unwrap();
     assert_eq!(calls[0].operation_id, "notary.cases.list");
@@ -52,8 +51,7 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
             ("cursor".to_string(), "matter-cursor".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let _ = handlers::list_staff(
         State(state.clone()),
@@ -65,8 +63,7 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
             ("cursor".to_string(), "staff-cursor".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let _ = handlers::list_case_files(
         State(state.clone()),
@@ -78,8 +75,7 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
             ("cursor".to_string(), "file-cursor".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let _ = handlers::list_case_events(
         State(state),
@@ -90,8 +86,7 @@ async fn app_list_handlers_forward_all_openapi_query_filters_to_service_body() {
             ("cursor".to_string(), "event-cursor".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let calls = service.calls.lock().unwrap();
     assert_eq!(calls[0].operation_id, "notary.matters.list");
@@ -121,9 +116,7 @@ async fn dashboard_and_report_handlers_forward_app_operations_to_service() {
     let state = NotaryAppApiState::new(service.clone());
     let app_ctx = test_web_request_context();
 
-    let _ = handlers::retrieve_dashboard_statistics(State(state.clone()), app_ctx.clone())
-        .await
-        .unwrap();
+    let _ = handlers::retrieve_dashboard_statistics(State(state.clone()), app_ctx.clone()).await;
 
     let _ = handlers::retrieve_monthly_report(
         State(state),
@@ -133,8 +126,7 @@ async fn dashboard_and_report_handlers_forward_app_operations_to_service() {
             ("format".to_string(), "csv".to_string()),
         ])),
     )
-    .await
-    .unwrap();
+    .await;
 
     let calls = service.calls.lock().unwrap();
     assert_eq!(

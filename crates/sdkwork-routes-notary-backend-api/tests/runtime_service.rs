@@ -6,7 +6,7 @@ use sdkwork_notary_case_contract::{NotaryCaseRecord, NotaryPartyCommand, NotaryS
 use sdkwork_notary_case_service::{
     AppbaseOrganizationMember, AppbasePort, CommerceCreateOrderCommand, CommerceOrderReference,
     CommercePort, DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveFolderReference,
-    DriveListNodesQuery, DriveNodeReference, DrivePort, NotaryCaseEventListPage,
+    DriveListNodesPage, DriveListNodesQuery, DrivePort, NotaryCaseEventListPage,
     NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
     NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryPartyRecord,
 };
@@ -30,22 +30,22 @@ async fn backend_runtime_service_dispatches_route_operations_to_notary_runtime()
             "notary.organizationProfiles.create",
             BTreeMap::new(),
             json!({
-                "organizationId": "org-1",
+                "organizationId": "200001",
                 "openedByMembershipId": "member-admin-1"
             }),
         )
         .await
         .unwrap();
 
-    assert_eq!(opened["organizationId"], "org-1");
+    assert_eq!(opened["organizationId"], "200001");
     assert_eq!(opened["driveSpaceType"], "notary");
-    assert_eq!(opened["driveSpaceId"], "space-notary-org-1");
+    assert_eq!(opened["driveSpaceId"], "space-notary-200001");
 }
 
 fn request_context() -> NotaryRequestContext {
     NotaryRequestContext {
         tenant_id: "100001".to_string(),
-        organization_id: Some("org-1".to_string()),
+        organization_id: Some("200001".to_string()),
         user_id: "1".to_string(),
         membership_id: Some("member-admin-1".to_string()),
         session_id: "session-1".to_string(),
@@ -65,7 +65,7 @@ impl RecordingAppbase {
             members: vec![AppbaseOrganizationMember {
                 membership_id: "member-admin-1".to_string(),
                 user_id: "1".to_string(),
-                organization_id: "org-1".to_string(),
+                organization_id: "200001".to_string(),
                 display_name: "Admin".to_string(),
                 enterprise_verified: true,
                 notary_enabled: true,
@@ -152,8 +152,12 @@ impl DrivePort for RecordingDrive {
     async fn list_nodes(
         &self,
         _query: DriveListNodesQuery,
-    ) -> Result<Vec<DriveNodeReference>, NotaryServiceError> {
-        Ok(Vec::new())
+    ) -> Result<DriveListNodesPage, NotaryServiceError> {
+        Ok(DriveListNodesPage {
+            items: Vec::new(),
+            has_more: false,
+            next_cursor: None,
+        })
     }
 }
 

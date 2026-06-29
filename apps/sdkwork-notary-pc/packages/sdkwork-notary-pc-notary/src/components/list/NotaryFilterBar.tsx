@@ -17,7 +17,7 @@ export interface NotaryFilterBarProps {
   onStatusFilterChange: (filter: string) => void;
 }
 
-const LEGACY_TYPE_FILTERS = [
+const DEFAULT_MATTER_TYPE_OPTIONS = [
   { value: 'ELECTRONIC', labelKey: 'filter.electronicContract' as const },
   { value: 'IPR', labelKey: 'filter.ipr' as const },
   { value: 'EVIDENCE', labelKey: 'filter.evidence' as const },
@@ -60,7 +60,7 @@ export const NotaryFilterBar: React.FC<NotaryFilterBarProps> = ({
               {matter.title}
             </option>
           ))
-          : LEGACY_TYPE_FILTERS.map((item) => (
+          : DEFAULT_MATTER_TYPE_OPTIONS.map((item) => (
             <option key={item.value} value={item.value}>
               {t(item.labelKey)}
             </option>

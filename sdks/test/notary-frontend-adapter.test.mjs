@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { chatPcRoot, chatPcTest, notaryPcRoot, workspaceRoot } from "./helpers/chat-pc-root.mjs";
+import { imPcRoot, imPcTest, notaryPcRoot, workspaceRoot } from "./helpers/im-pc-root.mjs";
 
 const notaryServicePath =
   "packages/sdkwork-notary-pc-notary/src/services/NotaryService.ts";
@@ -31,7 +31,7 @@ function functionBody(source, functionName) {
   return next >= 0 ? source.slice(start, next) : source.slice(start);
 }
 
-chatPcTest("real chat-pc notary service preserves the existing UI service shape", () => {
+imPcTest("real IM PC notary service preserves the existing UI service shape", () => {
   const source = readNotaryServiceSource();
   for (const method of [
     "getTasks",
@@ -76,7 +76,7 @@ chatPcTest("real chat-pc notary service preserves the existing UI service shape"
   );
 });
 
-chatPcTest("real chat-pc notary service maps generated SDK case models to existing task view models", () => {
+imPcTest("real IM PC notary service maps generated SDK case models to existing task view models", () => {
   const source = readNotaryServiceSource();
 
   for (const field of [
@@ -109,7 +109,7 @@ chatPcTest("real chat-pc notary service maps generated SDK case models to existi
   }
 });
 
-chatPcTest("real chat-pc notary service keeps operational case id separate from display case number", () => {
+imPcTest("real IM PC notary service keeps operational case id separate from display case number", () => {
   const source = readNotaryServiceSource();
 
   assert(
@@ -125,7 +125,7 @@ chatPcTest("real chat-pc notary service keeps operational case id separate from 
   );
 });
 
-chatPcTest("real chat-pc notary service creates cases with staff assignment and creation uploads", () => {
+imPcTest("real IM PC notary service creates cases with staff assignment and creation uploads", () => {
   const source = readNotaryServiceSource();
   const createTaskBody = methodBody(source, "createTask");
   assert.match(createTaskBody, /data\.skuId/);
@@ -157,7 +157,7 @@ chatPcTest("real chat-pc notary service creates cases with staff assignment and 
   assert.match(resolveBody, /selectedNotaryStaff/);
 });
 
-chatPcTest("real chat-pc notary service exposes dashboard, report, and matter SDK workflows", () => {
+imPcTest("real IM PC notary service exposes dashboard, report, and matter SDK workflows", () => {
   const source = readNotaryServiceSource();
 
   for (const method of [
@@ -178,7 +178,7 @@ chatPcTest("real chat-pc notary service exposes dashboard, report, and matter SD
   }
 });
 
-chatPcTest("real chat-pc notary service loads staff, filters cases by SKU, and forwards pagination", () => {
+imPcTest("real IM PC notary service loads staff, filters cases by SKU, and forwards pagination", () => {
   const source = readNotaryServiceSource();
 
   const staffBody = methodBody(source, "getStaff");
@@ -227,7 +227,7 @@ chatPcTest("real chat-pc notary service loads staff, filters cases by SKU, and f
   }
 });
 
-chatPcTest("real chat-pc notary service keeps document operations inside generated SDK facades", () => {
+imPcTest("real IM PC notary service keeps document operations inside generated SDK facades", () => {
   const source = readNotaryServiceSource();
 
   const downloadBody = methodBody(source, "downloadDocuments");
@@ -246,7 +246,7 @@ chatPcTest("real chat-pc notary service keeps document operations inside generat
   assert.doesNotMatch(removeDocumentBody, /createDownloadPackage|fetch\(|axios|Authorization|Access-Token/);
 });
 
-chatPcTest("real chat-pc notary service persists party identity media and party Drive files", () => {
+imPcTest("real IM PC notary service persists party identity media and party Drive files", () => {
   const source = readNotaryServiceSource();
 
   for (const token of [
@@ -284,7 +284,7 @@ chatPcTest("real chat-pc notary service persists party identity media and party 
   assert.doesNotMatch(uploadBody, /fetch\(|axios|Authorization|Access-Token/);
 });
 
-chatPcTest("real chat-pc notary service creates party video and signature invites through app SDK", () => {
+imPcTest("real IM PC notary service creates party video and signature invites through app SDK", () => {
   const source = readNotaryServiceSource();
 
   const videoBody = methodBody(source, "createVideoInvite");
@@ -302,7 +302,7 @@ chatPcTest("real chat-pc notary service creates party video and signature invite
   assert.doesNotMatch(signatureInviteBody, /fetch\(|axios|Authorization|Access-Token/);
 });
 
-chatPcTest("real chat-pc notary service synchronizes party edits and signatures through generated resources", () => {
+imPcTest("real IM PC notary service synchronizes party edits and signatures through generated resources", () => {
   const source = readNotaryServiceSource();
 
   const updateBody = methodBody(source, "updateTask");

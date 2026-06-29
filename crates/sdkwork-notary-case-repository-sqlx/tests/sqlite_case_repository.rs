@@ -14,16 +14,16 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
     let repository = SqliteNotaryCaseRepository::new(pool.clone(), "100001", "1");
 
     let profile = repository
-        .upsert_organization_profile("org-1", "drive-space-1", "notary")
+        .upsert_organization_profile("200001", "drive-space-1", "notary")
         .await
         .unwrap();
-    assert_eq!(profile.organization_id, "org-1");
+    assert_eq!(profile.organization_id, "200001");
     assert_eq!(profile.drive_space_id, "drive-space-1");
     assert_eq!(profile.drive_space_type, "notary");
 
     let suspended_profile = repository
         .update_organization_profile(NotaryOrganizationProfileUpdateCommand {
-            organization_id: "org-1".to_string(),
+            organization_id: "200001".to_string(),
             status: Some("suspended".to_string()),
             settings: Some(serde_json::json!({"reviewMode": "manual"})),
         })
@@ -32,7 +32,7 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
     assert_eq!(suspended_profile.status, "suspended");
 
     repository
-        .upsert_organization_profile("org-2", "drive-space-2", "notary")
+        .upsert_organization_profile("200002", "drive-space-2", "notary")
         .await
         .unwrap();
     let profiles = repository
@@ -40,14 +40,14 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
         .await
         .unwrap();
     assert_eq!(profiles.len(), 2);
-    assert_eq!(profiles[0].organization_id, "org-2");
-    assert_eq!(profiles[1].organization_id, "org-1");
+    assert_eq!(profiles[0].organization_id, "200002");
+    assert_eq!(profiles[1].organization_id, "200001");
     let org_1_profiles = repository
-        .list_organization_profiles(Some("org-1"), 10)
+        .list_organization_profiles(Some("200001"), 10)
         .await
         .unwrap();
     assert_eq!(org_1_profiles.len(), 1);
-    assert_eq!(org_1_profiles[0].organization_id, "org-1");
+    assert_eq!(org_1_profiles[0].organization_id, "200001");
 
     let inserted = repository.insert_case(case_record()).await.unwrap();
     assert_eq!(inserted.order_item_id, "order-item-1");
@@ -112,7 +112,7 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
 
     let listed = repository
         .list_cases(NotaryCaseListQuery {
-            organization_id: "org-1".to_string(),
+            organization_id: "200001".to_string(),
             status: Some("processing".to_string()),
             sku_id: Some("sku-notary-contract".to_string()),
             search_term: Some("contract".to_string()),
@@ -174,7 +174,7 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
     let assignment = repository
         .insert_assignment(NotaryCaseAssignmentCommand {
             case_id: "case-1".to_string(),
-            organization_id: "org-1".to_string(),
+            organization_id: "200001".to_string(),
             organization_membership_id: "member-notary-1".to_string(),
             user_id: "user-notary-1".to_string(),
             assignment_role: "primary_notary".to_string(),
@@ -234,7 +234,7 @@ fn case_record() -> NotaryCaseRecord {
     NotaryCaseRecord {
         case_id: "case-1".to_string(),
         case_no: "NT-20260610-000001".to_string(),
-        organization_id: "org-1".to_string(),
+        organization_id: "200001".to_string(),
         title: "Electronic contract preservation".to_string(),
         applicant_name: "Zhang San Network".to_string(),
         primary_notary_membership_id: Some("member-notary-1".to_string()),

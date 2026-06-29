@@ -14,14 +14,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <SdkworkSessionAuthBrowserRoot>
-      <AuthGate>
-        <Routes>
-          <Route path="/" element={<Navigate replace to={NOTARY_PC_HOME_PATH} />} />
-          <Route path="/notary/*" element={<NotaryPcRoutes />} />
-          <Route path="*" element={<Navigate replace to={NOTARY_PC_HOME_PATH} />} />
-        </Routes>
-      </AuthGate>
-          </SdkworkSessionAuthBrowserRoot>
+        <AuthGate>
+          <Routes>
+            <Route path="/" element={<Navigate replace to={NOTARY_PC_HOME_PATH} />} />
+            <Route path="/notary/*" element={<NotaryPcRoutes />} />
+            <Route path="*" element={<Navigate replace to={NOTARY_PC_HOME_PATH} />} />
+          </Routes>
+        </AuthGate>
+      </SdkworkSessionAuthBrowserRoot>
     </BrowserRouter>
   );
 }

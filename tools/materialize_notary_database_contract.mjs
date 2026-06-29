@@ -73,6 +73,6 @@ materialize({
   moduleId: 'notary',
   ownerTeam: 'notary-platform',
   tablePrefix: 'notary_',
-  baselineFile: 'database/ddl/baseline/postgres/0001_notary_legacy_baseline.sql',
+  baselineFile: 'database/ddl/baseline/postgres/0001_notary_foundation.sql',
   stdoutLabel: 'notary',
 });

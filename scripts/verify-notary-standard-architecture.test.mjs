@@ -159,7 +159,8 @@ test('integrates sdkwork-utils-rust for shared datetime and crypto helpers', () 
   assert.match(timeSource, /sdkwork_utils_rust/);
 
   const serviceSource = read('crates/sdkwork-notary-case-service/src/service.rs');
-  assert.match(serviceSource, /sdkwork_utils_rust::is_blank/);
+  assert.match(serviceSource, /sdkwork_utils_rust::\{[^}]*\bis_blank\b/);
+  assert.match(serviceSource, /PageInfo/);
   assert.doesNotMatch(serviceSource, /\.trim\(\)\.is_empty\(\)/);
 
   const piiVaultSource = read('crates/sdkwork-notary-case-repository-sqlx/src/pii_vault.rs');
@@ -412,7 +413,7 @@ test('declares contract maintenance scripts and schema registry', () => {
   const packageManifest = readJson('package.json');
   assert.equal(
     packageManifest.scripts['api:materialize'],
-    'node scripts/sync-notary-openapi-authorities.mjs && node scripts/sync-notary-api-framework-metadata.mjs && node scripts/generate-notary-route-manifests.mjs',
+    'node scripts/sync-notary-openapi-authorities.mjs && node scripts/generate-notary-route-manifests.mjs && node scripts/sync-notary-api-framework-metadata.mjs',
   );
   assert.ok(packageManifest.scripts['dev:browser'], 'package.json must expose pnpm dev:browser');
   assert.ok(packageManifest.scripts['api:check'], 'package.json must expose pnpm api:check');

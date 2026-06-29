@@ -6,7 +6,7 @@ use sdkwork_notary_case_contract::{NotaryCaseRecord, NotaryPartyCommand, NotaryS
 use sdkwork_notary_case_service::{
     AppbaseOrganizationMember, AppbasePort, CommerceCreateOrderCommand, CommerceOrderReference,
     CommercePort, DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveFolderReference,
-    DriveListNodesQuery, DriveNodeReference, DrivePort, NotaryCaseEventListPage,
+    DriveListNodesPage, DriveListNodesQuery, DrivePort, NotaryCaseEventListPage,
     NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
     NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryPartyRecord,
 };
@@ -30,7 +30,7 @@ async fn app_runtime_service_dispatches_route_operations_to_notary_runtime() {
             "notary.cases.create",
             BTreeMap::new(),
             json!({
-                "organizationId": "org-1",
+                "organizationId": "200001",
                 "skuId": "sku-electronic-contract",
                 "title": "Electronic contract preservation",
                 "applicantName": "Zhang San Network",
@@ -53,7 +53,7 @@ async fn app_runtime_service_dispatches_route_operations_to_notary_runtime() {
 fn request_context() -> NotaryRequestContext {
     NotaryRequestContext {
         tenant_id: "100001".to_string(),
-        organization_id: Some("org-1".to_string()),
+        organization_id: Some("200001".to_string()),
         user_id: "1".to_string(),
         membership_id: Some("member-notary-1".to_string()),
         session_id: "session-1".to_string(),
@@ -73,7 +73,7 @@ impl RecordingAppbase {
             member: Some(AppbaseOrganizationMember {
                 membership_id: "member-notary-1".to_string(),
                 user_id: "1".to_string(),
-                organization_id: "org-1".to_string(),
+                organization_id: "200001".to_string(),
                 display_name: "李明".to_string(),
                 enterprise_verified: true,
                 notary_enabled: true,
@@ -161,8 +161,12 @@ impl DrivePort for RecordingDrive {
     async fn list_nodes(
         &self,
         _query: DriveListNodesQuery,
-    ) -> Result<Vec<DriveNodeReference>, NotaryServiceError> {
-        Ok(Vec::new())
+    ) -> Result<DriveListNodesPage, NotaryServiceError> {
+        Ok(DriveListNodesPage {
+            items: Vec::new(),
+            has_more: false,
+            next_cursor: None,
+        })
     }
 }
 
@@ -182,8 +186,8 @@ impl RecordingNotaryRepository {
         Self {
             inner: Arc::new(StdMutex::new(RecordingNotaryRepositoryState {
                 profile: Some(NotaryOrganizationProfile {
-                    organization_id: "org-1".to_string(),
-                    drive_space_id: "space-notary-org-1".to_string(),
+                    organization_id: "200001".to_string(),
+                    drive_space_id: "space-notary-200001".to_string(),
                     drive_space_type: "notary".to_string(),
                     status: "active".to_string(),
                 }),

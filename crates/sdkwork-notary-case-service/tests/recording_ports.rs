@@ -7,11 +7,12 @@ use sdkwork_notary_case_service::{
     CommerceMatterListQuery, CommerceMatterRecord, CommerceMatterUpdateCommand,
     CommerceOrderReference, CommercePort, DriveCreateDownloadPackageCommand,
     DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveDownloadPackageReference,
-    DriveFolderReference, DriveListNodesQuery, DriveNodeReference, DrivePort,
-    NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListPage,
-    NotaryCaseEventListQuery, NotaryCaseEventRecord, NotaryCaseListPage, NotaryCaseListQuery,
-    NotaryCaseRepositoryPort, NotaryCaseUpdateCommand, NotaryOrganizationProfile,
-    NotaryOrganizationProfileUpdateCommand, NotaryPartyRecord, NotaryPartyUpdateCommand,
+    DriveFolderReference, DriveListNodesPage, DriveListNodesQuery, DriveNodeReference, DrivePort,
+    DriveRegisterCaseFileCommand, NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord,
+    NotaryCaseEventListPage, NotaryCaseEventListQuery, NotaryCaseEventRecord, NotaryCaseListPage,
+    NotaryCaseListQuery, NotaryCaseRepositoryPort, NotaryCaseUpdateCommand,
+    NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand, NotaryPartyRecord,
+    NotaryPartyUpdateCommand,
 };
 use serde_json::json;
 
@@ -129,11 +130,12 @@ impl CommercePort for RecordingCommerce {
     ) -> Result<Vec<CommerceMatterRecord>, NotaryServiceError> {
         let mut state = lock(&self.inner);
         state.events.push(format!(
-            "list_matters:{}:{}:{}:{}",
+            "list_matters:{}:{}:{}:{}:{}",
             query.organization_id.clone().unwrap_or_default(),
             query.search_term.clone().unwrap_or_default(),
             query.status.clone().unwrap_or_default(),
-            query.page_size
+            query.page_size,
+            query.offset
         ));
         Ok(state
             .matters
@@ -152,7 +154,8 @@ impl CommercePort for RecordingCommerce {
                         .contains(&search_term.to_ascii_lowercase())
                 })
             })
-            .take(query.page_size as usize)
+            .skip(query.offset.max(0) as usize)
+            .take(query.page_size.max(0) as usize)
             .cloned()
             .collect())
     }
@@ -282,7 +285,7 @@ impl DrivePort for RecordingDrive {
     async fn list_nodes(
         &self,
         query: DriveListNodesQuery,
-    ) -> Result<Vec<DriveNodeReference>, NotaryServiceError> {
+    ) -> Result<DriveListNodesPage, NotaryServiceError> {
         lock(&self.inner).events.push(format!(
             "list_nodes:{}:{}:{}:{}:{}:{}",
             query.space_type,
@@ -292,13 +295,28 @@ impl DrivePort for RecordingDrive {
             query.page_size,
             query.cursor.clone().unwrap_or_default()
         ));
-        Ok(vec![DriveNodeReference {
-            node_id: format!("node-{}", query.parent_node_id),
-            node_name: "合同.pdf".to_string(),
-            category: query.category.unwrap_or_else(|| "evidence".to_string()),
-            size_label: "2.4 MB".to_string(),
-            status: "verified".to_string(),
-        }])
+        Ok(DriveListNodesPage {
+            items: vec![DriveNodeReference {
+                node_id: format!("node-{}", query.parent_node_id),
+                node_name: "合同.pdf".to_string(),
+                category: query.category.unwrap_or_else(|| "evidence".to_string()),
+                size_label: "2.4 MB".to_string(),
+                status: "verified".to_string(),
+            }],
+            has_more: false,
+            next_cursor: None,
+        })
+    }
+
+    async fn register_case_file(
+        &self,
+        command: DriveRegisterCaseFileCommand,
+    ) -> Result<(), NotaryServiceError> {
+        lock(&self.inner).events.push(format!(
+            "register_case_file:{}:{}:{}:{}",
+            command.space_id, command.node_id, command.category, command.review_status
+        ));
+        Ok(())
     }
 
     async fn create_download_package(
