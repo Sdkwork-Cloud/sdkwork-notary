@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
-    "@sdkwork/app-topology": "file:../sdkwork-app-topology"
+    "@sdkwork/app-topology": "workspace:*"
   },
   "scripts": {
     "dev": "node scripts/notary-dev.mjs --deployment-profile standalone",
@@ -20,7 +20,7 @@
     "test:desktop": "pnpm --dir apps/sdkwork-notary-pc test",
     "build": "cargo build --workspace",
     "typecheck": "pnpm --dir apps/sdkwork-notary-h5 typecheck && pnpm --dir apps/sdkwork-notary-pc typecheck",
-    "check": "pnpm test:topology-validate && pnpm db:validate && pnpm format:check && pnpm typecheck && node ../sdkwork-specs/tools/check-pnpm-script-standard.mjs --root . --application-code-prefix notary",
+    "check": "pnpm run check:app-composition && pnpm test:topology-validate && pnpm db:validate && pnpm format:check && pnpm typecheck && node ../sdkwork-specs/tools/check-pnpm-script-standard.mjs --root . --application-code-prefix notary",
     "clean": "cargo clean --target-dir target-codex-test",
     "test": "pnpm.cmd test:contracts",
     "test:contracts": "node --test sdks/test/*.test.mjs scripts/dev/*.test.mjs scripts/verify-notary-standard-architecture.test.mjs scripts/verify-notary-iam-manifest.test.mjs scripts/verify-notary-utils-standard.test.mjs apps/sdkwork-notary-h5/src/__tests__/*.test.mjs apps/sdkwork-notary-pc/src/__tests__/*.test.mjs tests/contract/*.test.mjs",
@@ -38,8 +38,8 @@
     "sdk:generate:check": "node --test tests/contract/sdk-generate-check.contract.test.mjs",
     "sdk:check": "pnpm sdk:generate:check && node --test sdks/test/notary-composed-facade.test.mjs sdks/test/notary-frontend-adapter.test.mjs",
     "api:envelope:check": "node ../sdkwork-specs/tools/check-api-response-envelope.mjs --workspace .",
-    "verify": "pnpm.cmd check && pnpm.cmd test:topology-baggage && pnpm.cmd api:check && pnpm.cmd api:envelope:check && pnpm.cmd sdk:check && pnpm.cmd gateway:assembly:validate && pnpm.cmd test:contracts && pnpm.cmd test:rust && pnpm.cmd build:browser && pnpm.cmd build:desktop",
-    "db:materialize:contract": "node ../sdkwork-specs/tools/materialize-database-contract-from-baseline.mjs --root . --baseline database/ddl/baseline/postgres/0001_notary_foundation.sql --module-id notary --owner notary-platform --prefixes notary_ --engines postgres",
+    "verify": "pnpm.cmd check && pnpm.cmd test:topology-baggage && pnpm.cmd api:check && pnpm.cmd api:envelope:check && pnpm.cmd sdk:check && pnpm.cmd gateway:assembly:validate && pnpm.cmd test:contracts && pnpm.cmd test:rust && pnpm.cmd build:browser && pnpm.cmd build:desktop && pnpm run check:app-composition",
+    "db:materialize:contract": "node ../sdkwork-specs/tools/materialize-database-contract-from-baseline.mjs --root . --baseline database/ddl/baseline/postgres/0001_notary_baseline.sql --module-id notary --owner notary-platform --prefixes notary_ --engines postgres,sqlite",
     "db:validate": "node ../sdkwork-specs/tools/check-database-framework-standard.mjs --root .",
     "db:plan": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . plan",
     "db:init": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . init",
@@ -54,6 +54,7 @@
     "gateway:package:cloud": "node ../sdkwork-app-topology/scripts/gateway-cloud-bundle.mjs bundle --root .",
     "gateway:validate:cloud": "node ../sdkwork-app-topology/scripts/gateway-cloud-bundle.mjs validate --root .",
     "gateway:assembly:materialize": "node scripts/gateway/assembly-materialize.mjs",
-    "gateway:assembly:validate": "node scripts/gateway/assembly-validate.mjs"
+    "gateway:assembly:validate": "node scripts/gateway/assembly-validate.mjs",
+    "check:app-composition": "node ../sdkwork-specs/tools/verify-repo.mjs --root ."
   }
 }

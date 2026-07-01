@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.composition.resolved",
+  "repository": "sdkwork-notary",
+  "integrations": [
+    {
+      "workspace": "sdkwork-notary-app-sdk",
+      "surface": "app-api",
+      "apiPrefix": "/app/v3/api",
+      "connectivityPlane": "application",
+      "runtimeMode": "same-origin-embedded",
+      "mountStatus": null,
+      "envKey": "VITE_SDKWORK_NOTARY_APP_API_BASE_URL",
+      "forbidProductSameOriginFallback": false,
+      "corePackage": "sdkwork-notary-h5-core",
+      "source": "apps/sdkwork-notary-h5/packages/sdkwork-notary-h5-core/specs/component.spec.json"
+    },
+    {
+      "workspace": "sdkwork-notary-app-sdk",
+      "surface": "app-api",
+      "apiPrefix": "/app/v3/api",
+      "connectivityPlane": "application",
+      "runtimeMode": "same-origin-embedded",
+      "mountStatus": null,
+      "envKey": "VITE_SDKWORK_NOTARY_APP_API_BASE_URL",
+      "forbidProductSameOriginFallback": false,
+      "corePackage": "sdkwork-notary-pc-core",
+      "source": "apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-core/specs/component.spec.json"
+    }
+  ],
+  "permissions": {
+    "inheritanceMode": "module-catalog-with-overrides",
+    "inheritedManifests": [
+      {
+        "workspace": "sdkwork-notary-app-sdk",
+        "manifestRef": "specs/iam.module.manifest.json",
+        "inheritPermissions": true
+      },
+      {
+        "workspace": "sdkwork-notary-app-sdk",
+        "manifestRef": "specs/iam.module.manifest.json",
+        "inheritPermissions": true
+      }
+    ]
+  },
+  "env": {},
+  "requiresPlatformGatewayProcess": false,
+  "issues": [],
+  "meta": {
+    "resolver": "sdkwork-specs/tools/lib/composition-resolver.mjs",
+    "credentialModes": {
+      "sdkwork-notary-app-sdk": "authenticated-app-api"
+    }
+  }
+}

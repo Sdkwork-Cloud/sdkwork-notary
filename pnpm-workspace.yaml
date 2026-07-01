@@ -1,0 +1,5 @@
+packages:
+  - "apps/sdkwork-notary-h5"
+  - "apps/sdkwork-notary-h5/packages/*"
+  - "apps/sdkwork-notary-pc"
+  - "apps/sdkwork-notary-pc/packages/*"

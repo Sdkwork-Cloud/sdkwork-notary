@@ -18,6 +18,10 @@ license = "SEE LICENSE IN LICENSE"
 version = "0.1.0"
 
 [workspace.dependencies]
+sdkwork-drive-workspace-service = { path = "../sdkwork-drive/crates/sdkwork-drive-workspace-service" }
+sdkwork-order-service = { path = "../sdkwork-order/crates/sdkwork-order-service" }
+sdkwork-order-repository-sqlx = { path = "../sdkwork-order/crates/sdkwork-order-repository-sqlx" }
+sdkwork-contract-service = { path = "../sdkwork-account/crates/sdkwork-contract-service" }
 axum = "0.8"
 http = "1.3"
 sdkwork-web-core = { path = "../sdkwork-web-framework/crates/sdkwork-web-core" }

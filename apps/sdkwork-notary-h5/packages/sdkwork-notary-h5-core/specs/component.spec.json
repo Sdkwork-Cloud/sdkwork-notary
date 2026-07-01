@@ -42,7 +42,13 @@
       "@sdkwork/notary-app-sdk"
     ],
     "dependencyApiSurfaces": [],
-    "dependencyComposition": "../../../specs/dependency.composition.json"
+    "sdkDependencies": [
+      {
+        "workspace": "sdkwork-notary-app-sdk",
+        "surface": "app-api",
+        "credentialMode": "authenticated-app-api"
+      }
+    ]
   },
   "verification": {
     "commands": [

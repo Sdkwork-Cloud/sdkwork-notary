@@ -18,7 +18,7 @@
     "@sdkwork/notary-h5-notary": "workspace:*",
     "@sdkwork/notary-h5-shell": "workspace:*",
     "@sdkwork/sdk-common": "^1.0.3",
-    "@sdkwork/utils": "file:../../../sdkwork-utils/packages/sdkwork-utils-typescript",
+    "@sdkwork/utils": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.17.0"

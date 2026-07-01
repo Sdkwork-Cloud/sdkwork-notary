@@ -130,10 +130,8 @@ test('integrates sdkwork-database in notary SQLx repository crate', () => {
 
   assert.equal(exists('database/database.manifest.json'), true);
   assert.equal(exists('database/contract/schema.yaml'), true);
-  assert.equal(exists('database/migrations/postgres/0001_notary_foundation.up.sql'), true);
-  assert.equal(exists('database/migrations/postgres/0001_notary_foundation.down.sql'), true);
-  assert.equal(exists('database/migrations/sqlite/0001_notary_foundation.up.sql'), true);
-  assert.equal(exists('database/migrations/sqlite/0001_notary_foundation.down.sql'), true);
+  assert.equal(exists('database/ddl/baseline/postgres/0001_notary_baseline.sql'), true);
+  assert.equal(exists('database/ddl/baseline/sqlite/0001_notary_baseline.sql'), true);
   assert.equal(
     exists('crates/sdkwork-notary-case-repository-sqlx/migrations/0001_notary_foundation.sql'),
     false,
