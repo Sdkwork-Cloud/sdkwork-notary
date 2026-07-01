@@ -1,4 +1,5 @@
 # SDKWork Notary
+repository-kind: application
 
 `sdkwork-notary` defines the professional notary business contract layer for SDKWork. The current implementation is contract-first and runtime-ready: database schema, OpenAPI authority documents, SDK family metadata, TypeScript package roots, composed facades, and Rust service orchestration crates are in place so application and backend implementations can share stable boundaries.
 

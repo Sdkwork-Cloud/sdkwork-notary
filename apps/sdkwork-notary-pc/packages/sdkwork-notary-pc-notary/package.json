@@ -16,7 +16,7 @@
   "dependencies": {
     "@sdkwork/notary-pc-commons": "workspace:*",
     "@sdkwork/notary-pc-core": "workspace:*",
-    "@sdkwork/utils": "file:../../../../../sdkwork-utils/packages/sdkwork-utils-typescript"
+    "@sdkwork/utils": "workspace:*"
   },
   "peerDependencies": {
     "i18next": "^26.0.0",
