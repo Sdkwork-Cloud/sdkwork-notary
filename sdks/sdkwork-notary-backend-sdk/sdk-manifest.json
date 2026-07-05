@@ -74,5 +74,30 @@
   "standardProfile": "sdkwork-v3",
   "fixedSdkVersion": "0.1.0",
   "ownerOnlyOperationCount": 13,
-  "managedBy": "sdkwork-notary-contract"
+  "managedBy": "sdkwork-notary-contract",
+  "packageName": "@sdkwork/notary-backend-sdk",
+  "transportPackageName": "sdkwork-notary-backend-sdk-generated-typescript",
+  "typescript": {
+    "composedRoot": "sdkwork-notary-backend-sdk-typescript",
+    "composedEntry": "sdkwork-notary-backend-sdk-typescript/src/index.ts",
+    "transportRoot": "sdkwork-notary-backend-sdk-typescript/generated/server-openapi",
+    "transportEntry": "sdkwork-notary-backend-sdk-typescript/generated/server-openapi/src/index.ts"
+  },
+  "workspace": "sdkwork-notary-backend-sdk",
+  "title": "SDKWork Notary Backend API SDK",
+  "apiVersion": "0.1.0",
+  "openapiVersion": "3.1.2",
+  "authoritySpec": "../../generated/openapi/notary-backend-api.openapi.json",
+  "derivedSpecs": {
+    "default": "../../generated/openapi/notary-backend-api.openapi.json"
+  },
+  "discoverySurface": {
+    "sdkTarget": "backend",
+    "apiPrefix": "/backend/v3/api",
+    "schemaUrl": "/backend/v3/openapi.json",
+    "generatedProtocols": [
+      "http-openapi"
+    ],
+    "manualTransports": []
+  }
 }

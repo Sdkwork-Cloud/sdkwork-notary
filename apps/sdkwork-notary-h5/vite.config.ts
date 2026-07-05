@@ -17,7 +17,7 @@ const generatedDriveAppSdkEntry = path.resolve(
 );
 const generatedAppbaseAppSdkEntry = path.resolve(
   workspaceRoot,
-  'sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript/generated/server-openapi/src/index.ts',
+  'sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript/src/index.ts',
 );
 
 export default defineConfig(({ mode }) => {

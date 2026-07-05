@@ -23,11 +23,6 @@
       "types": "./composed/index.ts",
       "import": "./composed/index.ts",
       "default": "./composed/index.ts"
-    },
-    "./generated": {
-      "types": "./generated/server-openapi/src/index.ts",
-      "import": "./generated/server-openapi/src/index.ts",
-      "default": "./generated/server-openapi/src/index.ts"
     }
   },
   "dependencies": {
