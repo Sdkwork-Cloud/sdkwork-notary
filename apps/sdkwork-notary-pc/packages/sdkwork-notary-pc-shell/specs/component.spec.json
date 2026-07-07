@@ -25,7 +25,8 @@
     "publicExports": ["@sdkwork/notary-pc-shell"],
     "runtimeEntrypoints": ["NotaryPcRoutes", "NOTARY_PC_HOME_PATH"],
     "sdkClients": [],
-    "dependencyApiSurfaces": ["@sdkwork/notary-pc-notary"]
+    "requiredPorts": ["@sdkwork/notary-pc-notary"],
+    "dependencyApiSurfaces": []
   },
   "verification": {
     "commands": ["pnpm --dir apps/sdkwork-notary-pc typecheck", "pnpm test:desktop"]

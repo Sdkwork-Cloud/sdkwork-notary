@@ -5,8 +5,9 @@ use sdkwork_notary_case_contract::{
 use sdkwork_notary_case_service::{
     NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListPage,
     NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
-    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand,
-    NotaryPartyUpdateCommand,
+    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryOrganizationProfileListPage,
+    NotaryOrganizationProfileUpdateCommand, NotaryPartyListPage, NotaryPartyListQuery,
+    NotaryPartyUpdateCommand, decode_keyset_cursor, encode_keyset_cursor, validated_list_page_size,
 };
 pub use sdkwork_notary_case_service::{NotaryCaseEventRecord, NotaryPartyRecord};
 use sqlx::{PgPool, Row};
@@ -115,25 +116,60 @@ impl PostgresNotaryCaseRepository {
         &self,
         organization_id: Option<&str>,
         page_size: i64,
-    ) -> Result<Vec<NotaryOrganizationProfile>, NotaryServiceError> {
+        cursor: Option<&str>,
+    ) -> Result<NotaryOrganizationProfileListPage, NotaryServiceError> {
+        let page_size = validated_list_page_size(page_size);
+        let fetch_limit = page_size + 1;
+        let keyset = decode_keyset_cursor(cursor)?;
+        let (cursor_updated_at, cursor_id) = match keyset {
+            Some((updated_at, id)) => (Some(updated_at), Some(id)),
+            None => (None, None),
+        };
         let rows = sqlx::query(
             r#"
-            SELECT organization_id, drive_space_id, drive_space_type, status
+            SELECT organization_id, drive_space_id, drive_space_type, status, updated_at, id
             FROM notary_organization_profile
             WHERE tenant_id = $1
               AND ($2 IS NULL OR organization_id = $2)
+              AND (
+                $3 IS NULL
+                OR updated_at < $3
+                OR (updated_at = $3 AND id < $4)
+              )
             ORDER BY updated_at DESC, id DESC
-            LIMIT $3
+            LIMIT $5
             "#,
         )
         .bind(&self.tenant_id)
         .bind(organization_id)
-        .bind(page_size)
+        .bind(cursor_updated_at.as_deref())
+        .bind(cursor_id.as_deref())
+        .bind(fetch_limit)
         .fetch_all(&self.pool)
         .await
         .map_err(store_error("failed to list notary organization profiles"))?;
 
-        Ok(rows.iter().map(profile_from_row).collect())
+        let mut items = rows.iter().map(profile_from_row).collect::<Vec<_>>();
+        let has_more = items.len() as i64 > page_size;
+        if has_more {
+            items.truncate(page_size as usize);
+        }
+        let next_cursor = if has_more {
+            let last_row = rows
+                .get((page_size as usize).saturating_sub(1))
+                .expect("organization profile page row");
+            Some(encode_keyset_cursor(
+                &string_cell(last_row, "updated_at"),
+                &string_cell(last_row, "id"),
+            ))
+        } else {
+            None
+        };
+        Ok(NotaryOrganizationProfileListPage {
+            items,
+            has_more,
+            next_cursor,
+        })
     }
 
     pub async fn update_organization_profile(
@@ -272,30 +308,38 @@ impl PostgresNotaryCaseRepository {
     }
 
     pub async fn delete_case(&self, case_id: &str) -> Result<(), NotaryServiceError> {
+        let mut tx = self
+            .pool
+            .begin()
+            .await
+            .map_err(store_error("failed to begin notary case delete transaction"))?;
         sqlx::query("DELETE FROM notary_case_event WHERE tenant_id = $1 AND case_id = $2")
             .bind(&self.tenant_id)
             .bind(case_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await
             .map_err(store_error("failed to delete notary case events"))?;
         sqlx::query("DELETE FROM notary_case_assignment WHERE tenant_id = $1 AND case_id = $2")
             .bind(&self.tenant_id)
             .bind(case_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await
             .map_err(store_error("failed to delete notary case assignments"))?;
         sqlx::query("DELETE FROM notary_party WHERE tenant_id = $1 AND case_id = $2")
             .bind(&self.tenant_id)
             .bind(case_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await
             .map_err(store_error("failed to delete notary case parties"))?;
         sqlx::query("DELETE FROM notary_case WHERE tenant_id = $1 AND id = $2")
             .bind(&self.tenant_id)
             .bind(case_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await
             .map_err(store_error("failed to delete notary case"))?;
+        tx.commit()
+            .await
+            .map_err(store_error("failed to commit notary case delete transaction"))?;
         Ok(())
     }
 
@@ -794,8 +838,13 @@ impl PostgresNotaryCaseRepository {
         &self,
         query: NotaryCaseListQuery,
     ) -> Result<NotaryCaseListPage, NotaryServiceError> {
-        let page_size = query.page_size.max(1).min(100);
+        let page_size = validated_list_page_size(query.page_size);
         let fetch_limit = page_size + 1;
+        let keyset = decode_keyset_cursor(query.cursor.as_deref())?;
+        let (cursor_updated_at, cursor_id) = match keyset {
+            Some((updated_at, id)) => (Some(updated_at), Some(id)),
+            None => (None, None),
+        };
         let search_pattern = query
             .search_term
             .as_ref()
@@ -839,9 +888,13 @@ impl PostgresNotaryCaseRepository {
                 OR case_no LIKE $4
               )
               AND ($5 IS NULL OR sku_id = $5)
-              AND ($6 IS NULL OR id < $6)
+              AND (
+                $6 IS NULL
+                OR updated_at < $6
+                OR (updated_at = $6 AND id < $7)
+              )
             ORDER BY updated_at DESC, id DESC
-            LIMIT $7
+            LIMIT $8
             "#,
         )
         .bind(&self.tenant_id)
@@ -849,7 +902,8 @@ impl PostgresNotaryCaseRepository {
         .bind(query.status.as_deref())
         .bind(search_pattern.as_deref())
         .bind(query.sku_id.as_deref())
-        .bind(query.cursor.as_deref())
+        .bind(cursor_updated_at.as_deref())
+        .bind(cursor_id.as_deref())
         .bind(fetch_limit)
         .fetch_all(&self.pool)
         .await
@@ -863,13 +917,37 @@ impl PostgresNotaryCaseRepository {
         if has_more {
             items.truncate(page_size as usize);
         }
-        Ok(NotaryCaseListPage { items, has_more })
+        let next_cursor = if has_more {
+            let last = items.last().expect("notary case page item");
+            Some(encode_keyset_cursor(&last.updated_at, &last.case_id))
+        } else {
+            None
+        };
+        Ok(NotaryCaseListPage {
+            items,
+            has_more,
+            next_cursor,
+        })
     }
 
     pub async fn list_parties(
         &self,
-        case_id: &str,
-    ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
+        query: NotaryPartyListQuery,
+    ) -> Result<NotaryPartyListPage, NotaryServiceError> {
+        let page_size = validated_list_page_size(query.page_size);
+        let fetch_limit = page_size + 1;
+        let keyset = decode_keyset_cursor(query.cursor.as_deref())?;
+        let (cursor_sort_order, cursor_id) = match keyset {
+            Some((sort_value, id)) => (
+                Some(
+                    sort_value
+                        .parse::<i64>()
+                        .map_err(|_| NotaryServiceError::validation("invalid list cursor"))?,
+                ),
+                Some(id),
+            ),
+            None => (None, None),
+        };
         let rows = sqlx::query(
             r#"
             SELECT
@@ -883,29 +961,64 @@ impl PostgresNotaryCaseRepository {
                 identity_no_last4,
                 phone_masked,
                 status,
-                signature_node_id
+                signature_node_id,
+                sort_order
             FROM notary_party
             WHERE tenant_id = $1
               AND case_id = $2
               AND status = 'active'
+              AND (
+                $3 IS NULL
+                OR sort_order > $3
+                OR (sort_order = $3 AND id > $4)
+              )
             ORDER BY sort_order ASC, id ASC
+            LIMIT $5
             "#,
         )
         .bind(&self.tenant_id)
-        .bind(case_id)
+        .bind(&query.case_id)
+        .bind(cursor_sort_order)
+        .bind(cursor_id.as_deref())
+        .bind(fetch_limit)
         .fetch_all(&self.pool)
         .await
         .map_err(store_error("failed to list notary parties"))?;
 
-        Ok(rows.iter().map(party_from_row).collect())
+        let mut items = rows.iter().map(party_from_row).collect::<Vec<_>>();
+        let has_more = items.len() as i64 > page_size;
+        if has_more {
+            items.truncate(page_size as usize);
+        }
+        let next_cursor = if has_more {
+            let last_row = rows
+                .get((page_size as usize).saturating_sub(1))
+                .expect("notary party page row");
+            Some(encode_keyset_cursor(
+                &string_cell(last_row, "sort_order"),
+                &string_cell(last_row, "id"),
+            ))
+        } else {
+            None
+        };
+        Ok(NotaryPartyListPage {
+            items,
+            has_more,
+            next_cursor,
+        })
     }
 
     pub async fn list_events(
         &self,
         query: NotaryCaseEventListQuery,
     ) -> Result<NotaryCaseEventListPage, NotaryServiceError> {
-        let page_size = query.page_size.max(1).min(100);
+        let page_size = validated_list_page_size(query.page_size);
         let fetch_limit = page_size + 1;
+        let keyset = decode_keyset_cursor(query.cursor.as_deref())?;
+        let (cursor_occurred_at, cursor_id) = match keyset {
+            Some((occurred_at, id)) => (Some(occurred_at), Some(id)),
+            None => (None, None),
+        };
         let rows = sqlx::query(
             r#"
             SELECT
@@ -918,14 +1031,19 @@ impl PostgresNotaryCaseRepository {
             FROM notary_case_event
             WHERE tenant_id = $1
               AND case_id = $2
-              AND ($3 IS NULL OR id > $3)
+              AND (
+                $3 IS NULL
+                OR occurred_at > $3
+                OR (occurred_at = $3 AND id > $4)
+              )
             ORDER BY occurred_at ASC, id ASC
-            LIMIT $4
+            LIMIT $5
             "#,
         )
         .bind(&self.tenant_id)
         .bind(&query.case_id)
-        .bind(query.cursor.as_deref())
+        .bind(cursor_occurred_at.as_deref())
+        .bind(cursor_id.as_deref())
         .bind(fetch_limit)
         .fetch_all(&self.pool)
         .await
@@ -936,7 +1054,17 @@ impl PostgresNotaryCaseRepository {
         if has_more {
             items.truncate(page_size as usize);
         }
-        Ok(NotaryCaseEventListPage { items, has_more })
+        let next_cursor = if has_more {
+            let last = items.last().expect("notary event page item");
+            Some(encode_keyset_cursor(&last.occurred_at, &last.event_id))
+        } else {
+            None
+        };
+        Ok(NotaryCaseEventListPage {
+            items,
+            has_more,
+            next_cursor,
+        })
     }
 }
 
@@ -1078,9 +1206,15 @@ impl NotaryCaseRepositoryPort for PostgresNotaryCaseRepository {
         &self,
         organization_id: Option<&str>,
         page_size: i64,
-    ) -> Result<Vec<NotaryOrganizationProfile>, NotaryServiceError> {
-        PostgresNotaryCaseRepository::list_organization_profiles(self, organization_id, page_size)
-            .await
+        cursor: Option<&str>,
+    ) -> Result<NotaryOrganizationProfileListPage, NotaryServiceError> {
+        PostgresNotaryCaseRepository::list_organization_profiles(
+            self,
+            organization_id,
+            page_size,
+            cursor,
+        )
+        .await
     }
 
     async fn update_organization_profile(
@@ -1184,9 +1318,9 @@ impl NotaryCaseRepositoryPort for PostgresNotaryCaseRepository {
 
     async fn list_parties(
         &self,
-        case_id: &str,
-    ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
-        PostgresNotaryCaseRepository::list_parties(self, case_id).await
+        query: NotaryPartyListQuery,
+    ) -> Result<NotaryPartyListPage, NotaryServiceError> {
+        PostgresNotaryCaseRepository::list_parties(self, query).await
     }
 
     async fn list_events(

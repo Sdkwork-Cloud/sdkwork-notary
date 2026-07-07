@@ -4,7 +4,8 @@ use sdkwork_notary_case_repository_sqlx::{
 };
 use sdkwork_notary_case_service::{
     NotaryCaseAssignmentCommand, NotaryCaseEventListQuery, NotaryCaseListQuery,
-    NotaryCaseUpdateCommand, NotaryOrganizationProfileUpdateCommand, NotaryPartyUpdateCommand,
+    NotaryCaseUpdateCommand, NotaryOrganizationProfileUpdateCommand, NotaryPartyListQuery,
+    NotaryPartyUpdateCommand,
 };
 use sqlx::SqlitePool;
 
@@ -36,18 +37,18 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
         .await
         .unwrap();
     let profiles = repository
-        .list_organization_profiles(None, 10)
+        .list_organization_profiles(None, 10, None)
         .await
         .unwrap();
-    assert_eq!(profiles.len(), 2);
-    assert_eq!(profiles[0].organization_id, "200002");
-    assert_eq!(profiles[1].organization_id, "200001");
+    assert_eq!(profiles.items.len(), 2);
+    assert_eq!(profiles.items[0].organization_id, "200002");
+    assert_eq!(profiles.items[1].organization_id, "200001");
     let org_1_profiles = repository
-        .list_organization_profiles(Some("200001"), 10)
+        .list_organization_profiles(Some("200001"), 10, None)
         .await
         .unwrap();
-    assert_eq!(org_1_profiles.len(), 1);
-    assert_eq!(org_1_profiles[0].organization_id, "200001");
+    assert_eq!(org_1_profiles.items.len(), 1);
+    assert_eq!(org_1_profiles.items[0].organization_id, "200001");
 
     let inserted = repository.insert_case(case_record()).await.unwrap();
     assert_eq!(inserted.order_item_id, "order-item-1");
@@ -130,17 +131,24 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
     );
     assert_eq!(listed.items[0].drive_space_type, "notary");
 
-    let parties = repository.list_parties("case-1").await.unwrap();
-    assert_eq!(parties.len(), 1);
-    assert_eq!(parties[0].name, "Zhang San");
-    assert_eq!(parties[0].order_id, "order-1");
-    assert_eq!(parties[0].sku_id, "sku-notary-contract");
-    assert_eq!(parties[0].identity_no_last4, "1234");
+    let parties = repository
+        .list_parties(NotaryPartyListQuery {
+            case_id: "case-1".to_string(),
+            page_size: 20,
+            cursor: None,
+        })
+        .await
+        .unwrap();
+    assert_eq!(parties.items.len(), 1);
+    assert_eq!(parties.items[0].name, "Zhang San");
+    assert_eq!(parties.items[0].order_id, "order-1");
+    assert_eq!(parties.items[0].sku_id, "sku-notary-contract");
+    assert_eq!(parties.items[0].identity_no_last4, "1234");
 
     let updated_party = repository
         .update_party(NotaryPartyUpdateCommand {
             case_id: "case-1".to_string(),
-            party_id: parties[0].party_id.clone(),
+            party_id: parties.items[0].party_id.clone(),
             name: Some("Li Si".to_string()),
             party_role: Some("counterparty".to_string()),
             identity_no: Some("110105199202021235".to_string()),
@@ -158,9 +166,16 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
         Some("signature-node-1".to_string())
     );
 
-    let signed_parties = repository.list_parties("case-1").await.unwrap();
+    let signed_parties = repository
+        .list_parties(NotaryPartyListQuery {
+            case_id: "case-1".to_string(),
+            page_size: 20,
+            cursor: None,
+        })
+        .await
+        .unwrap();
     assert_eq!(
-        signed_parties[0].signature_node_id,
+        signed_parties.items[0].signature_node_id,
         Some("signature-node-1".to_string())
     );
 
@@ -168,8 +183,15 @@ async fn sqlite_repository_persists_profile_case_parties_and_events_without_depe
         .remove_party("case-1", &updated_party.party_id)
         .await
         .unwrap();
-    let active_parties = repository.list_parties("case-1").await.unwrap();
-    assert!(active_parties.is_empty());
+    let active_parties = repository
+        .list_parties(NotaryPartyListQuery {
+            case_id: "case-1".to_string(),
+            page_size: 20,
+            cursor: None,
+        })
+        .await
+        .unwrap();
+    assert!(active_parties.items.is_empty());
 
     let assignment = repository
         .insert_assignment(NotaryCaseAssignmentCommand {

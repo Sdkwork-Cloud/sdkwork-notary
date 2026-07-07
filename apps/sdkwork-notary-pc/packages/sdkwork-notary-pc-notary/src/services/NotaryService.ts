@@ -2,12 +2,10 @@ import type { NotaryDocument, NotaryTask, Party, TimelineEvent } from '@sdkwork/
 import type { MonthlyReportResult, NotaryMatterOption, NotaryStats } from '../types';
 import {
   createNotaryApi,
-  type CreateNotaryApiOptions,
-} from '@sdkwork/notary-app-sdk';
-import {
   getConfiguredAppbaseAppSdkClient,
   getConfiguredDriveAppSdkClient,
   getConfiguredNotaryAppSdkClient,
+  type CreateNotaryApiOptions,
 } from '@sdkwork/notary-pc-core';
 import { SYSTEM_ASSIGNED_NOTARY_LABEL } from '../constants';
 

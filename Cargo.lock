@@ -1996,6 +1996,7 @@ dependencies = [
  "sdkwork-contract-service",
  "sdkwork-order-service",
  "sdkwork-payment-service",
+ "sdkwork-utils-rust",
  "serde",
  "serde_json",
  "sqlx",
@@ -2007,6 +2008,8 @@ name = "sdkwork-order-service"
 version = "0.1.0"
 dependencies = [
  "sdkwork-contract-service",
+ "sdkwork-utils-rust",
+ "tracing",
 ]
 
 [[package]]

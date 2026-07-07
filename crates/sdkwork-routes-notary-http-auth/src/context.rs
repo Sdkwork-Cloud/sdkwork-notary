@@ -64,7 +64,7 @@ fn notary_runtime_environment_allows_dev_fallback() -> bool {
     matches!(
         std::env::var("SDKWORK_NOTARY_ENVIRONMENT")
             .or_else(|_| std::env::var("SDKWORK_ENVIRONMENT"))
-            .unwrap_or_else(|_| "development".to_owned())
+            .unwrap_or_else(|_| "production".to_owned())
             .to_ascii_lowercase()
             .as_str(),
         "development" | "dev" | "test" | "local"

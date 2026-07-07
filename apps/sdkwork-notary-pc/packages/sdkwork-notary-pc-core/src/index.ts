@@ -1,11 +1,13 @@
 export {
   bootstrapNotaryPcSdkClients,
+  createNotaryApi,
   createNotaryPcComposedApi,
   getNotaryPcAppSdkClient,
   getNotaryPcComposedApi,
   initNotaryPcAppSdkClient,
   resetNotaryPcSdkClients,
 } from './notaryAppSdk';
+export type { CreateNotaryApiOptions } from './notaryAppSdk';
 
 export {
   getNotaryPcAppbaseAppSdkClient,

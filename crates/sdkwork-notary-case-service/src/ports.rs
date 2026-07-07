@@ -257,12 +257,50 @@ pub struct NotaryOrganizationProfileUpdateCommand {
 pub struct NotaryCaseListPage {
     pub items: Vec<NotaryCaseRecord>,
     pub has_more: bool,
+    pub next_cursor: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NotaryCaseEventListPage {
     pub items: Vec<NotaryCaseEventRecord>,
     pub has_more: bool,
+    pub next_cursor: Option<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotaryPartyListPage {
+    pub items: Vec<NotaryPartyRecord>,
+    pub has_more: bool,
+    pub next_cursor: Option<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotaryPartyListQuery {
+    pub case_id: String,
+    pub page_size: i64,
+    pub cursor: Option<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotaryOrganizationProfileListPage {
+    pub items: Vec<NotaryOrganizationProfile>,
+    pub has_more: bool,
+    pub next_cursor: Option<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotaryStaffListQuery {
+    pub organization_id: String,
+    pub staff_role: Option<String>,
+    pub page_size: i64,
+    pub offset: i64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotaryStaffListPage {
+    pub items: Vec<AppbaseOrganizationMember>,
+    pub has_more: bool,
+    pub next_offset: i64,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -360,6 +398,15 @@ pub trait AppbasePort: Send + Sync {
         &self,
         organization_id: &str,
     ) -> Result<Vec<AppbaseOrganizationMember>, NotaryServiceError>;
+
+    async fn list_notary_staff_page(
+        &self,
+        _query: NotaryStaffListQuery,
+    ) -> Result<NotaryStaffListPage, NotaryServiceError> {
+        Err(NotaryServiceError::provider_unavailable(
+            "notary staff listing is not configured",
+        ))
+    }
 }
 
 #[async_trait]
@@ -371,7 +418,9 @@ pub trait CommercePort: Send + Sync {
 
     async fn cancel_notary_order(&self, order_id: &str) -> Result<(), NotaryServiceError> {
         let _ = order_id;
-        Ok(())
+        Err(NotaryServiceError::provider_unavailable(
+            "commerce notary order cancellation is not configured",
+        ))
     }
 
     async fn list_notary_matters(
@@ -421,7 +470,9 @@ pub trait DrivePort: Send + Sync {
         space_type: &str,
     ) -> Result<(), NotaryServiceError> {
         let _ = (folder_node_id, space_id, space_type);
-        Ok(())
+        Err(NotaryServiceError::provider_unavailable(
+            "drive notary case folder deletion is not configured",
+        ))
     }
 
     async fn list_nodes(
@@ -434,101 +485,49 @@ pub trait DrivePort: Send + Sync {
         command: DriveRegisterCaseFileCommand,
     ) -> Result<(), NotaryServiceError> {
         let _ = command;
-        Ok(())
+        Err(NotaryServiceError::provider_unavailable(
+            "drive notary case file registration is not configured",
+        ))
     }
 
     async fn create_download_package(
         &self,
         command: DriveCreateDownloadPackageCommand,
     ) -> Result<DriveDownloadPackageReference, NotaryServiceError> {
-        Ok(DriveDownloadPackageReference {
-            package_id: format!("download-package-{}", command.case_id),
-            case_id: command.case_id,
-            drive_space_id: command.space_id,
-            drive_space_type: command.space_type,
-            status: "preparing".to_string(),
-            package_name: command.package_name,
-            download_url: None,
-        })
+        let _ = command;
+        Err(NotaryServiceError::provider_unavailable(
+            "drive notary download package creation is not configured",
+        ))
     }
 
     async fn create_party_video_invite(
         &self,
         command: DriveCreatePartyVideoInviteCommand,
     ) -> Result<DrivePartyVideoInviteReference, NotaryServiceError> {
-        let conversation_id = format!(
-            "notary-{}-{}-video",
-            port_slug_segment(&command.case_id),
-            port_slug_segment(&command.party_id)
-        );
-        let invite_id = format!(
-            "video-invite-{}-{}",
-            port_slug_segment(&command.case_id),
-            port_slug_segment(&command.party_id)
-        );
-        let invite_url = format!(
-            "sdkwork://notary/video?inviteId={}&caseId={}&partyId={}&conversationId={}",
-            port_url_component(&invite_id),
-            port_url_component(&command.case_id),
-            port_url_component(&command.party_id),
-            port_url_component(&conversation_id)
-        );
-        Ok(DrivePartyVideoInviteReference {
-            invite_id,
-            case_id: command.case_id,
-            party_id: command.party_id,
-            party_name: command.party_name,
-            purpose: command.purpose,
-            conversation_id,
-            invite_url,
-            drive_space_id: command.drive_space_id,
-            drive_space_type: command.drive_space_type,
-            drive_folder_node_id: command.drive_folder_node_id,
-        })
+        let _ = command;
+        Err(NotaryServiceError::provider_unavailable(
+            "drive notary party video invite creation is not configured",
+        ))
     }
 
     async fn create_party_signature_invite(
         &self,
         command: DriveCreatePartySignatureInviteCommand,
     ) -> Result<DrivePartySignatureInviteReference, NotaryServiceError> {
-        let invite_id = format!(
-            "signature-invite-{}-{}",
-            port_slug_segment(&command.case_id),
-            port_slug_segment(&command.party_id)
-        );
-        let invite_url = format!(
-            "sdkwork://notary/signature?inviteId={}&caseId={}&partyId={}&driveFolderNodeId={}",
-            port_url_component(&invite_id),
-            port_url_component(&command.case_id),
-            port_url_component(&command.party_id),
-            port_url_component(&command.drive_folder_node_id)
-        );
-        Ok(DrivePartySignatureInviteReference {
-            invite_id,
-            case_id: command.case_id,
-            party_id: command.party_id,
-            party_name: command.party_name,
-            purpose: command.purpose,
-            invite_url,
-            drive_space_id: command.drive_space_id,
-            drive_space_type: command.drive_space_type,
-            drive_folder_node_id: command.drive_folder_node_id,
-        })
+        let _ = command;
+        Err(NotaryServiceError::provider_unavailable(
+            "drive notary party signature invite creation is not configured",
+        ))
     }
 
     async fn create_monthly_report(
         &self,
         command: DriveCreateMonthlyReportCommand,
     ) -> Result<DriveMonthlyReportReference, NotaryServiceError> {
-        let report_id = format!("notary-monthly-{}-{}", command.month, command.format);
-        Ok(DriveMonthlyReportReference {
-            report_id: report_id.clone(),
-            month: command.month,
-            format: command.format.clone(),
-            download_url: format!("sdkwork://notary/reports/{report_id}.{}", command.format),
-            file_size: command.case_count * 4096,
-            case_count: command.case_count,
-        })
+        let _ = command;
+        Err(NotaryServiceError::provider_unavailable(
+            "drive notary monthly report generation is not configured",
+        ))
     }
 }
 
@@ -577,7 +576,8 @@ pub trait NotaryCaseRepositoryPort: Send + Sync {
         &self,
         _organization_id: Option<&str>,
         _page_size: i64,
-    ) -> Result<Vec<NotaryOrganizationProfile>, NotaryServiceError> {
+        _cursor: Option<&str>,
+    ) -> Result<NotaryOrganizationProfileListPage, NotaryServiceError> {
         Err(NotaryServiceError::provider_unavailable(
             "notary organization profile listing is not configured",
         ))
@@ -669,8 +669,8 @@ pub trait NotaryCaseRepositoryPort: Send + Sync {
 
     async fn list_parties(
         &self,
-        case_id: &str,
-    ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError>;
+        query: NotaryPartyListQuery,
+    ) -> Result<NotaryPartyListPage, NotaryServiceError>;
 
     async fn list_events(
         &self,

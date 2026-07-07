@@ -1,7 +1,10 @@
 use async_trait::async_trait;
 use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_notary_case_contract::NotaryServiceError;
-use sdkwork_notary_case_service::{AppbaseOrganizationMember, AppbasePort};
+use sdkwork_notary_case_service::{
+    AppbaseOrganizationMember, AppbasePort, NotaryStaffListPage, NotaryStaffListQuery,
+    validated_list_page_size,
+};
 use sqlx::Row;
 
 pub struct IamSqlxAppbasePort {
@@ -47,6 +50,20 @@ impl AppbasePort for IamSqlxAppbasePort {
             }
             DatabasePool::Postgres(pool, _) => {
                 list_members_postgres(pool, organization_id, self.development_mode).await
+            }
+        }
+    }
+
+    async fn list_notary_staff_page(
+        &self,
+        query: NotaryStaffListQuery,
+    ) -> Result<NotaryStaffListPage, NotaryServiceError> {
+        match &self.pool {
+            DatabasePool::Sqlite(pool, _) => {
+                list_notary_staff_page_sqlite(pool, &query, self.development_mode).await
+            }
+            DatabasePool::Postgres(pool, _) => {
+                list_notary_staff_page_postgres(pool, &query, self.development_mode).await
             }
         }
     }
@@ -416,6 +433,192 @@ async fn load_departments_postgres(
         .into_iter()
         .filter_map(|row| row.try_get::<String, _>("name").ok())
         .collect())
+}
+
+async fn list_notary_staff_page_sqlite(
+    pool: &sqlx::SqlitePool,
+    query: &NotaryStaffListQuery,
+    development_mode: bool,
+) -> Result<NotaryStaffListPage, NotaryServiceError> {
+    let page_size = validated_list_page_size(query.page_size);
+    let fetch_limit = page_size + 1;
+    let dev_flag = i64::from(development_mode);
+    let rows = sqlx::query(
+        "SELECT m.id, m.tenant_id, m.organization_id, m.user_id, m.display_name, m.status, \
+         COALESCE(o.verification_status, 'verified') AS verification_status \
+         FROM iam_organization_membership m \
+         LEFT JOIN iam_organization o \
+           ON o.tenant_id = m.tenant_id AND o.id = m.organization_id \
+         WHERE m.organization_id = ?1 AND m.status = 'active' \
+           AND (?2 = 1 OR COALESCE(o.verification_status, 'verified') = 'verified') \
+           AND ( \
+             ?2 = 1 \
+             OR EXISTS ( \
+               SELECT 1 FROM iam_role_binding b \
+               JOIN iam_role r ON r.tenant_id = b.tenant_id AND r.id = b.role_id \
+               WHERE b.tenant_id = m.tenant_id AND b.principal_id = m.id AND b.status = 'active' \
+                 AND r.code IN ('notary', 'notary_admin', 'assistant', 'reviewer', 'approver', 'owner') \
+             ) \
+             OR EXISTS ( \
+               SELECT 1 FROM iam_position_assignment pa \
+               JOIN iam_position p ON p.tenant_id = pa.tenant_id AND p.id = pa.position_id \
+               WHERE pa.tenant_id = m.tenant_id AND pa.organization_membership_id = m.id \
+                 AND pa.status = 'active' \
+                 AND (p.name LIKE '%公证%' OR lower(p.code) = 'notary') \
+             ) \
+           ) \
+           AND ( \
+             ?3 IS NULL \
+             OR EXISTS ( \
+               SELECT 1 FROM iam_role_binding b \
+               JOIN iam_role r ON r.tenant_id = b.tenant_id AND r.id = b.role_id \
+               WHERE b.tenant_id = m.tenant_id AND b.principal_id = m.id AND b.status = 'active' \
+                 AND r.code = ?3 \
+             ) \
+           ) \
+         ORDER BY m.is_primary DESC, m.id \
+         LIMIT ?4 OFFSET ?5",
+    )
+    .bind(&query.organization_id)
+    .bind(dev_flag)
+    .bind(query.staff_role.as_deref())
+    .bind(fetch_limit)
+    .bind(query.offset.max(0))
+    .fetch_all(pool)
+    .await
+    .map_err(storage_error)?;
+
+    let mut items = Vec::with_capacity(rows.len());
+    for row in rows {
+        let tenant_id: String = row.try_get("tenant_id").map_err(storage_error)?;
+        let membership_id: String = row.try_get("id").map_err(storage_error)?;
+        let user_id: String = row.try_get("user_id").map_err(storage_error)?;
+        let organization_id: String = row.try_get("organization_id").map_err(storage_error)?;
+        let display_name = row
+            .try_get::<Option<String>, _>("display_name")
+            .ok()
+            .flatten()
+            .filter(|value| !value.trim().is_empty())
+            .unwrap_or_else(|| user_id.clone());
+        let verification_status: String =
+            row.try_get("verification_status").map_err(storage_error)?;
+        let roles = load_roles_sqlite(pool, &tenant_id, &membership_id).await?;
+        let positions = load_positions_sqlite(pool, &tenant_id, &membership_id).await?;
+        let departments = load_departments_sqlite(pool, &tenant_id, &membership_id).await?;
+        items.push(build_member(
+            membership_id,
+            user_id,
+            organization_id,
+            display_name,
+            verification_status,
+            roles,
+            positions,
+            departments,
+            development_mode,
+        ));
+    }
+    let has_more = items.len() as i64 > page_size;
+    if has_more {
+        items.truncate(page_size as usize);
+    }
+    Ok(NotaryStaffListPage {
+        next_offset: query.offset + items.len() as i64,
+        has_more,
+        items,
+    })
+}
+
+async fn list_notary_staff_page_postgres(
+    pool: &sqlx::PgPool,
+    query: &NotaryStaffListQuery,
+    development_mode: bool,
+) -> Result<NotaryStaffListPage, NotaryServiceError> {
+    let page_size = validated_list_page_size(query.page_size);
+    let fetch_limit = page_size + 1;
+    let dev_flag = development_mode;
+    let rows = sqlx::query(
+        "SELECT m.id, m.tenant_id, m.organization_id, m.user_id, m.display_name, m.status, \
+         COALESCE(o.verification_status, 'verified') AS verification_status \
+         FROM iam_organization_membership m \
+         LEFT JOIN iam_organization o \
+           ON o.tenant_id = m.tenant_id AND o.id = m.organization_id \
+         WHERE m.organization_id = $1 AND m.status = 'active' \
+           AND ($2 OR COALESCE(o.verification_status, 'verified') = 'verified') \
+           AND ( \
+             $2 \
+             OR EXISTS ( \
+               SELECT 1 FROM iam_role_binding b \
+               JOIN iam_role r ON r.tenant_id = b.tenant_id AND r.id = b.role_id \
+               WHERE b.tenant_id = m.tenant_id AND b.principal_id = m.id AND b.status = 'active' \
+                 AND r.code IN ('notary', 'notary_admin', 'assistant', 'reviewer', 'approver', 'owner') \
+             ) \
+             OR EXISTS ( \
+               SELECT 1 FROM iam_position_assignment pa \
+               JOIN iam_position p ON p.tenant_id = pa.tenant_id AND p.id = pa.position_id \
+               WHERE pa.tenant_id = m.tenant_id AND pa.organization_membership_id = m.id \
+                 AND pa.status = 'active' \
+                 AND (p.name LIKE '%公证%' OR lower(p.code) = 'notary') \
+             ) \
+           ) \
+           AND ( \
+             $3::text IS NULL \
+             OR EXISTS ( \
+               SELECT 1 FROM iam_role_binding b \
+               JOIN iam_role r ON r.tenant_id = b.tenant_id AND r.id = b.role_id \
+               WHERE b.tenant_id = m.tenant_id AND b.principal_id = m.id AND b.status = 'active' \
+                 AND r.code = $3 \
+             ) \
+           ) \
+         ORDER BY m.is_primary DESC, m.id \
+         LIMIT $4 OFFSET $5",
+    )
+    .bind(&query.organization_id)
+    .bind(dev_flag)
+    .bind(query.staff_role.as_deref())
+    .bind(fetch_limit)
+    .bind(query.offset.max(0))
+    .fetch_all(pool)
+    .await
+    .map_err(storage_error)?;
+
+    let mut items = Vec::with_capacity(rows.len());
+    for row in rows {
+        let tenant_id: String = row.try_get("tenant_id").map_err(storage_error)?;
+        let membership_id: String = row.try_get("id").map_err(storage_error)?;
+        let user_id: String = row.try_get("user_id").map_err(storage_error)?;
+        let organization_id: String = row.try_get("organization_id").map_err(storage_error)?;
+        let display_name = row
+            .try_get::<Option<String>, _>("display_name")
+            .ok()
+            .flatten()
+            .filter(|value| !value.trim().is_empty())
+            .unwrap_or_else(|| user_id.clone());
+        let verification_status: String =
+            row.try_get("verification_status").map_err(storage_error)?;
+        let roles = load_roles_postgres(pool, &tenant_id, &membership_id).await?;
+        let positions = load_positions_postgres(pool, &tenant_id, &membership_id).await?;
+        let departments = load_departments_postgres(pool, &tenant_id, &membership_id).await?;
+        items.push(build_member(
+            membership_id,
+            user_id,
+            organization_id,
+            display_name,
+            verification_status,
+            roles,
+            positions,
+            departments,
+            development_mode,
+        ));
+    }
+    let has_more = items.len() as i64 > page_size;
+    if has_more {
+        items.truncate(page_size as usize);
+    }
+    Ok(NotaryStaffListPage {
+        next_offset: query.offset + items.len() as i64,
+        has_more,
+        items,
+    })
 }
 
 fn storage_error(error: sqlx::Error) -> NotaryServiceError {

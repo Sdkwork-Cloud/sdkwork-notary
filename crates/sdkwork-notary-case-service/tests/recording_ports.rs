@@ -11,8 +11,9 @@ use sdkwork_notary_case_service::{
     DriveRegisterCaseFileCommand, NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord,
     NotaryCaseEventListPage, NotaryCaseEventListQuery, NotaryCaseEventRecord, NotaryCaseListPage,
     NotaryCaseListQuery, NotaryCaseRepositoryPort, NotaryCaseUpdateCommand,
-    NotaryOrganizationProfile, NotaryOrganizationProfileUpdateCommand, NotaryPartyRecord,
-    NotaryPartyUpdateCommand,
+    NotaryOrganizationProfile, NotaryOrganizationProfileListPage,
+    NotaryOrganizationProfileUpdateCommand, NotaryPartyListPage, NotaryPartyListQuery,
+    NotaryPartyRecord, NotaryPartyUpdateCommand, NotaryStaffListPage, NotaryStaffListQuery,
 };
 use serde_json::json;
 
@@ -67,6 +68,36 @@ impl AppbasePort for RecordingAppbase {
             .filter(|member| member.organization_id == organization_id)
             .cloned()
             .collect())
+    }
+
+    async fn list_notary_staff_page(
+        &self,
+        query: NotaryStaffListQuery,
+    ) -> Result<NotaryStaffListPage, NotaryServiceError> {
+        let members = self.list_organization_members(&query.organization_id).await?;
+        let page_size = query.page_size.max(1);
+        let offset = query.offset.max(0) as usize;
+        let filtered: Vec<_> = members
+            .into_iter()
+            .filter(|member| member.enterprise_verified && member.notary_enabled)
+            .filter(|member| {
+                query.staff_role.as_ref().is_none_or(|role| {
+                    member.roles.iter().any(|value| value == role)
+                })
+            })
+            .skip(offset)
+            .take((page_size + 1) as usize)
+            .collect();
+        let has_more = filtered.len() as i64 > page_size;
+        let items = filtered
+            .into_iter()
+            .take(page_size as usize)
+            .collect::<Vec<_>>();
+        Ok(NotaryStaffListPage {
+            items,
+            has_more,
+            next_offset: query.offset + items.len() as i64,
+        })
     }
 }
 
@@ -450,14 +481,16 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
         &self,
         organization_id: Option<&str>,
         page_size: i64,
-    ) -> Result<Vec<NotaryOrganizationProfile>, NotaryServiceError> {
+        cursor: Option<&str>,
+    ) -> Result<NotaryOrganizationProfileListPage, NotaryServiceError> {
         let mut state = lock(&self.inner);
         state.events.push(format!(
-            "list_profiles:{}:{}",
+            "list_profiles:{}:{}:{}",
             organization_id.unwrap_or_default(),
-            page_size
+            page_size,
+            cursor.unwrap_or_default()
         ));
-        Ok(state
+        let items = state
             .profiles
             .iter()
             .filter(|(profile_org_id, _, _)| {
@@ -472,7 +505,12 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
                     status: status.clone(),
                 },
             )
-            .collect())
+            .collect();
+        Ok(NotaryOrganizationProfileListPage {
+            items,
+            has_more: false,
+            next_cursor: None,
+        })
     }
 
     async fn update_organization_profile(
@@ -787,19 +825,31 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
         if has_more {
             items.truncate(page_size as usize);
         }
-        Ok(NotaryCaseListPage { items, has_more })
+        Ok(NotaryCaseListPage {
+            items,
+            has_more,
+            next_cursor: items
+                .last()
+                .map(|record| record.case_id.clone()),
+        })
     }
 
     async fn list_parties(
         &self,
-        case_id: &str,
-    ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
-        Ok(lock(&self.inner)
+        query: NotaryPartyListQuery,
+    ) -> Result<NotaryPartyListPage, NotaryServiceError> {
+        let items = lock(&self.inner)
             .parties
             .iter()
-            .filter(|record| record.case_id == case_id)
+            .filter(|record| record.case_id == query.case_id)
+            .take(query.page_size.max(1) as usize)
             .cloned()
-            .collect())
+            .collect();
+        Ok(NotaryPartyListPage {
+            items,
+            has_more: false,
+            next_cursor: None,
+        })
     }
 
     async fn list_events(
@@ -831,7 +881,13 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
         if has_more {
             items.truncate(page_size as usize);
         }
-        Ok(NotaryCaseEventListPage { items, has_more })
+        Ok(NotaryCaseEventListPage {
+            items,
+            has_more,
+            next_cursor: items
+                .last()
+                .map(|record| record.event_id.clone()),
+        })
     }
 }
 

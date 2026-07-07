@@ -6,7 +6,9 @@ use axum::{
     Json,
 };
 use sdkwork_routes_notary_http_auth::{
-    finish_success, notary_request_context_from_web, success_status_for_notary_backend_operation,
+    envelope_success_data, finish_success, finish_success_no_content,
+    is_delete_no_content_operation, notary_request_context_from_web,
+    success_status_for_notary_backend_operation,
 };
 use sdkwork_web_core::WebRequestContext;
 use serde_json::{Map, Value};
@@ -245,10 +247,13 @@ async fn call_operation(
         let response = service
             .handle(request_context, operation_id, path_params, body)
             .await?;
+        if is_delete_no_content_operation(operation_id) {
+            return finish_success_no_content(&app_ctx);
+        }
         finish_success(
             &app_ctx,
             success_status_for_notary_backend_operation(operation_id),
-            response,
+            envelope_success_data(operation_id, response),
         )
     }
     .await;

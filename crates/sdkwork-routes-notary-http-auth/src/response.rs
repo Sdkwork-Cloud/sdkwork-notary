@@ -78,6 +78,13 @@ pub fn finish_success(
     Ok(success_envelope(ctx, status, data))
 }
 
+pub fn finish_success_no_content(ctx: &WebRequestContext) -> Result<Response, NotaryRouteError> {
+    let trace_id = ctx.resolved_trace_id();
+    let mut response = StatusCode::NO_CONTENT.into_response();
+    attach_trace_header(&mut response, &trace_id);
+    Ok(response)
+}
+
 const NOTARY_APP_CREATED_OPERATIONS: &[&str] = &[
     "notary.cases.create",
     "notary.cases.parties.create",

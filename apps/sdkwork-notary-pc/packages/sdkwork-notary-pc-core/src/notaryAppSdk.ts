@@ -14,6 +14,9 @@ import { getNotaryPcDriveAppSdkClient, resetNotaryPcDriveAppSdkClient } from './
 let notaryAppSdkClient: SdkworkNotaryAppClient | null = null;
 let notaryComposedApi: ReturnType<typeof createNotaryApi> | null = null;
 
+export { createNotaryApi };
+export type { CreateNotaryApiOptions };
+
 export function initNotaryPcAppSdkClient(config: SdkworkAppConfig): SdkworkNotaryAppClient {
   notaryAppSdkClient = createNotaryAppClient({
     ...config,

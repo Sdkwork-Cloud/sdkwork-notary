@@ -30,7 +30,8 @@
     "publicExports": ["@sdkwork/notary-pc-notary"],
     "runtimeEntrypoints": ["NotaryView", "createNotaryPcService", "configureNotaryPcRuntime"],
     "sdkClients": ["@sdkwork/notary-pc-core"],
-    "dependencyApiSurfaces": ["@sdkwork/notary-pc-commons"]
+    "requiredPorts": ["@sdkwork/notary-pc-commons"],
+    "dependencyApiSurfaces": []
   },
   "verification": {
     "commands": ["pnpm --dir apps/sdkwork-notary-pc typecheck", "pnpm test:desktop"]
