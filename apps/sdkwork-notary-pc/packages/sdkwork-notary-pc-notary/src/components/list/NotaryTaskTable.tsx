@@ -7,12 +7,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { FileCheck, MoreHorizontal, Download, User as UserIcon, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { NotaryTask } from '@sdkwork/notary-pc-commons';
 import { getNotaryTaskDisplayNo } from '../../utils/notaryTask';
+import { isNotaryTaskTerminalStatus } from '../../utils/notaryTask';
 
 export interface NotaryTaskTableProps {
-  /** All tasks (for total count) */
+  /** Tasks returned by the server for the current page */
   tasks: NotaryTask[];
-  /** Tasks to display on current page */
-  paginatedTasks: NotaryTask[];
+  /** Total records reported by the server, when available */
+  totalItems?: string | number;
   /** Currently selected task */
   selectedTask: NotaryTask | null;
   /** Which row's dropdown is open */
@@ -45,7 +46,7 @@ export interface NotaryTaskTableProps {
 
 export const NotaryTaskTable: React.FC<NotaryTaskTableProps> = ({
   tasks,
-  paginatedTasks,
+  totalItems,
   selectedTask,
   activeDropdown,
   pageSize,
@@ -81,20 +82,20 @@ export const NotaryTaskTable: React.FC<NotaryTaskTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {paginatedTasks.length === 0 ? (
+            {tasks.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-6 py-16 text-center text-sm text-gray-500">
                   {loading ? t('stats.loading') : t('table.noTasks')}
                 </td>
               </tr>
             ) : (
-              paginatedTasks.map((task, idx) => (
+              tasks.map((task, idx) => (
               <tr
                 key={task.id}
                 onClick={() => onSelectTask(task)}
                 className={`text-sm group transition-colors cursor-pointer
                   ${selectedTask?.id === task.id ? 'bg-indigo-500/10' : 'hover:bg-white/5'}
-                  ${idx !== paginatedTasks.length - 1 ? 'border-b border-white/5' : ''}
+                  ${idx !== tasks.length - 1 ? 'border-b border-white/5' : ''}
                 `}
               >
                 <td className="px-6 py-4">
@@ -167,17 +168,21 @@ export const NotaryTaskTable: React.FC<NotaryTaskTableProps> = ({
                             >
                               <UserIcon size={14} /> {t('actions.printPartyInfo')}
                             </div>
-                            <div className="h-px bg-white/10 my-1 mx-2" />
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDropdownToggle(null);
-                                onDeleteTask(task);
-                              }}
-                              className="px-4 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer transition-colors flex items-center gap-2"
-                            >
-                              <X size={14} /> {t('table.delete')}
-                            </div>
+                            {!isNotaryTaskTerminalStatus(task.status) && (
+                              <>
+                                <div className="h-px bg-white/10 my-1 mx-2" />
+                                <div
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDropdownToggle(null);
+                                    onDeleteTask(task);
+                                  }}
+                                  className="px-4 py-2 hover:bg-red-500/20 text-red-400 cursor-pointer transition-colors flex items-center gap-2"
+                                >
+                                  <X size={14} /> {t('actions.cancel')}
+                                </div>
+                              </>
+                            )}
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -194,7 +199,7 @@ export const NotaryTaskTable: React.FC<NotaryTaskTableProps> = ({
       {/* Pagination */}
       <div className="p-4 border-t border-white/5 flex items-center justify-between text-sm text-gray-400 bg-[#181818]/60 shrink-0">
         <div className="flex items-center gap-4">
-          <span>{t('table.totalRecords', { count: tasks.length })}</span>
+          <span>{t('table.totalRecords', { count: totalItems ?? tasks.length })}</span>
           <div className="flex items-center gap-2">
             <span className="text-gray-500">{t('table.perPage')}</span>
             <select

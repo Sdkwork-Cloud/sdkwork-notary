@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "@sdkwork/notary-pc-admin-merchandise",
+    "displayName": "SDKWork Notary PC Admin Merchandise",
+    "version": "0.1.0",
+    "type": "react-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-admin-merchandise",
+    "domain": "notary",
+    "declaredDomain": "notary",
+    "capability": "merchandise",
+    "surface": "backend-admin",
+    "status": "ready",
+    "languages": ["typescript"],
+    "generated": false,
+    "private": true,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_PC_ARCHITECTURE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md",
+      "purpose": "PC admin capability package ownership and dependency direction."
+    },
+    {
+      "file": "BACKEND_UI_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/BACKEND_UI_SPEC.md",
+      "purpose": "Backend-admin service, permission, i18n, and operational UI rules."
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "Composed backend SDK consumption without raw HTTP or local DTO forks."
+    },
+    {
+      "file": "PAGINATION_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/PAGINATION_SPEC.md",
+      "purpose": "Server-side cursor pagination and interactive list behavior."
+    },
+    {
+      "file": "I18N_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/I18N_SPEC.md",
+      "purpose": "Package-local backend-admin locale fragment layout."
+    },
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component manifest and public port contract."
+    },
+    {
+      "file": "TYPESCRIPT_CODE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md",
+      "purpose": "Strict TypeScript service, view-model, and public export boundaries."
+    },
+    {
+      "file": "FRONTEND_CODE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/FRONTEND_CODE_SPEC.md",
+      "purpose": "Operational React UI, accessibility, and responsive behavior."
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored feature structure and SDK orchestration boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "Canonical merchandise capability and backend-admin naming."
+    }
+  ],
+  "contracts": {
+    "layerRole": "frontend-feature",
+    "publicExports": ["."],
+    "providedPorts": [
+      {
+        "name": "notaryMatterManagement",
+        "export": "."
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "notaryPcAdminBackendSdkRuntime",
+        "export": "."
+      }
+    ],
+    "runtimeEntrypoints": [
+      "NotaryMatterManagementPage",
+      "createNotaryMatterAdminService",
+      "NOTARY_MATTER_PERMISSIONS"
+    ],
+    "sdkClients": [],
+    "sdkDependencies": [],
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": [],
+    "routeManifest": null,
+    "uiRoutes": {
+      "rootPath": "/admin/notary/matters",
+      "routes": [
+        {
+          "path": "/admin/notary/matters",
+          "permission": "notary.matters.management.read"
+        }
+      ]
+    },
+    "permissions": [
+      "notary.matters.management.read",
+      "notary.matters.create",
+      "notary.matters.update"
+    ]
+  },
+  "integration": {
+    "authority": "The package owns the backend-admin UI projection of merchandise-backed Notary matters.",
+    "dependencyPolicy": "Pages call injected services; services call the admin-core backend SDK port; no shell, app, console, database, Order, or Payment implementation is imported.",
+    "sdkPolicy": "Generated Notary backend DTOs and methods are preserved through admin-core exports; raw HTTP, manual headers, and local transport DTOs are forbidden.",
+    "languagePolicy": "TypeScript source uses strict view models while API DTOs remain generated SDK types."
+  },
+  "verification": {
+    "commands": [
+      "pnpm --dir apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-admin-merchandise typecheck",
+      "pnpm --dir apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-admin-merchandise test",
+      "node ../sdkwork-specs/tools/check-pagination.mjs --workspace .",
+      "node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace ."
+    ]
+  },
+  "metadata": {
+    "managedBy": "codex",
+    "standardVersion": "2026-07-11"
+  }
+}

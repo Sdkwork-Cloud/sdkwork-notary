@@ -27,6 +27,14 @@ impl From<NotaryAuthError> for NotaryRouteError {
 }
 
 impl NotaryRouteError {
+    pub fn invalid_parameter(message: impl Into<String>) -> Self {
+        Self {
+            status: StatusCode::BAD_REQUEST,
+            result_code: SdkWorkResultCode::InvalidParameter,
+            message: message.into(),
+        }
+    }
+
     pub fn from_wire(status: StatusCode, wire_code: &str, message: impl Into<String>) -> Self {
         Self {
             status,
@@ -87,6 +95,9 @@ pub fn finish_success_no_content(ctx: &WebRequestContext) -> Result<Response, No
 
 const NOTARY_APP_CREATED_OPERATIONS: &[&str] = &[
     "notary.cases.create",
+    "notary.cases.acceptances.create",
+    "notary.cases.rejections.create",
+    "notary.cases.completions.create",
     "notary.cases.parties.create",
     "notary.cases.parties.signatures.create",
     "notary.cases.parties.videoInvites.create",
@@ -222,8 +233,16 @@ mod tests {
             success_status_for_notary_app_operation("notary.cases.create")
         );
         assert_eq!(
-            StatusCode::OK,
+            StatusCode::CREATED,
             success_status_for_notary_app_operation("notary.cases.acceptances.create")
+        );
+        assert_eq!(
+            StatusCode::CREATED,
+            success_status_for_notary_app_operation("notary.cases.rejections.create")
+        );
+        assert_eq!(
+            StatusCode::CREATED,
+            success_status_for_notary_app_operation("notary.cases.completions.create")
         );
         assert_eq!(
             StatusCode::CREATED,

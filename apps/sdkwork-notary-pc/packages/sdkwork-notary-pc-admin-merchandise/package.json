@@ -1,0 +1,43 @@
+{
+  "name": "@sdkwork/notary-pc-admin-merchandise",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "SDKWork Notary PC backend-admin merchandise-backed matter management.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@sdkwork/notary-pc-admin-core": "workspace:*",
+    "@sdkwork/utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "lucide-react": "^1.0.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "typescript": "^5.8.2"
+  },
+  "sdkwork": {
+    "workspace": "sdkwork-notary",
+    "product": "sdkwork-notary",
+    "architecture": "pc-admin",
+    "domain": "notary",
+    "capability": "merchandise",
+    "surface": "backend-admin",
+    "status": "ready"
+  }
+}

@@ -28,6 +28,18 @@ export function renderStatusBadge(status: NotaryTask['status'], t: TFunction): R
           {t('status.rejected')}
         </span>
       );
+    case 'CANCELLED':
+      return (
+        <span className="px-2 py-1 rounded bg-red-500/20 text-red-400 text-xs font-medium border border-red-500/20">
+          {t('status.CANCELLED')}
+        </span>
+      );
+    case 'CREATE_FAILED':
+      return (
+        <span className="px-2 py-1 rounded bg-red-500/20 text-red-400 text-xs font-medium border border-red-500/20">
+          {t('status.CREATE_FAILED')}
+        </span>
+      );
     default:
       return null;
   }

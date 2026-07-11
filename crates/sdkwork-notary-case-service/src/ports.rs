@@ -9,6 +9,11 @@ pub const NOTARY_COMMERCE_PORT: &str = "commerce.order";
 pub const NOTARY_DRIVE_PORT: &str = "drive.notary_space";
 pub const NOTARY_CASE_REPOSITORY_PORT: &str = "notary.case.repository";
 
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct NotaryOperationMetadata {
+    pub idempotency_key: Option<String>,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AppbaseOrganizationMember {
     pub membership_id: String,
@@ -43,6 +48,14 @@ pub struct CommerceOrderReference {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CommerceOrderFulfillmentState {
+    pub order_id: String,
+    pub order_status: String,
+    pub payment_status: Option<String>,
+    pub payable_amount: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CommerceMatterListQuery {
     pub organization_id: Option<String>,
     pub search_term: Option<String>,
@@ -66,11 +79,16 @@ pub struct CommerceMatterCommand {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct CommerceMatterUpdateCommand {
+    pub organization_id: String,
     pub sku_id: String,
     pub title: Option<String>,
-    pub description: Option<String>,
+    /// PATCH tri-state: `None` preserves the value, `Some(Some(_))` replaces it,
+    /// and `Some(None)` clears it.
+    pub description: Option<Option<String>>,
     pub price_amount: Option<String>,
-    pub original_price_amount: Option<String>,
+    /// PATCH tri-state: `None` preserves the value, `Some(Some(_))` replaces it,
+    /// and `Some(None)` clears it.
+    pub original_price_amount: Option<Option<String>>,
     pub currency_code: Option<String>,
     pub status: Option<String>,
     pub spec: Option<Value>,
@@ -88,6 +106,12 @@ pub struct CommerceMatterRecord {
     pub currency_code: String,
     pub status: String,
     pub spec: Value,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct CommerceMatterListPage {
+    pub items: Vec<CommerceMatterRecord>,
+    pub has_more: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -132,6 +156,8 @@ pub struct DriveNodeReference {
     pub category: String,
     pub size_label: String,
     pub status: String,
+    pub material_code: Option<String>,
+    pub party_id: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -143,6 +169,8 @@ pub struct DriveListNodesPage {
 
 pub const NOTARY_FILE_CATEGORY_PROPERTY: &str = "notary.category";
 pub const NOTARY_FILE_REVIEW_STATUS_PROPERTY: &str = "notary.review_status";
+pub const NOTARY_FILE_MATERIAL_CODE_PROPERTY: &str = "notary.material_code";
+pub const NOTARY_FILE_PARTY_ID_PROPERTY: &str = "notary.party_id";
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DriveRegisterCaseFileCommand {
@@ -150,6 +178,8 @@ pub struct DriveRegisterCaseFileCommand {
     pub node_id: String,
     pub category: String,
     pub review_status: String,
+    pub material_code: Option<String>,
+    pub party_id: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -258,6 +288,7 @@ pub struct NotaryCaseListPage {
     pub items: Vec<NotaryCaseRecord>,
     pub has_more: bool,
     pub next_cursor: Option<String>,
+    pub total_items: i64,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -314,6 +345,69 @@ pub struct NotaryCaseListQuery {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotaryDashboardStatisticsQuery {
+    pub organization_id: String,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct NotaryDashboardStatisticsAggregate {
+    pub pending_review_count: i64,
+    pub today_completed_count: i64,
+    pub yesterday_completed_count: i64,
+    pub monthly_case_count: i64,
+    pub anomaly_intercepted_count: i64,
+    pub unsynced_completed_count: i64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct NotaryMonthlyCaseCountQuery {
+    organization_id: String,
+    month: String,
+}
+
+impl NotaryMonthlyCaseCountQuery {
+    pub fn new(
+        organization_id: impl Into<String>,
+        month: impl Into<String>,
+    ) -> Result<Self, NotaryServiceError> {
+        let organization_id = organization_id.into();
+        let month = month.into();
+        let bytes = month.as_bytes();
+        let valid_shape = bytes.len() == 7
+            && bytes[4] == b'-'
+            && bytes[..4].iter().all(u8::is_ascii_digit)
+            && bytes[5..].iter().all(u8::is_ascii_digit);
+        let valid_calendar_month = valid_shape
+            && month[..4].parse::<u16>().is_ok_and(|year| year > 0)
+            && month[5..]
+                .parse::<u8>()
+                .is_ok_and(|month| (1..=12).contains(&month));
+        if !valid_calendar_month {
+            return Err(NotaryServiceError::validation(
+                "month must use YYYY-MM with a calendar month from 01 to 12",
+            ));
+        }
+        Ok(Self {
+            organization_id,
+            month,
+        })
+    }
+
+    pub fn organization_id(&self) -> &str {
+        &self.organization_id
+    }
+
+    pub fn month(&self) -> &str {
+        &self.month
+    }
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct NotaryMonthlyCaseCount {
+    pub count: i64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NotaryCaseEventListQuery {
     pub case_id: String,
     pub page_size: i64,
@@ -323,10 +417,13 @@ pub struct NotaryCaseEventListQuery {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct NotaryCaseUpdateCommand {
     pub case_id: String,
+    pub expected_version: i64,
     pub title: Option<String>,
     pub remarks: Option<String>,
     pub status: Option<NotaryCaseStatus>,
     pub chain_hash: Option<String>,
+    pub reject_reason: Option<String>,
+    pub event_type: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -416,17 +513,32 @@ pub trait CommercePort: Send + Sync {
         command: CommerceCreateOrderCommand,
     ) -> Result<CommerceOrderReference, NotaryServiceError>;
 
-    async fn cancel_notary_order(&self, order_id: &str) -> Result<(), NotaryServiceError> {
-        let _ = order_id;
+    async fn cancel_notary_order(
+        &self,
+        organization_id: &str,
+        order_id: &str,
+    ) -> Result<(), NotaryServiceError> {
+        let _ = (organization_id, order_id);
         Err(NotaryServiceError::provider_unavailable(
             "commerce notary order cancellation is not configured",
+        ))
+    }
+
+    async fn get_notary_order_fulfillment_state(
+        &self,
+        organization_id: &str,
+        order_id: &str,
+    ) -> Result<CommerceOrderFulfillmentState, NotaryServiceError> {
+        let _ = (organization_id, order_id);
+        Err(NotaryServiceError::provider_unavailable(
+            "commerce notary order fulfillment state is not configured",
         ))
     }
 
     async fn list_notary_matters(
         &self,
         _query: CommerceMatterListQuery,
-    ) -> Result<Vec<CommerceMatterRecord>, NotaryServiceError> {
+    ) -> Result<CommerceMatterListPage, NotaryServiceError> {
         Err(NotaryServiceError::provider_unavailable(
             "commerce notary matter listing is not configured",
         ))
@@ -529,33 +641,6 @@ pub trait DrivePort: Send + Sync {
             "drive notary monthly report generation is not configured",
         ))
     }
-}
-
-fn port_slug_segment(value: &str) -> String {
-    let mut result = String::new();
-    let mut previous_dash = false;
-    for character in value.chars() {
-        if character.is_ascii_alphanumeric() {
-            result.push(character.to_ascii_lowercase());
-            previous_dash = false;
-        } else if !previous_dash && !result.is_empty() {
-            result.push('-');
-            previous_dash = true;
-        }
-    }
-    result.trim_end_matches('-').to_string()
-}
-
-fn port_url_component(value: &str) -> String {
-    value
-        .bytes()
-        .map(|byte| match byte {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
-                (byte as char).to_string()
-            }
-            _ => format!("%{byte:02X}"),
-        })
-        .collect()
 }
 
 #[async_trait]
@@ -666,6 +751,16 @@ pub trait NotaryCaseRepositoryPort: Send + Sync {
         &self,
         query: NotaryCaseListQuery,
     ) -> Result<NotaryCaseListPage, NotaryServiceError>;
+
+    async fn get_dashboard_statistics(
+        &self,
+        query: NotaryDashboardStatisticsQuery,
+    ) -> Result<NotaryDashboardStatisticsAggregate, NotaryServiceError>;
+
+    async fn count_cases_for_month(
+        &self,
+        query: NotaryMonthlyCaseCountQuery,
+    ) -> Result<NotaryMonthlyCaseCount, NotaryServiceError>;
 
     async fn list_parties(
         &self,

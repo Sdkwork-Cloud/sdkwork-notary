@@ -1,0 +1,25 @@
+{
+  "print": {
+    "notaryCertificate": "公证电子存证凭证",
+    "birthDate": "出生日期",
+    "ethnicity": "民族",
+    "address": "住址",
+    "idNumber": "身份证号",
+    "issuingAuthority": "签发机关",
+    "validPeriod": "有效期限",
+    "livePhoto": "现场采集照片",
+    "comparisonScore": "对比分值",
+    "comparisonResult": "对比结果",
+    "comparisonMethod": "对比方式",
+    "referenceThreshold": "参考阈值",
+    "partySignature": "当事人签名:",
+    "success": "成功",
+    "faceComparison": "人脸对比",
+    "idPhoto": "身份证照片",
+    "faceComparisonVerification": "人脸比对验证表",
+    "totalPages": "共 {{count}} 页",
+    "photo": "照片",
+    "referenceThresholdValue": "68",
+    "loadingMedia": "身份影像加载中..."
+  }
+}

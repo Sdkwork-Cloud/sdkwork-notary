@@ -4,11 +4,17 @@ use std::{
 };
 
 use async_trait::async_trait;
-use axum::extract::{Path, Query, State};
+use axum::{
+    body::to_bytes,
+    extract::{Path, Query, State},
+    http::{HeaderMap, HeaderValue, StatusCode},
+    response::Response,
+    Json,
+};
 use sdkwork_routes_notary_app_api::{
-    handlers,
+    handlers, notary_app_api_http_route_manifest,
     service_port::{NotaryAppApiState, NotaryRouteError},
-    NotaryAppApiServicePort, NotaryRequestContext,
+    NotaryAppApiServicePort, NotaryOperationMetadata, NotaryRequestContext,
 };
 use sdkwork_routes_notary_http_auth::test_support::test_web_request_context;
 use serde_json::Value;
@@ -24,7 +30,7 @@ async fn list_cases_handler_forwards_query_filters_to_service_body() {
         Query(BTreeMap::from([
             ("status".to_string(), "PROCESSING".to_string()),
             ("q".to_string(), "contract".to_string()),
-            ("pageSize".to_string(), "25".to_string()),
+            ("page_size".to_string(), "100".to_string()),
         ])),
     )
     .await;
@@ -33,7 +39,147 @@ async fn list_cases_handler_forwards_query_filters_to_service_body() {
     assert_eq!(calls[0].operation_id, "notary.cases.list");
     assert_eq!(calls[0].body["status"], "PROCESSING");
     assert_eq!(calls[0].body["q"], "contract");
-    assert_eq!(calls[0].body["pageSize"], "25");
+    assert_eq!(calls[0].body["page_size"], "100");
+}
+
+#[tokio::test]
+async fn app_list_query_rejections_return_invalid_parameter_before_service_dispatch() {
+    let service = Arc::new(RecordingService::default());
+    let state = NotaryAppApiState::new(service.clone());
+    let app_ctx = test_web_request_context();
+
+    let alias_response = handlers::list_cases(
+        State(state.clone()),
+        app_ctx.clone(),
+        Query(BTreeMap::from([("pageSize".to_string(), "20".to_string())])),
+    )
+    .await;
+    assert_invalid_parameter(alias_response).await;
+
+    let combination_response = handlers::list_matters(
+        State(state.clone()),
+        app_ctx.clone(),
+        Query(BTreeMap::from([
+            ("page".to_string(), "1".to_string()),
+            ("cursor".to_string(), "next-page".to_string()),
+        ])),
+    )
+    .await;
+    assert_invalid_parameter(combination_response).await;
+
+    let staff_response = handlers::list_staff(
+        State(state.clone()),
+        app_ctx.clone(),
+        Query(BTreeMap::from([(
+            "page_size".to_string(),
+            "201".to_string(),
+        )])),
+    )
+    .await;
+    assert_invalid_parameter(staff_response).await;
+
+    let files_response = handlers::list_case_files(
+        State(state.clone()),
+        app_ctx.clone(),
+        Path("case-1".to_string()),
+        Query(BTreeMap::from([("page_size".to_string(), "0".to_string())])),
+    )
+    .await;
+    assert_invalid_parameter(files_response).await;
+
+    let events_response = handlers::list_case_events(
+        State(state),
+        app_ctx,
+        Path("case-1".to_string()),
+        Query(BTreeMap::from([(
+            "page_size".to_string(),
+            "many".to_string(),
+        )])),
+    )
+    .await;
+    assert_invalid_parameter(events_response).await;
+
+    assert!(
+        service.calls.lock().unwrap().is_empty(),
+        "invalid list queries must not reach the service"
+    );
+}
+
+#[tokio::test]
+async fn create_case_handler_forwards_standard_idempotency_header_as_metadata() {
+    let service = Arc::new(RecordingService::default());
+    let state = NotaryAppApiState::new(service.clone());
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        "Idempotency-Key",
+        HeaderValue::from_static("case-create-request-1"),
+    );
+    let body = serde_json::json!({
+        "organizationId": "200001",
+        "skuId": "sku-electronic-contract",
+        "title": "Electronic contract preservation",
+        "applicantName": "Zhang San Network"
+    });
+
+    let _ = handlers::create_case(
+        State(state),
+        test_web_request_context(),
+        headers,
+        Json(body),
+    )
+    .await;
+
+    let calls = service.calls.lock().unwrap();
+    assert_eq!(calls[0].operation_id, "notary.cases.create");
+    assert_eq!(
+        calls[0].metadata.idempotency_key.as_deref(),
+        Some("case-create-request-1")
+    );
+    assert!(calls[0].body.get("idempotencyKey").is_none());
+}
+
+#[test]
+fn create_case_route_policy_is_idempotent() {
+    let route = notary_app_api_http_route_manifest()
+        .routes()
+        .iter()
+        .find(|route| route.operation_id == "notary.cases.create")
+        .expect("notary.cases.create route");
+
+    assert!(route.idempotent);
+}
+
+#[tokio::test]
+async fn case_action_create_handlers_return_created_status() {
+    let service = Arc::new(RecordingService::default());
+    let state = NotaryAppApiState::new(service);
+    let app_ctx = test_web_request_context();
+
+    let accepted = handlers::accept_case(
+        State(state.clone()),
+        app_ctx.clone(),
+        Path("case-1".to_string()),
+        None,
+    )
+    .await;
+    let rejected = handlers::reject_case(
+        State(state.clone()),
+        app_ctx.clone(),
+        Path("case-1".to_string()),
+        Json(serde_json::json!({"reason": "invalid evidence"})),
+    )
+    .await;
+    let completed = handlers::complete_case(
+        State(state),
+        app_ctx,
+        Path("case-1".to_string()),
+        Json(serde_json::json!({"chainHash": "sha256:case-1"})),
+    )
+    .await;
+
+    assert_eq!(accepted.status(), StatusCode::CREATED);
+    assert_eq!(rejected.status(), StatusCode::CREATED);
+    assert_eq!(completed.status(), StatusCode::CREATED);
 }
 
 #[tokio::test]
@@ -148,6 +294,7 @@ struct RecordingService {
 struct RecordedCall {
     operation_id: &'static str,
     body: Value,
+    metadata: NotaryOperationMetadata,
 }
 
 #[async_trait]
@@ -158,11 +305,13 @@ impl NotaryAppApiServicePort for RecordingService {
         operation_id: &'static str,
         _path_params: BTreeMap<String, String>,
         body: Value,
+        metadata: NotaryOperationMetadata,
     ) -> Result<Value, NotaryRouteError> {
-        self.calls
-            .lock()
-            .unwrap()
-            .push(RecordedCall { operation_id, body });
+        self.calls.lock().unwrap().push(RecordedCall {
+            operation_id,
+            body,
+            metadata,
+        });
         Ok(serde_json::json!({
             "items": [],
             "pageInfo": {
@@ -170,4 +319,20 @@ impl NotaryAppApiServicePort for RecordingService {
             }
         }))
     }
+}
+
+async fn assert_invalid_parameter(response: Response) {
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    assert_eq!(
+        response
+            .headers()
+            .get(axum::http::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok()),
+        Some("application/problem+json")
+    );
+    let body = to_bytes(response.into_body(), usize::MAX)
+        .await
+        .expect("problem body");
+    let payload: Value = serde_json::from_slice(&body).expect("problem json");
+    assert_eq!(payload["code"].as_i64(), Some(40003));
 }

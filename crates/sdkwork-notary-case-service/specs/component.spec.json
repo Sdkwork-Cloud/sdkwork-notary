@@ -51,7 +51,32 @@
     }
   ],
   "contracts": {
+    "layerRole": "backend-service",
     "publicExports": ["sdkwork_notary_case_service::*"],
+    "providedPorts": [
+      {
+        "name": "notary.case",
+        "export": "sdkwork_notary_case_service::*"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "appbase.iam.organization_member",
+        "export": "sdkwork_notary_case_service::*"
+      },
+      {
+        "name": "commerce.order",
+        "export": "sdkwork_notary_case_service::*"
+      },
+      {
+        "name": "drive.notary_space",
+        "export": "sdkwork_notary_case_service::*"
+      },
+      {
+        "name": "notary.case.repository",
+        "export": "sdkwork_notary_case_service::*"
+      }
+    ],
     "runtimeEntrypoints": [
       "notary_runtime_contract",
       "ensure_notary_business_open",

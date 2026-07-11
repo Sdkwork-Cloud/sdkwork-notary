@@ -98,9 +98,33 @@ mod tests {
 
     static ENV_TEST_LOCK: Mutex<()> = Mutex::new(());
 
+    struct EnvironmentGuard {
+        key: &'static str,
+        previous: Option<String>,
+    }
+
+    impl EnvironmentGuard {
+        fn set(key: &'static str, value: &str) -> Self {
+            let previous = std::env::var(key).ok();
+            std::env::set_var(key, value);
+            Self { key, previous }
+        }
+    }
+
+    impl Drop for EnvironmentGuard {
+        fn drop(&mut self) {
+            if let Some(value) = self.previous.as_deref() {
+                std::env::set_var(self.key, value);
+            } else {
+                std::env::remove_var(self.key);
+            }
+        }
+    }
+
     #[test]
     fn pii_vault_round_trips_sensitive_values() {
         let _guard = ENV_TEST_LOCK.lock().expect("env test lock");
+        let _environment = EnvironmentGuard::set("SDKWORK_NOTARY_ENVIRONMENT", "test");
         let vault = PiiVault::for_tenant("100001").expect("vault");
         let encrypted = vault.encrypt("110101199001011234").expect("encrypt");
         assert!(encrypted.starts_with("notary-vault:v1:"));

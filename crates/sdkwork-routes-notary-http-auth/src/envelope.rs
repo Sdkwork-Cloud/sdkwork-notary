@@ -1,5 +1,5 @@
-use serde_json::Value;
 use sdkwork_utils_rust::sdkwork_resource_json;
+use serde_json::Value;
 
 const LIST_OPERATIONS: &[&str] = &[
     "notary.matters.list",

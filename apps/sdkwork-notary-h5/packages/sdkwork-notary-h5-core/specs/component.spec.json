@@ -31,9 +31,17 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-core",
     "publicExports": [
       "@sdkwork/notary-h5-core"
     ],
+    "providedPorts": [
+      {
+        "name": "notaryH5SdkRuntime",
+        "export": "@sdkwork/notary-h5-core"
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": [
       "initNotaryH5AppSdkClient",
       "getNotaryH5ComposedApi"

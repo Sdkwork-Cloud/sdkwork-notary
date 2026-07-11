@@ -40,7 +40,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "c63de1ee5f4e791555ec83587c79eb8f2a8c8757694243d76f62817b2f75bdd9"
+      "sha256": "18a2e99a54936a04b1ec199a0bb4beda3416db8f547992b1a8b2e999e0a0d436"
     },
     {
       "path": "README.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "sdkwork-sdk.json",
-      "sha256": "13fc5cb2ec948cde8bf9d245915d32a6732235968dedf19a519e672bc52ae0d2"
+      "sha256": "d54db4cbb600356b597aeb6e8cd103618058ff5b87f606a81fcdbae2593450f1"
     },
     {
       "path": "src/api/base.ts",
@@ -60,7 +60,7 @@
     },
     {
       "path": "src/api/notary.ts",
-      "sha256": "ce98343f1d95008d51b8f0fa13a33aff352f7c64cb103e6022b42cf9dd305b1f"
+      "sha256": "83682df7494cabb00e99b3dfd71029405c3efbd8c80d1b58896e70c1d0c28096"
     },
     {
       "path": "src/api/paths.ts",
@@ -72,7 +72,7 @@
     },
     {
       "path": "src/http/client.ts",
-      "sha256": "1d339275acee6ec54660a32eb9effcc718ebf0992c5e9bfdb80a3452e0702137"
+      "sha256": "6e389d5c14fb5845365972b6776af185d8af8eb8da7bb398e59be6c29e394ddf"
     },
     {
       "path": "src/http/index.ts",
@@ -96,7 +96,7 @@
     },
     {
       "path": "src/types/create-notary-matter-request.ts",
-      "sha256": "e712ea2ad0a58eac299cfab99e0d5ae2140d189d52eba40b85a65eecd83068f7"
+      "sha256": "6879a9cccacda7859d7382d65917840406a33984b5c668a333b68ca926433bbe"
     },
     {
       "path": "src/types/create-notary-organization-profile-request.ts",
@@ -108,7 +108,7 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "e1cc08532ad7ae1b7e7ad5a1b901c203bd11a493fc701ec24cae6b24a1626cbf"
+      "sha256": "24f4a7a462a5ef76e45a23c5ea12116244c74dd9ac862c451c3d88cbd384446d"
     },
     {
       "path": "src/types/notary-case-assignment.ts",
@@ -136,7 +136,7 @@
     },
     {
       "path": "src/types/notary-cases-management-list-response.ts",
-      "sha256": "01fe9b0b886b84387e8c55fdc73b58d000ff99431ed907ea7e5add5f970f9df7"
+      "sha256": "726e8a1ad0dba0970c047adb54ebd97e4d69dd0a988c84a92b0fb3bb116682bb"
     },
     {
       "path": "src/types/notary-cases-management-retrieve-response.ts",
@@ -147,8 +147,12 @@
       "sha256": "6580b3e45c93eefc13115b0cfd2ee10685c098b97948da5f33edded21ed25fdd"
     },
     {
+      "path": "src/types/notary-matter-status.ts",
+      "sha256": "c76488dd788731d1c4e2eaf5b74ad860c31c0e8e57d8c76e3b13d682c05d1934"
+    },
+    {
       "path": "src/types/notary-matter.ts",
-      "sha256": "a81e075b73c56bcab3d5d43a16c389d50ce1e1bb94067ec4943fbced4502015e"
+      "sha256": "a90d5c57a0553d63ee2f76d5a29dec4be47c8e66f857605e2b1e1428acf93660"
     },
     {
       "path": "src/types/notary-matters-create-response201.ts",
@@ -156,7 +160,11 @@
     },
     {
       "path": "src/types/notary-matters-management-list-response.ts",
-      "sha256": "f2f34b8d99dd4448a07374bcd055d3ca20ecd8ef0df9ef80432321897a9ade53"
+      "sha256": "af22173f8b82f66e5bf546b4a50d83518298e3433292d15591232b20c7e60e18"
+    },
+    {
+      "path": "src/types/notary-matters-update-response.ts",
+      "sha256": "ec8b14125c3a91abdf545f16a27b3f0a20bb012ffc457fff44dc50b0d02646c2"
     },
     {
       "path": "src/types/notary-organization-profile-page.ts",
@@ -172,7 +180,15 @@
     },
     {
       "path": "src/types/notary-organization-profiles-list-response.ts",
-      "sha256": "9594d091ad2d731b16bea98dc7b797e92669e68239b537f4c6d963256e4e20f5"
+      "sha256": "e27bf361cc104ac08ff2bfec8a62332800e3b660779d7eb84d65622aded406e3"
+    },
+    {
+      "path": "src/types/notary-organization-profiles-retrieve-response.ts",
+      "sha256": "55c94e70c8c92577e355e8bb35d7918926acfec37a43d38e58e6207eeb0b92b4"
+    },
+    {
+      "path": "src/types/notary-organization-profiles-update-response.ts",
+      "sha256": "700ce515ac1544fb325a177715c83d13cce40c88ba243c63d2438a5fab38b2be"
     },
     {
       "path": "src/types/notary-reports-case-summary-retrieve-response.ts",
@@ -180,7 +196,7 @@
     },
     {
       "path": "src/types/notary-staff-list-response.ts",
-      "sha256": "579694150f024a399a6882b0f2987352e418b6892dd3475d3156014b05d6f4dc"
+      "sha256": "15a3c5c30b8ba8869b8c44c545f7d4035e7a023167031d6fd83f0c35c16befb8"
     },
     {
       "path": "src/types/notary-staff-member-page.ts",
@@ -232,7 +248,7 @@
     },
     {
       "path": "src/types/update-notary-matter-request.ts",
-      "sha256": "60e9770686f4bb5604bde99eac72fd9e62d82ef74ca83a22582dccbfca2b4991"
+      "sha256": "63fb95a4fc93110ae626cf47bd46c5f411f18b722735353133f2ea50da48eea1"
     },
     {
       "path": "src/types/update-notary-organization-profile-request.ts",

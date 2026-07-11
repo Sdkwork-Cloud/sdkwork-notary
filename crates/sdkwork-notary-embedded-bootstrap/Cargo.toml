@@ -3,7 +3,7 @@ name = "sdkwork-notary-embedded-bootstrap"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
-description = "Embedded notary application bootstrap for unified-process platform consumers."
+description = "Embedded notary application bootstrap for platform runtime consumers."
 
 [lib]
 name = "sdkwork_notary_embedded_bootstrap"
@@ -14,17 +14,20 @@ async-trait = "0.1.89"
 axum.workspace = true
 dotenvy = "0.15"
 sdkwork-contract-service = { workspace = true }
+sdkwork-merchandise-repository-sqlx = { workspace = true }
+sdkwork-merchandise-service = { workspace = true }
 sdkwork-order-repository-sqlx = { workspace = true }
 sdkwork-order-service = { workspace = true }
 sdkwork-database-config.workspace = true
+sdkwork-database-id.workspace = true
 sdkwork-database-sqlx.workspace = true
 sdkwork-drive-workspace-service = { workspace = true }
-sdkwork-notary-case-contract = { path = "../sdkwork-notary-case-contract" }
-sdkwork-notary-case-repository-sqlx = { path = "../sdkwork-notary-case-repository-sqlx" }
-sdkwork-notary-case-service = { path = "../sdkwork-notary-case-service" }
-sdkwork-notary-database-host = { path = "../sdkwork-notary-database-host" }
-sdkwork-routes-notary-app-api = { path = "../sdkwork-routes-notary-app-api" }
-sdkwork-routes-notary-backend-api = { path = "../sdkwork-routes-notary-backend-api" }
+sdkwork-notary-case-contract.workspace = true
+sdkwork-notary-case-repository-sqlx.workspace = true
+sdkwork-notary-case-service.workspace = true
+sdkwork-notary-database-host.workspace = true
+sdkwork-routes-notary-app-api.workspace = true
+sdkwork-routes-notary-backend-api.workspace = true
 sdkwork-utils-rust.workspace = true
 serde_json = "1"
 sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio", "sqlite", "postgres", "any"] }

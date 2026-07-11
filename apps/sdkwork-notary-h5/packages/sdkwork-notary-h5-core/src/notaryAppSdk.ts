@@ -29,23 +29,21 @@ export function getNotaryH5AppSdkClient(): SdkworkNotaryAppClient {
 }
 
 function resolveComposedDependencyClients(
-  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'>>,
-): Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'> {
+  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'appbase'>>,
+): Pick<CreateNotaryApiOptions, 'drive' | 'appbase'> {
   return {
     drive: options.drive ?? getNotaryH5DriveAppSdkClient(),
-    commerce: options.commerce,
     appbase: options.appbase ?? getNotaryH5AppbaseAppSdkClient(),
   };
 }
 
 export function createNotaryH5ComposedApi(
-  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'>> = {},
+  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'appbase'>> = {},
 ) {
   const dependencies = resolveComposedDependencyClients(options);
   return createNotaryApi({
     notary: getNotaryH5AppSdkClient().notary,
     drive: dependencies.drive,
-    commerce: dependencies.commerce,
     appbase: dependencies.appbase,
   });
 }

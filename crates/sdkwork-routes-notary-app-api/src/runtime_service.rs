@@ -4,12 +4,14 @@ use async_trait::async_trait;
 use axum::http::StatusCode;
 use sdkwork_notary_case_contract::{NotaryRuntimeContext, NotaryServiceError};
 use sdkwork_notary_case_service::{
-    handle_notary_app_operation, AppbasePort, CommercePort, DrivePort, NotaryCaseRepositoryPort,
-    NotaryRuntimePorts,
+    handle_notary_app_operation_with_metadata, AppbasePort, CommercePort, DrivePort,
+    NotaryCaseRepositoryPort, NotaryRuntimePorts,
 };
 use serde_json::Value;
 
-use crate::service_port::{NotaryAppApiServicePort, NotaryRequestContext, NotaryRouteError};
+use crate::service_port::{
+    NotaryAppApiServicePort, NotaryOperationMetadata, NotaryRequestContext, NotaryRouteError,
+};
 
 pub struct NotaryAppRuntimeService<Appbase, Commerce, Drive, Repository>
 where
@@ -57,14 +59,16 @@ where
         operation_id: &'static str,
         path_params: BTreeMap<String, String>,
         body: Value,
+        metadata: NotaryOperationMetadata,
     ) -> Result<Value, NotaryRouteError> {
         let runtime_context = runtime_context_from_route(context);
 
-        handle_notary_app_operation(
+        handle_notary_app_operation_with_metadata(
             &runtime_context,
             operation_id,
             path_params,
             body,
+            &metadata,
             &NotaryRuntimePorts {
                 appbase: &self.appbase,
                 commerce: &self.commerce,

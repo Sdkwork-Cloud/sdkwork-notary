@@ -36,8 +36,29 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-core",
     "publicExports": [
       "@sdkwork/notary-pc-core"
+    ],
+    "providedPorts": [
+      {
+        "name": "notaryPcSdkRuntime",
+        "export": "@sdkwork/notary-pc-core"
+      },
+      {
+        "name": "notaryPcTokenManager",
+        "export": "@sdkwork/notary-pc-core"
+      },
+      {
+        "name": "notaryPcIamRuntime",
+        "export": "@sdkwork/notary-pc-core"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "notaryPcSdkPorts",
+        "export": "@sdkwork/notary-pc-core"
+      }
     ],
     "runtimeEntrypoints": [
       "initNotaryPcAppSdkClient",

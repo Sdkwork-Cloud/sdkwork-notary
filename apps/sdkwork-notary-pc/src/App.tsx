@@ -4,6 +4,7 @@ import { SdkworkSessionAuthBrowserRoot } from '@sdkwork/auth-pc-react';
 import { NotaryPcRoutes, NOTARY_PC_HOME_PATH } from '@sdkwork/notary-pc-shell';
 
 import { AuthGate } from './AuthGate';
+import { AdminSurface } from './AdminSurface';
 import { bootstrap } from './bootstrap/runtime';
 
 import './index.css';
@@ -18,6 +19,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate replace to={NOTARY_PC_HOME_PATH} />} />
             <Route path="/notary/*" element={<NotaryPcRoutes />} />
+            <Route path="/admin/*" element={<AdminSurface />} />
             <Route path="*" element={<Navigate replace to={NOTARY_PC_HOME_PATH} />} />
           </Routes>
         </AuthGate>

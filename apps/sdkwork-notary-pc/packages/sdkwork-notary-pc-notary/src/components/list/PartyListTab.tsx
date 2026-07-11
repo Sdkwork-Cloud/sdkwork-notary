@@ -69,6 +69,7 @@ export const PartyListTab: React.FC<PartyListTabProps> = ({
 }) => {
   const { t } = useTranslation('notary');
   const parties = task.parties || [];
+  const canMutateParty = !['COMPLETED', 'REJECTED', 'CANCELLED', 'CREATE_FAILED'].includes(task.status);
 
   if (parties.length === 0) {
     return (
@@ -87,12 +88,12 @@ export const PartyListTab: React.FC<PartyListTabProps> = ({
           expanded={expandedParty === party.id}
           showPhone
           onExpand={onExpand}
-          onDoubleClick={onEdit}
-          showSign={task.status !== 'COMPLETED' && task.status !== 'REJECTED'}
-          onSign={() => onSign(party)}
+          onDoubleClick={canMutateParty ? onEdit : undefined}
+          showSign={canMutateParty}
+          onSign={canMutateParty ? () => onSign(party) : undefined}
           onDrive={() => onDrive(party)}
-          onVideoCall={() => onVideoCall(party)}
-          onEdit={() => onEdit(party)}
+          onVideoCall={canMutateParty ? () => onVideoCall(party) : undefined}
+          onEdit={canMutateParty ? () => onEdit(party) : undefined}
         >
           <AnimatePresence>
             {expandedParty === party.id && (

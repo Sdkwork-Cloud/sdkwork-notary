@@ -40,7 +40,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "8d1182cc89aeaec8c3d11042441cd9c87f80b189c6f0ca4baf5943f9d5604b02"
+      "sha256": "1a665481fa76f82e52a0a0a7422acd18a2dc4dad293a1533aa6719738d4b935b"
     },
     {
       "path": "README.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "sdkwork-sdk.json",
-      "sha256": "105c9537ed186e21164117c3aeae59e33d704175cfa82f4bdc8a419ea6ba7964"
+      "sha256": "390c9424c0cc388b9cc1bb94259c1cd837c58adaea40c2626425b5dfbb4aed78"
     },
     {
       "path": "src/api/base.ts",
@@ -60,7 +60,7 @@
     },
     {
       "path": "src/api/notary.ts",
-      "sha256": "0fcb2587ce47d8cb71069651408da18f17d011c3451e5b16b6fc11db7ea9701f"
+      "sha256": "763ac6ec78544a3d9eaa12d2785e370efca89f0a11326c36a8261e579004244d"
     },
     {
       "path": "src/api/paths.ts",
@@ -72,7 +72,7 @@
     },
     {
       "path": "src/http/client.ts",
-      "sha256": "7c5521163579261418c56e8126b0389dd78be9e0931e5e6064749c7cc9df0edc"
+      "sha256": "902ecbf9b15072c147ac9716f22209cd50b770e517b55d1ce1583671ab4d2c3e"
     },
     {
       "path": "src/http/index.ts",
@@ -132,7 +132,7 @@
     },
     {
       "path": "src/types/index.ts",
-      "sha256": "99ed5d10843b2f8e2730b4174c6e9ed6f0f7265599a76cc5beab06f3853ea893"
+      "sha256": "3b3e69bc4b5075a0b2ed6acf0c0ead560087071b83ac3a95d312f86066bb34fd"
     },
     {
       "path": "src/types/monthly-report.ts",
@@ -167,8 +167,16 @@
       "sha256": "3b2cad95d29749465be03d349a51396cd2bfb44c2826027be5b61cb909ef6a04"
     },
     {
+      "path": "src/types/notary-cases-acceptances-create-response201.ts",
+      "sha256": "463f47e4b810cd810910b197f6bda96c4d70a1e7331ba11b485e72740bfa9aaf"
+    },
+    {
       "path": "src/types/notary-cases-assignments-create-response201.ts",
       "sha256": "193ddd2e8b2712d6ee8966d338a73d07397ee7310f07d93b64052eedd0efb4e7"
+    },
+    {
+      "path": "src/types/notary-cases-completions-create-response201.ts",
+      "sha256": "74e2e5c4e5073634111b0b8b952bf33c17f89f6bed2698b8b28b3e1fe205a33a"
     },
     {
       "path": "src/types/notary-cases-create-response201.ts",
@@ -180,7 +188,7 @@
     },
     {
       "path": "src/types/notary-cases-events-list-response.ts",
-      "sha256": "b9c8b6ba3bf452a5cbed50797ed6857ee0861ddbcd319ea0ae159c884fdce7da"
+      "sha256": "32bcf90442f6a5d119ce8303a566f8ba68074018d4f4ccda508d1cdee856edb0"
     },
     {
       "path": "src/types/notary-cases-files-create-response201.ts",
@@ -188,11 +196,11 @@
     },
     {
       "path": "src/types/notary-cases-files-list-response.ts",
-      "sha256": "58397b0f71dd337172e2b1f84dcb70ab5f25cf5fe15cfd0a5a5f669cf9f9b904"
+      "sha256": "13e73f8002b8464fec7ffb611effc7a85a82aca857d761d034f27f5b36079967"
     },
     {
       "path": "src/types/notary-cases-list-response.ts",
-      "sha256": "92b0cc214fc4f327434f7af9d04f6006cfc61dfeff84b0c8fde10a474dd0868d"
+      "sha256": "c46e96602cad98e9a39d3c52b178acf7bfa5b8ac4d0684ff1564c1d32e3b9d89"
     },
     {
       "path": "src/types/notary-cases-parties-create-response201.ts",
@@ -200,15 +208,35 @@
     },
     {
       "path": "src/types/notary-cases-parties-list-response.ts",
-      "sha256": "399840f3d6fbe0fefb987ba79b2c3f6b0e2b6b64716206212251af5efc3d07c2"
+      "sha256": "80772f6207161d9057006ad99209fb6ed5835d97745e38c4e6b02d2259f9ee74"
     },
     {
       "path": "src/types/notary-cases-parties-signature-invites-create-response201.ts",
       "sha256": "8cdff4b4a3e1c58ee739fb052915aacab0b1dbf3db20636eb5ef3ea1e29b9f64"
     },
     {
+      "path": "src/types/notary-cases-parties-signatures-create-response201.ts",
+      "sha256": "45870b46306f39c8776c9f0b61e674268372926da1ef2c762914c7a7d4d762d1"
+    },
+    {
+      "path": "src/types/notary-cases-parties-update-response.ts",
+      "sha256": "df4ad57a1d0f5d7fc9a9ddc99eb2a246ee140ae229669fe0e2f0ffe506fec634"
+    },
+    {
       "path": "src/types/notary-cases-parties-video-invites-create-response201.ts",
       "sha256": "b26b42c2838e3b536fdbe51fc31c5851551a1e685d2ab9f88ef00a8f31732cd1"
+    },
+    {
+      "path": "src/types/notary-cases-rejections-create-response201.ts",
+      "sha256": "f494114ef688087bfe007aed9833b4195da5f831f4d3fae2744e8b5294c83f05"
+    },
+    {
+      "path": "src/types/notary-cases-retrieve-response.ts",
+      "sha256": "690ecc450f2eedf6ed71fb1439619fdd0d68207d47d288bc84060b536aac214a"
+    },
+    {
+      "path": "src/types/notary-cases-update-response.ts",
+      "sha256": "7491d26fc705eaa1e5b90b925e6fdcbc6eff611768aafd58311c95d5554cd4a2"
     },
     {
       "path": "src/types/notary-dashboard-statistics-retrieve-response.ts",
@@ -236,11 +264,11 @@
     },
     {
       "path": "src/types/notary-matter.ts",
-      "sha256": "98429abfda3690da3cf441ecb61c65fae4c95d5ab94d5f17842a72074639a501"
+      "sha256": "8f322a7e78e79bcc1cf00ca7d45e73ad022bcf925e43c2d213bf255fe41b7966"
     },
     {
       "path": "src/types/notary-matters-list-response.ts",
-      "sha256": "22b7e42e4519303478bfabae9360df56d07f73ef4e81deb556c5bc3cb234ad95"
+      "sha256": "e273cc689b7b369ad75c99a3eb8025dd1df0a7227d7d2dc2f515d3b793097461"
     },
     {
       "path": "src/types/notary-party-list.ts",
@@ -252,7 +280,7 @@
     },
     {
       "path": "src/types/notary-staff-list-response.ts",
-      "sha256": "579694150f024a399a6882b0f2987352e418b6892dd3475d3156014b05d6f4dc"
+      "sha256": "15a3c5c30b8ba8869b8c44c545f7d4035e7a023167031d6fd83f0c35c16befb8"
     },
     {
       "path": "src/types/notary-staff-member-page.ts",

@@ -57,7 +57,10 @@
     }
   ],
   "contracts": {
+    "layerRole": "contract",
     "publicExports": [],
+    "providedPorts": [],
+    "requiredPorts": [],
     "runtimeEntrypoints": [
       "build_sdkwork_notary_app_api_router",
       "build_sdkwork_notary_backend_api_router"

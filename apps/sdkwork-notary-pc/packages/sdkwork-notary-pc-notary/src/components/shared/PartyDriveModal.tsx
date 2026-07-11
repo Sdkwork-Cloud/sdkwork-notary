@@ -24,7 +24,7 @@ export interface PartyDriveModalProps {
   /** Called when modal is closed */
   onClose: () => void;
   /** Called when files are uploaded */
-  onUpload: (files: File[]) => void;
+  onUpload?: (files: File[]) => void;
   /** Called when a document is clicked for preview (optional) */
   onPreview?: (doc: NotaryDocument | LocalAttachment) => void;
   /** Called when a document download is requested (optional, for API docs) */
@@ -46,7 +46,7 @@ export const PartyDriveModal: React.FC<PartyDriveModalProps> = ({
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from<File>(event.target.files || []);
-    if (files.length > 0) {
+    if (files.length > 0 && onUpload) {
       onUpload(files);
     }
     event.target.value = '';
@@ -90,14 +90,16 @@ export const PartyDriveModal: React.FC<PartyDriveModalProps> = ({
             className="relative w-full max-w-5xl h-full max-h-[800px] bg-[#1e1e1e] rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden"
           >
             {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={handleFileChange}
-              accept="image/*,video/*,application/pdf"
-            />
+            {onUpload && (
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+                accept="image/*,video/*,application/pdf"
+              />
+            )}
 
             {/* Header */}
             <div className="h-16 px-6 border-b border-white/5 bg-[#181818] flex items-center justify-between shrink-0">
@@ -110,12 +112,14 @@ export const PartyDriveModal: React.FC<PartyDriveModalProps> = ({
                 <span className="text-indigo-400">{party.name}</span>
               </div>
               <div className="flex items-center gap-4">
-                <button
-                  onClick={triggerUpload}
-                  className="bg-cyan-600 hover:bg-cyan-700 text-white font-medium px-4 py-2 flex items-center gap-2 rounded-lg transition-colors text-sm shadow-md"
-                >
-                  <Upload size={16} /> {t('createTask.uploadInDir')}
-                </button>
+                {onUpload && (
+                  <button
+                    onClick={triggerUpload}
+                    className="bg-cyan-600 hover:bg-cyan-700 text-white font-medium px-4 py-2 flex items-center gap-2 rounded-lg transition-colors text-sm shadow-md"
+                  >
+                    <Upload size={16} /> {t('createTask.uploadInDir')}
+                  </button>
+                )}
                 <button
                   onClick={onClose}
                   className="text-gray-400 hover:text-white p-2 rounded-lg hover:bg-white/10"
@@ -143,7 +147,7 @@ export const PartyDriveModal: React.FC<PartyDriveModalProps> = ({
               </p>
 
               {/* Documents list or empty state */}
-              {documents.length === 0 ? (
+              {documents.length === 0 && onUpload ? (
                 <button
                   onClick={triggerUpload}
                   className="px-6 py-3 bg-[#2b2b2d] border border-cyan-500/30 text-cyan-400 rounded-xl hover:bg-cyan-500/10 transition-colors flex items-center gap-2"
@@ -188,12 +192,14 @@ export const PartyDriveModal: React.FC<PartyDriveModalProps> = ({
                   ))}
 
                   {/* Upload more button */}
-                  <button
-                    onClick={triggerUpload}
-                    className="mt-4 self-center px-6 py-3 bg-[#2b2b2d] border border-cyan-500/30 text-cyan-400 rounded-xl hover:bg-cyan-500/10 transition-colors flex items-center gap-2"
-                  >
-                    <Plus size={18} /> {loading ? t('createTask.uploadProcessing') : t('createTask.uploadMoreToDir')}
-                  </button>
+                  {onUpload && (
+                    <button
+                      onClick={triggerUpload}
+                      className="mt-4 self-center px-6 py-3 bg-[#2b2b2d] border border-cyan-500/30 text-cyan-400 rounded-xl hover:bg-cyan-500/10 transition-colors flex items-center gap-2"
+                    >
+                      <Plus size={18} /> {loading ? t('createTask.uploadProcessing') : t('createTask.uploadMoreToDir')}
+                    </button>
+                  )}
                 </div>
               )}
             </div>

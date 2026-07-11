@@ -14,6 +14,8 @@ export const imPcRoot = process.env.SDKWORK_IM_PC_ROOT
   ? path.resolve(process.env.SDKWORK_IM_PC_ROOT)
   : defaultImPcRoot;
 
+export const imRepoRoot = path.resolve(imPcRoot, "..", "..");
+
 export const imPcAvailable = existsSync(path.join(imPcRoot, "package.json"));
 
 export function imPcTest(name, fn) {

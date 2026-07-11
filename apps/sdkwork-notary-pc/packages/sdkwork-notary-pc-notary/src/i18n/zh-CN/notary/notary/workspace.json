@@ -1,0 +1,24 @@
+{
+  "workspace": {
+    "title": "公证业务工作台",
+    "searchPlaceholder": "搜索流水卷宗号 / 机构名称 / 存证标的..."
+  },
+  "stats": {
+    "pendingQueue": "待审核队列",
+    "todayCompleted": "今日已出证",
+    "anomalyIntercepted": "异常卷宗拦截",
+    "monthlyVolume": "本月存证量",
+    "dash": "—",
+    "loading": "数据同步中...",
+    "estimatedProcessingTime": "预计处理时长 {{hours}} 小时",
+    "comparedToYesterday": "+12 较昨日",
+    "comparedToYesterdayPositive": "+{{delta}} 较昨日",
+    "comparedToYesterdayNegative": "-{{delta}} 较昨日",
+    "riskControlAutoIntercept": "风控模型自动拦截",
+    "blockchainSyncOk": "区块链同步正常",
+    "blockchainSyncing": "区块链同步中"
+  },
+  "common": {
+    "notAvailable": "—"
+  }
+}

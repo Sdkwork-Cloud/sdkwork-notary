@@ -19,6 +19,7 @@ export interface Party {
   identityFrontFile?: File;
   identityBackFile?: File;
   faceImageDataUrl?: string;
+  auxiliaryAttachments?: File[];
 }
 
 export interface NotaryDocument {
@@ -28,6 +29,7 @@ export interface NotaryDocument {
   category: 'identity' | 'evidence' | 'notary';
   materialCode?: string;
   partyId?: string;
+  uploadIntentId?: string;
   file?: File;
   nodeId?: string;
   driveNodeId?: string;
@@ -48,7 +50,7 @@ export interface NotaryTask {
   notary: string;
   remarks: string;
   type: string;
-  status: 'PENDING_REVIEW' | 'PROCESSING' | 'COMPLETED' | 'REJECTED';
+  status: 'PENDING_REVIEW' | 'PROCESSING' | 'COMPLETED' | 'REJECTED' | 'CANCELLED' | 'CREATE_FAILED';
   fee: number;
   hash?: string;
   parties?: Party[];
@@ -62,4 +64,5 @@ export interface NotaryTask {
   driveSpaceId?: string;
   driveFolderNodeId?: string;
   primaryNotaryMembershipId?: string;
+  version?: string;
 }

@@ -8,7 +8,9 @@ use sdkwork_notary_case_service::{
     CommercePort, DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveFolderReference,
     DriveListNodesPage, DriveListNodesQuery, DrivePort, NotaryCaseEventListPage,
     NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
-    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryPartyRecord,
+    NotaryCaseUpdateCommand, NotaryDashboardStatisticsAggregate, NotaryDashboardStatisticsQuery,
+    NotaryMonthlyCaseCount, NotaryMonthlyCaseCountQuery, NotaryOrganizationProfile,
+    NotaryPartyListPage, NotaryPartyListQuery,
 };
 use sdkwork_routes_notary_backend_api::{
     NotaryBackendApiServicePort, NotaryBackendRuntimeService, NotaryRequestContext,
@@ -19,8 +21,8 @@ use serde_json::json;
 async fn backend_runtime_service_dispatches_route_operations_to_notary_runtime() {
     let service = NotaryBackendRuntimeService::new(
         RecordingAppbase::with_admin_member(),
-        RecordingCommerce::default(),
-        RecordingDrive::default(),
+        RecordingCommerce,
+        RecordingDrive,
         RecordingNotaryRepository::default(),
     );
 
@@ -254,14 +256,34 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
         Ok(NotaryCaseListPage {
             items: Vec::new(),
             has_more: false,
+            next_cursor: None,
+            total_items: 0,
         })
+    }
+
+    async fn get_dashboard_statistics(
+        &self,
+        _query: NotaryDashboardStatisticsQuery,
+    ) -> Result<NotaryDashboardStatisticsAggregate, NotaryServiceError> {
+        Ok(NotaryDashboardStatisticsAggregate::default())
+    }
+
+    async fn count_cases_for_month(
+        &self,
+        _query: NotaryMonthlyCaseCountQuery,
+    ) -> Result<NotaryMonthlyCaseCount, NotaryServiceError> {
+        Ok(NotaryMonthlyCaseCount::default())
     }
 
     async fn list_parties(
         &self,
-        _case_id: &str,
-    ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
-        Ok(Vec::new())
+        _query: NotaryPartyListQuery,
+    ) -> Result<NotaryPartyListPage, NotaryServiceError> {
+        Ok(NotaryPartyListPage {
+            items: Vec::new(),
+            has_more: false,
+            next_cursor: None,
+        })
     }
 
     async fn list_events(
@@ -271,6 +293,7 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
         Ok(NotaryCaseEventListPage {
             items: Vec::new(),
             has_more: false,
+            next_cursor: None,
         })
     }
 }

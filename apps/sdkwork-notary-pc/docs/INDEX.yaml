@@ -4,5 +4,18 @@ repository: sdkwork-notary-pc
 canon:
   prd: docs/product/prd/PRD.md
   techArchitecture: docs/architecture/tech/TECH_ARCHITECTURE.md
-entries: []
-domains: []
+entries:
+  - id: REQ-2026-0001
+    path: ../../../docs/product/requirements/REQ-2026-0001-notary-pc-admin-matters.md
+    layer: work
+    audience: [product, engineering, operations]
+    status: implemented
+  - id: ADR-20260711
+    path: ../../../docs/architecture/decisions/ADR-20260711-notary-admin-merchandise.md
+    layer: work
+    audience: [architecture, engineering, operations]
+    status: accepted
+domains:
+  - name: notary-admin-merchandise
+    path: packages/sdkwork-notary-pc-admin-merchandise/
+    owner: sdkwork-notary

@@ -4,7 +4,12 @@ use std::{
 };
 
 use async_trait::async_trait;
-use axum::extract::{Query, State};
+use axum::{
+    body::to_bytes,
+    extract::{Query, State},
+    http::StatusCode,
+    response::Response,
+};
 use sdkwork_routes_notary_backend_api::{
     handlers,
     service_port::{NotaryBackendApiState, NotaryRouteError},
@@ -26,7 +31,7 @@ async fn backend_list_handlers_forward_query_filters_to_service_body() {
             ("organization_id".to_string(), "200001".to_string()),
             ("status".to_string(), "PROCESSING".to_string()),
             ("q".to_string(), "contract".to_string()),
-            ("page_size".to_string(), "25".to_string()),
+            ("page_size".to_string(), "100".to_string()),
         ])),
     )
     .await;
@@ -63,7 +68,7 @@ async fn backend_list_handlers_forward_query_filters_to_service_body() {
     assert_eq!(calls[0].body["organization_id"], "200001");
     assert_eq!(calls[0].body["status"], "PROCESSING");
     assert_eq!(calls[0].body["q"], "contract");
-    assert_eq!(calls[0].body["page_size"], "25");
+    assert_eq!(calls[0].body["page_size"], "100");
 
     assert_eq!(calls[1].operation_id, "notary.staff.list");
     assert_eq!(calls[1].body["organization_id"], "200001");
@@ -113,6 +118,59 @@ async fn backend_profile_and_matter_list_handlers_forward_query_filters_to_servi
     assert_eq!(calls[1].body["page_size"], "20");
 }
 
+#[tokio::test]
+async fn backend_list_query_rejections_return_invalid_parameter_before_service_dispatch() {
+    let service = Arc::new(RecordingService::default());
+    let state = NotaryBackendApiState::new(service.clone());
+    let app_ctx = test_backend_web_request_context();
+
+    let profiles_response = handlers::list_organization_profiles(
+        State(state.clone()),
+        app_ctx.clone(),
+        Query(BTreeMap::from([("limit".to_string(), "20".to_string())])),
+    )
+    .await;
+    assert_invalid_parameter(profiles_response).await;
+
+    let matters_response = handlers::list_matters(
+        State(state.clone()),
+        app_ctx.clone(),
+        Query(BTreeMap::from([
+            ("page".to_string(), "1".to_string()),
+            ("cursor".to_string(), "next-page".to_string()),
+        ])),
+    )
+    .await;
+    assert_invalid_parameter(matters_response).await;
+
+    let cases_response = handlers::list_cases(
+        State(state.clone()),
+        app_ctx.clone(),
+        Query(BTreeMap::from([(
+            "page_size".to_string(),
+            "201".to_string(),
+        )])),
+    )
+    .await;
+    assert_invalid_parameter(cases_response).await;
+
+    let staff_response = handlers::list_staff(
+        State(state),
+        app_ctx,
+        Query(BTreeMap::from([(
+            "page_size".to_string(),
+            "staff".to_string(),
+        )])),
+    )
+    .await;
+    assert_invalid_parameter(staff_response).await;
+
+    assert!(
+        service.calls.lock().unwrap().is_empty(),
+        "invalid list queries must not reach the service"
+    );
+}
+
 #[derive(Default)]
 struct RecordingService {
     calls: Mutex<Vec<RecordedCall>>,
@@ -143,4 +201,20 @@ impl NotaryBackendApiServicePort for RecordingService {
             }
         }))
     }
+}
+
+async fn assert_invalid_parameter(response: Response) {
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    assert_eq!(
+        response
+            .headers()
+            .get(axum::http::header::CONTENT_TYPE)
+            .and_then(|value| value.to_str().ok()),
+        Some("application/problem+json")
+    );
+    let body = to_bytes(response.into_body(), usize::MAX)
+        .await
+        .expect("problem body");
+    let payload: Value = serde_json::from_slice(&body).expect("problem json");
+    assert_eq!(payload["code"].as_i64(), Some(40003));
 }

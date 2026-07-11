@@ -9,35 +9,10 @@
     "protocol": "http",
     "packageName": "sdkwork-notary-backend-sdk-generated-typescript"
   },
-  "changeFingerprint": "7da6ddb858f91de5a957ce15163dcf70a475143091b472828c59be8dd8a9ed53",
+  "changeFingerprint": "82f50342c0e1416feb6b8fd133fe25e924d83969848152bc796ddd0a39e1755a",
   "changes": {
-    "createdGeneratedFiles": [
-      "src/types/field-error.ts",
-      "src/types/notary-cases-assignments-create-response201.ts",
-      "src/types/notary-cases-management-list-response.ts",
-      "src/types/notary-cases-management-retrieve-response.ts",
-      "src/types/notary-matters-create-response201.ts",
-      "src/types/notary-matters-management-list-response.ts",
-      "src/types/notary-organization-profiles-create-response201.ts",
-      "src/types/notary-organization-profiles-list-response.ts",
-      "src/types/notary-reports-case-summary-retrieve-response.ts",
-      "src/types/notary-staff-list-response.ts",
-      "src/types/sdk-work-api-response.ts",
-      "src/types/sdk-work-command-data.ts",
-      "src/types/sdk-work-command-response.ts",
-      "src/types/sdk-work-list-response.ts",
-      "src/types/sdk-work-page-data.ts",
-      "src/types/sdk-work-platform-error-code.ts",
-      "src/types/sdk-work-resource-data.ts",
-      "src/types/sdk-work-resource-response.ts"
-    ],
-    "updatedGeneratedFiles": [
-      "src/api/notary.ts",
-      "src/http/client.ts",
-      "src/types/index.ts",
-      "src/types/page-info.ts",
-      "src/types/problem-detail.ts"
-    ],
+    "createdGeneratedFiles": [],
+    "updatedGeneratedFiles": [],
     "unchangedGeneratedFiles": [
       "bin/publish-core.mjs",
       "bin/publish.ps1",
@@ -51,8 +26,10 @@
       "sdkwork-sdk.json",
       "src/api/base.ts",
       "src/api/index.ts",
+      "src/api/notary.ts",
       "src/api/paths.ts",
       "src/auth/index.ts",
+      "src/http/client.ts",
       "src/http/index.ts",
       "src/index.ts",
       "src/sdk.ts",
@@ -60,17 +37,42 @@
       "src/types/create-case-assignment-request.ts",
       "src/types/create-notary-matter-request.ts",
       "src/types/create-notary-organization-profile-request.ts",
+      "src/types/field-error.ts",
+      "src/types/index.ts",
       "src/types/notary-case-assignment.ts",
       "src/types/notary-case-page.ts",
       "src/types/notary-case-status.ts",
       "src/types/notary-case-summary.ts",
       "src/types/notary-case.ts",
+      "src/types/notary-cases-assignments-create-response201.ts",
+      "src/types/notary-cases-management-list-response.ts",
+      "src/types/notary-cases-management-retrieve-response.ts",
       "src/types/notary-matter-page.ts",
+      "src/types/notary-matter-status.ts",
       "src/types/notary-matter.ts",
+      "src/types/notary-matters-create-response201.ts",
+      "src/types/notary-matters-management-list-response.ts",
+      "src/types/notary-matters-update-response.ts",
       "src/types/notary-organization-profile-page.ts",
       "src/types/notary-organization-profile.ts",
+      "src/types/notary-organization-profiles-create-response201.ts",
+      "src/types/notary-organization-profiles-list-response.ts",
+      "src/types/notary-organization-profiles-retrieve-response.ts",
+      "src/types/notary-organization-profiles-update-response.ts",
+      "src/types/notary-reports-case-summary-retrieve-response.ts",
+      "src/types/notary-staff-list-response.ts",
       "src/types/notary-staff-member-page.ts",
       "src/types/notary-staff-member.ts",
+      "src/types/page-info.ts",
+      "src/types/problem-detail.ts",
+      "src/types/sdk-work-api-response.ts",
+      "src/types/sdk-work-command-data.ts",
+      "src/types/sdk-work-command-response.ts",
+      "src/types/sdk-work-list-response.ts",
+      "src/types/sdk-work-page-data.ts",
+      "src/types/sdk-work-platform-error-code.ts",
+      "src/types/sdk-work-resource-data.ts",
+      "src/types/sdk-work-resource-response.ts",
       "src/types/update-notary-matter-request.ts",
       "src/types/update-notary-organization-profile-request.ts",
       "tsconfig.json"
@@ -85,107 +87,26 @@
   },
   "impact": {
     "schemaVersion": 1,
-    "areas": [
-      "api-surface",
-      "models",
-      "runtime"
-    ],
-    "details": [
-      {
-        "area": "api-surface",
-        "paths": [
-          "src/api/notary.ts",
-          "src/http/client.ts"
-        ]
-      },
-      {
-        "area": "models",
-        "paths": [
-          "src/types/field-error.ts",
-          "src/types/index.ts",
-          "src/types/notary-cases-assignments-create-response201.ts",
-          "src/types/notary-cases-management-list-response.ts",
-          "src/types/notary-cases-management-retrieve-response.ts",
-          "src/types/notary-matters-create-response201.ts",
-          "src/types/notary-matters-management-list-response.ts",
-          "src/types/notary-organization-profiles-create-response201.ts",
-          "src/types/notary-organization-profiles-list-response.ts",
-          "src/types/notary-reports-case-summary-retrieve-response.ts",
-          "src/types/notary-staff-list-response.ts",
-          "src/types/page-info.ts",
-          "src/types/problem-detail.ts",
-          "src/types/sdk-work-api-response.ts",
-          "src/types/sdk-work-command-data.ts",
-          "src/types/sdk-work-command-response.ts",
-          "src/types/sdk-work-list-response.ts",
-          "src/types/sdk-work-page-data.ts",
-          "src/types/sdk-work-platform-error-code.ts",
-          "src/types/sdk-work-resource-data.ts",
-          "src/types/sdk-work-resource-response.ts"
-        ]
-      },
-      {
-        "area": "runtime",
-        "paths": [
-          "src/http/client.ts"
-        ]
-      }
-    ],
-    "requiresVerification": true,
-    "summary": "Detected impact areas: api-surface, models, runtime. Verification is required."
+    "areas": [],
+    "details": [],
+    "requiresVerification": false,
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped."
   },
   "verificationPlan": {
-    "shouldRun": true,
-    "runPhase": "now",
-    "summary": "Detected impact areas: api-surface, models, runtime. Verification is required. Run the required verification commands now against the generated SDK output.",
-    "steps": [
-      {
-        "id": "check",
-        "title": "Unified package check",
-        "required": true,
-        "rationale": "Validate the generated package with the unified publish helper. Triggered by: api-surface, models, runtime.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-notary\\sdks\\sdkwork-notary-backend-sdk\\sdkwork-notary-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "check"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action check"
-      },
-      {
-        "id": "build",
-        "title": "Unified package build",
-        "required": true,
-        "rationale": "Run the full package build because this language uses a lighter check path than the final build. Triggered by: api-surface, models, runtime.",
-        "workingDirectory": "E:\\sdkwork-space\\sdkwork-notary\\sdks\\sdkwork-notary-backend-sdk\\sdkwork-notary-backend-sdk-typescript\\generated\\server-openapi",
-        "command": "node",
-        "args": [
-          "./bin/publish-core.mjs",
-          "--language",
-          "typescript",
-          "--project-dir",
-          ".",
-          "--action",
-          "build"
-        ],
-        "displayCommand": "node ./bin/publish-core.mjs --language typescript --project-dir . --action build"
-      }
-    ]
+    "shouldRun": false,
+    "runPhase": "skip",
+    "summary": "No generated, scaffold, or backup changes detected. Verification can be skipped.",
+    "steps": []
   },
   "executionDecision": {
     "schemaVersion": 1,
-    "riskLevel": "medium",
-    "nextAction": "verify",
+    "riskLevel": "low",
+    "nextAction": "skip",
     "requiresManualReview": false,
     "applyRequiresExpectedFingerprint": false,
-    "summary": "Changes have been applied. Run the required verification plan now.",
+    "summary": "No actionable changes were detected. No apply or verification step is required.",
     "reasons": [
-      "verification-required"
+      "no-actionable-changes"
     ]
   },
   "preservedLegacyFiles": false

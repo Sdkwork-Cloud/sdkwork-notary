@@ -8,7 +8,7 @@ use axum::{
 use sdkwork_routes_notary_http_auth::{
     envelope_success_data, finish_success, finish_success_no_content,
     is_delete_no_content_operation, notary_request_context_from_web,
-    success_status_for_notary_backend_operation,
+    success_status_for_notary_backend_operation, validate_list_query,
 };
 use sdkwork_web_core::WebRequestContext;
 use serde_json::{Map, Value};
@@ -20,6 +20,9 @@ pub async fn list_organization_profiles(
     app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_operation(
         state,
         app_ctx,
@@ -83,6 +86,9 @@ pub async fn list_matters(
     app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_operation(
         state,
         app_ctx,
@@ -130,6 +136,9 @@ pub async fn list_cases(
     app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_operation(
         state,
         app_ctx,
@@ -196,6 +205,9 @@ pub async fn list_staff(
     app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_operation(
         state,
         app_ctx,

@@ -47,7 +47,20 @@
     }
   ],
   "contracts": {
+    "layerRole": "backend-route",
     "publicExports": ["sdkwork_routes_notary_app_api::*"],
+    "providedPorts": [
+      {
+        "name": "build_sdkwork_notary_app_api_router",
+        "export": "sdkwork_routes_notary_app_api::*"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "NotaryAppApiServicePort",
+        "export": "sdkwork_routes_notary_app_api::*"
+      }
+    ],
     "runtimeEntrypoints": ["build_sdkwork_notary_app_api_router"],
     "routeManifest": "../../../sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json",
     "sdkClients": [],

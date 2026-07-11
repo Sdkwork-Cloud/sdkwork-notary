@@ -1,5 +1,5 @@
 import i18n, { subscribeNotaryI18nFromHost, syncNotaryI18nFromHost } from './i18n';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import { PenTool } from 'lucide-react';
 import type { NotaryDocument, NotaryTask, Party } from '@sdkwork/notary-pc-commons';
@@ -19,10 +19,15 @@ import {
 import { VideoCallQROverlay } from './components/create';
 import { NotaryPickerDrawer } from './components/create/NotaryPickerDrawer';
 import { PartyDriveModal } from './components/shared/PartyDriveModal';
-import { notaryService, type NotaryStaffOption } from './services/NotaryService';
+import {
+  notaryService,
+  type NotaryStaffOption,
+  type NotaryTaskPageInfo,
+} from './services/NotaryService';
 import type { ActiveCallState, MediaPreviewState, NotaryMatterOption, NotaryStats, PartyIdentityMediaUrls } from './types';
 import { renderStatusBadge } from './utils/renderStatusBadge';
 import { isNotaryAssigned } from './utils/isNotaryAssigned';
+import { isNotaryTaskTerminalStatus } from './utils/notaryTask';
 
 function openSanitizedExternalUrl(rawUrl: string | null | undefined) {
   const url = notarySanitizeLinkHref(rawUrl ?? '');
@@ -36,6 +41,12 @@ const EMPTY_STATS: NotaryStats = {
   completedCount: 0,
   rejectedCount: 0,
   totalCount: 0,
+};
+
+const INITIAL_TASK_PAGE_INFO: NotaryTaskPageInfo = {
+  mode: 'cursor',
+  pageSize: 20,
+  hasMore: false,
 };
 
 export const NotaryView: React.FC = () => {
@@ -63,6 +74,14 @@ const NotaryViewContent: React.FC = () => {
   const [activePaneTab, setActivePaneTab] = useState<DetailPaneTab>('parties');
   const [pageSize, setPageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
+  const [knownPageCount, setKnownPageCount] = useState(1);
+  const [taskPageInfo, setTaskPageInfo] = useState<NotaryTaskPageInfo>(INITIAL_TASK_PAGE_INFO);
+  const [taskQueryRevision, setTaskQueryRevision] = useState(0);
+  const taskPageCursorByPageRef = useRef<Map<number, string | undefined>>(
+    new Map([[1, undefined]]),
+  );
+  const taskRequestSequenceRef = useRef(0);
+  const detailRequestSequenceRef = useRef(0);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [expandedParty, setExpandedParty] = useState<string | null>(null);
   const [printTask, setPrintTask] = useState<NotaryTask | null>(null);
@@ -102,6 +121,18 @@ const NotaryViewContent: React.FC = () => {
     [t],
   );
 
+  const resetTaskPagination = useCallback(() => {
+    taskRequestSequenceRef.current += 1;
+    taskPageCursorByPageRef.current = new Map([[1, undefined]]);
+    setCurrentPage(1);
+    setKnownPageCount(1);
+    setTaskPageInfo((current) => ({
+      ...INITIAL_TASK_PAGE_INFO,
+      pageSize: current.pageSize,
+    }));
+    setTaskQueryRevision((current) => current + 1);
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = () => setActiveDropdown(null);
     document.addEventListener('click', handleClickOutside);
@@ -109,9 +140,15 @@ const NotaryViewContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearchTerm(searchTerm.trim()), 300);
+    const timer = window.setTimeout(() => {
+      const nextSearchTerm = searchTerm.trim();
+      if (nextSearchTerm !== debouncedSearchTerm) {
+        resetTaskPagination();
+        setDebouncedSearchTerm(nextSearchTerm);
+      }
+    }, 300);
     return () => window.clearTimeout(timer);
-  }, [searchTerm]);
+  }, [debouncedSearchTerm, resetTaskPagination, searchTerm]);
 
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
@@ -126,21 +163,50 @@ const NotaryViewContent: React.FC = () => {
   }, [t]);
 
   const fetchTasks = useCallback(async () => {
+    const requestSequence = taskRequestSequenceRef.current + 1;
+    taskRequestSequenceRef.current = requestSequence;
     setLoading(true);
     try {
-      const data = await notaryService.getTasks({
+      const pageCursor = taskPageCursorByPageRef.current.get(currentPage);
+      const page = await notaryService.getTasks({
         businessType: typeFilter,
         status: statusFilter,
         searchTerm: debouncedSearchTerm,
+        pageSize,
+        cursor: pageCursor,
       });
-      setTasks(data);
+      if (requestSequence !== taskRequestSequenceRef.current) {
+        return;
+      }
+
+      setTasks(page.items);
+      setTaskPageInfo(page.pageInfo);
+
+      for (const pageNumber of taskPageCursorByPageRef.current.keys()) {
+        if (pageNumber > currentPage + 1) {
+          taskPageCursorByPageRef.current.delete(pageNumber);
+        }
+      }
+      const nextCursor = page.pageInfo.nextCursor?.trim();
+      if (page.pageInfo.hasMore && nextCursor) {
+        taskPageCursorByPageRef.current.set(currentPage + 1, nextCursor);
+        setKnownPageCount(currentPage + 1);
+      } else {
+        taskPageCursorByPageRef.current.delete(currentPage + 1);
+        setKnownPageCount(currentPage);
+      }
     } catch (error) {
+      if (requestSequence !== taskRequestSequenceRef.current) {
+        return;
+      }
       console.error('Failed to fetch tasks:', error);
       notaryToast(t('toast.tasksLoadFailed'), 'error');
     } finally {
-      setLoading(false);
+      if (requestSequence === taskRequestSequenceRef.current) {
+        setLoading(false);
+      }
     }
-  }, [debouncedSearchTerm, statusFilter, typeFilter, t]);
+  }, [currentPage, debouncedSearchTerm, pageSize, statusFilter, typeFilter, t]);
 
   const fetchMatters = useCallback(async () => {
     setMattersLoading(true);
@@ -158,16 +224,14 @@ const NotaryViewContent: React.FC = () => {
     if (activeView === 'list') {
       void fetchStats();
       void fetchMatters();
-      void fetchTasks();
-      setCurrentPage(1);
     }
-  }, [activeView, fetchMatters, fetchStats, fetchTasks]);
+  }, [activeView, fetchMatters, fetchStats]);
 
   useEffect(() => {
     if (activeView === 'list') {
-      setCurrentPage(1);
+      void fetchTasks();
     }
-  }, [activeView, debouncedSearchTerm, typeFilter, statusFilter]);
+  }, [activeView, fetchTasks, taskQueryRevision]);
 
   useEffect(() => {
     if (!selectedTask) {
@@ -271,26 +335,32 @@ const NotaryViewContent: React.FC = () => {
   };
 
   const handleSelectTask = async (task: NotaryTask) => {
+    const requestSequence = ++detailRequestSequenceRef.current;
     setSelectedTask(task);
     setActivePaneTab('parties');
     setExpandedParty(null);
     setDetailLoading(true);
     try {
       const detail = await notaryService.getTaskById(task.id);
-      if (detail) {
+      if (requestSequence === detailRequestSequenceRef.current && detail) {
         setSelectedTask(detail);
       }
     } catch (error) {
+      if (requestSequence !== detailRequestSequenceRef.current) {
+        return;
+      }
       console.error('Failed to load task detail:', error);
       notaryToast(t('toast.taskDetailLoadFailed'), 'error');
     } finally {
-      setDetailLoading(false);
+      if (requestSequence === detailRequestSequenceRef.current) {
+        setDetailLoading(false);
+      }
     }
   };
 
-  const handleCreateSuccess = async () => {
+  const handleCreateSuccess = () => {
+    resetTaskPagination();
     setActiveView('list');
-    await Promise.all([fetchStats(), fetchMatters(), fetchTasks()]);
   };
 
   const handleMonthlyReport = async () => {
@@ -356,7 +426,7 @@ const NotaryViewContent: React.FC = () => {
       return;
     }
     try {
-      const updated = await notaryService.updateTaskStatus(selectedTask.id, status);
+      const updated = await notaryService.updateTaskStatus(selectedTask.id, status, selectedTask.version);
       setSelectedTask(updated);
       setTasks((prev) => prev.map((task) => (task.id === updated.id ? updated : task)));
       await Promise.all([fetchStats(), fetchTasks()]);
@@ -399,7 +469,7 @@ const NotaryViewContent: React.FC = () => {
       return;
     }
     try {
-      const { previewUrl, downloadUrl, url } = await notaryService.getDocumentUrl(selectedTask.id, doc.name, {
+      const { previewUrl, downloadUrl, url } = await notaryService.getDocumentUrl(selectedTask.id, doc, {
         disposition: 'inline',
       });
       const resolvedUrl = previewUrl ?? downloadUrl ?? url;
@@ -423,7 +493,7 @@ const NotaryViewContent: React.FC = () => {
     }
     try {
       notaryToast(t('detail.downloadingFile', { name: doc.name }), 'success');
-      const { downloadUrl, url } = await notaryService.getDocumentUrl(selectedTask.id, doc.name, {
+      const { downloadUrl, url } = await notaryService.getDocumentUrl(selectedTask.id, doc, {
         disposition: 'attachment',
       });
       const resolvedUrl = downloadUrl ?? url;
@@ -534,8 +604,7 @@ const NotaryViewContent: React.FC = () => {
     );
   }
 
-  const totalPages = Math.ceil(tasks.length / pageSize) || 1;
-  const paginatedTasks = tasks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const totalPages = Math.max(1, knownPageCount);
 
   return (
     <>
@@ -556,13 +625,19 @@ const NotaryViewContent: React.FC = () => {
               matters={matters}
               mattersLoading={mattersLoading}
               onSearchChange={setSearchTerm}
-              onTypeFilterChange={setTypeFilter}
-              onStatusFilterChange={setStatusFilter}
+              onTypeFilterChange={(filter) => {
+                resetTaskPagination();
+                setTypeFilter(filter);
+              }}
+              onStatusFilterChange={(filter) => {
+                resetTaskPagination();
+                setStatusFilter(filter);
+              }}
             />
 
             <NotaryTaskTable
               tasks={tasks}
-              paginatedTasks={paginatedTasks}
+              totalItems={taskPageInfo.totalItems}
               loading={loading}
               selectedTask={selectedTask}
               activeDropdown={activeDropdown}
@@ -590,23 +665,29 @@ const NotaryViewContent: React.FC = () => {
                   return;
                 }
                 try {
-                  await notaryService.deleteTask(task.id);
-                  setTasks((prev) => prev.filter((item) => item.id !== task.id));
-                  if (selectedTask?.id === task.id) {
-                    setSelectedTask(null);
-                  }
-                  notaryToast(t('toast.taskDeleted'), 'success');
+                   await notaryService.deleteTask(task.id);
+                   if (selectedTask?.id === task.id) {
+                     detailRequestSequenceRef.current += 1;
+                     setDetailLoading(false);
+                     setSelectedTask(null);
+                   }
+                  notaryToast(t('toast.taskCancelled'), 'success');
+                  resetTaskPagination();
                   void fetchStats();
                 } catch (error) {
-                  console.error('Failed to delete task:', error);
+                  console.error('Failed to cancel task:', error);
                   notaryToast(t('toast.cancelFailed'), 'error');
                 }
               }}
               onPageSizeChange={(size) => {
+                resetTaskPagination();
                 setPageSize(size);
-                setCurrentPage(1);
               }}
-              onPageChange={setCurrentPage}
+              onPageChange={(page) => {
+                if (taskPageCursorByPageRef.current.has(page)) {
+                  setCurrentPage(page);
+                }
+              }}
             />
 
             {loading && (
@@ -627,9 +708,15 @@ const NotaryViewContent: React.FC = () => {
               expandedPartyMediaLoading={expandedPartyMediaLoading}
               expandedPartyMediaUrls={expandedPartyMediaUrls}
               getStatusBadge={getStatusBadge}
-              canAssignNotary={selectedTask.status !== 'COMPLETED' && selectedTask.status !== 'REJECTED'}
+              canAssignNotary={
+                !isNotaryTaskTerminalStatus(selectedTask.status)
+              }
               onAssignNotary={() => void openNotaryPicker()}
-              onClose={() => setSelectedTask(null)}
+              onClose={() => {
+                detailRequestSequenceRef.current += 1;
+                setDetailLoading(false);
+                setSelectedTask(null);
+              }}
               onTabChange={setActivePaneTab}
               onExpandParty={(partyId) => setExpandedParty((current) => (current === partyId ? null : partyId))}
               onEditParty={handleEditParty}
@@ -660,7 +747,9 @@ const NotaryViewContent: React.FC = () => {
             documents={partyDriveDocuments}
             loading={partyDriveLoading}
             onClose={() => setActiveDriveParty(null)}
-            onUpload={(files) => void handlePartyDriveUpload(files)}
+            onUpload={selectedTask && !isNotaryTaskTerminalStatus(selectedTask.status)
+              ? (files) => void handlePartyDriveUpload(files)
+              : undefined}
             onPreview={(doc) => {
               if ('nodeId' in doc || 'driveNodeId' in doc) {
                 void handlePreviewDocument(doc as NotaryDocument);
@@ -684,7 +773,12 @@ const NotaryViewContent: React.FC = () => {
             party={editingPartyId ? selectedTask?.parties?.find((party) => party.id === editingPartyId) || null : null}
             onSave={handleSaveParty}
             onSign={setActiveSignParty}
-            readOnly={selectedTask?.status === 'COMPLETED' || selectedTask?.status === 'REJECTED'}
+            readOnly={
+               selectedTask?.status === 'COMPLETED'
+               || selectedTask?.status === 'REJECTED'
+               || selectedTask?.status === 'CANCELLED'
+               || selectedTask?.status === 'CREATE_FAILED'
+             }
           />
 
           <CallOverlay

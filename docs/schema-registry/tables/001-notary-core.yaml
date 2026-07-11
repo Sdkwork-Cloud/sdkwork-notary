@@ -1,6 +1,6 @@
 module: notary
 owner: sdkwork-notary
-description: Minimal notary-owned persistence. Commerce, Drive, and Appbase remain their own systems of record.
+description: Minimal notary-owned persistence. IAM, Merchandise, Order, Payment, and Drive remain their own systems of record.
 compliance_level: L3
 system_of_record: true
 write_owner: sdkwork-notary
@@ -91,7 +91,7 @@ tables:
     compliance_level: L3
     system_of_record: true
     write_owner: sdkwork-notary
-    description: Case dossier for one notary order item. Order and SKU facts are owned by Commerce.
+    description: Case dossier for one notary order item. Order owns order facts and Merchandise owns SKU facts.
     columns:
       - name: id
         type: varchar(64)
@@ -159,7 +159,7 @@ tables:
     compliance_level: L3
     system_of_record: true
     write_owner: sdkwork-notary
-    description: Party facts for one notary case. Stores order_id and sku_id for efficient case/order/product filtering.
+    description: Party facts for one notary case. Stores order_id and sku_id for efficient case/order/merchandise filtering.
     columns:
       - name: id
         type: varchar(64)

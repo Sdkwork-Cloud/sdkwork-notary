@@ -19,6 +19,8 @@ version = "0.1.0"
 
 [workspace.dependencies]
 sdkwork-drive-workspace-service = { path = "../sdkwork-drive/crates/sdkwork-drive-workspace-service" }
+sdkwork-merchandise-repository-sqlx = { path = "../sdkwork-merchandise/crates/sdkwork-merchandise-repository-sqlx", package = "sdkwork-merchandise-repository-sqlx" }
+sdkwork-merchandise-service = { path = "../sdkwork-merchandise/crates/sdkwork-merchandise-service", package = "sdkwork-merchandise-service" }
 sdkwork-order-service = { path = "../sdkwork-order/crates/sdkwork-order-service" }
 sdkwork-order-repository-sqlx = { path = "../sdkwork-order/crates/sdkwork-order-repository-sqlx" }
 sdkwork-contract-service = { path = "../sdkwork-account/crates/sdkwork-contract-service" }
@@ -28,8 +30,16 @@ sdkwork-web-core = { path = "../sdkwork-web-framework/crates/sdkwork-web-core" }
 sdkwork-web-axum = { path = "../sdkwork-web-framework/crates/sdkwork-web-axum" }
 sdkwork-web-contract = { path = "../sdkwork-web-framework/crates/sdkwork-web-contract" }
 sdkwork-iam-web-adapter = { path = "../sdkwork-iam/crates/sdkwork-iam-web-adapter" }
+sdkwork-notary-case-contract = { path = "crates/sdkwork-notary-case-contract" }
+sdkwork-notary-case-repository-sqlx = { path = "crates/sdkwork-notary-case-repository-sqlx" }
+sdkwork-notary-case-service = { path = "crates/sdkwork-notary-case-service" }
 sdkwork-notary-database-host = { path = "crates/sdkwork-notary-database-host" }
+sdkwork-notary-embedded-bootstrap = { path = "crates/sdkwork-notary-embedded-bootstrap" }
+sdkwork-routes-notary-app-api = { path = "crates/sdkwork-routes-notary-app-api" }
+sdkwork-routes-notary-backend-api = { path = "crates/sdkwork-routes-notary-backend-api" }
+sdkwork-routes-notary-http-auth = { path = "crates/sdkwork-routes-notary-http-auth" }
 sdkwork-database-config = { path = "../sdkwork-database/crates/sdkwork-database-config", package = "sdkwork-database-config" }
+sdkwork-database-id = { path = "../sdkwork-database/crates/sdkwork-database-id", package = "sdkwork-database-id" }
 sdkwork-database-lifecycle = { path = "../sdkwork-database/crates/sdkwork-database-lifecycle", package = "sdkwork-database-lifecycle" }
 sdkwork-database-spi = { path = "../sdkwork-database/crates/sdkwork-database-spi", package = "sdkwork-database-spi" }
 sdkwork-database-sqlx = { path = "../sdkwork-database/crates/sdkwork-database-sqlx", package = "sdkwork-database-sqlx" }

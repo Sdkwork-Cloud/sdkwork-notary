@@ -7,19 +7,13 @@ import { fileURLToPath } from "node:url";
 const sdkName = "sdkwork-notary-backend-sdk";
 const sdkType = "backend";
 const apiPrefix = "/backend/v3/api";
-import {
-  DEFAULT_DEV_PROFILE_ID,
-  loadProfile,
-  resolveDefaultBackendSdkBaseUrl,
-} from "../../../scripts/lib/notary-topology.mjs";
-
-const defaultBaseUrl = resolveDefaultBackendSdkBaseUrl(loadProfile(DEFAULT_DEV_PROFILE_ID));
 const fixedSdkVersion = "0.1.0";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const sdkRoot = path.resolve(scriptDir, "..");
 const workspaceRoot = path.resolve(sdkRoot, "../..");
 const generatorBin = path.resolve(workspaceRoot, "../sdkwork-sdk-generator/bin/sdkgen.js");
-const defaultInput = path.resolve(workspaceRoot, "generated/openapi/notary-backend-api.openapi.json");
+const defaultInput = path.resolve(sdkRoot, "openapi/notary-backend-api.sdkgen.json");
+const defaultBaseUrl = readSdkManifestBaseUrl();
 
 run(process.argv.slice(2));
 
@@ -133,6 +127,15 @@ function parseArgs(argv) {
 
 function resolveWorkspacePath(value) {
   return path.isAbsolute(value) ? value : path.resolve(workspaceRoot, value);
+}
+
+function readSdkManifestBaseUrl() {
+  const manifestPath = path.join(sdkRoot, "sdk-manifest.json");
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  if (typeof manifest.baseUrl !== "string" || !manifest.baseUrl.trim()) {
+    fail(`SDK manifest baseUrl is required: ${manifestPath}`);
+  }
+  return manifest.baseUrl.trim();
 }
 
 function fail(message) {

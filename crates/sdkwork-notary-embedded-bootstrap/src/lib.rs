@@ -1,4 +1,4 @@
-//! In-process notary application bootstrap for unified-process platform consumers.
+//! Embedded notary application bootstrap for platform runtime consumers.
 
 mod adapters;
 mod bootstrap;

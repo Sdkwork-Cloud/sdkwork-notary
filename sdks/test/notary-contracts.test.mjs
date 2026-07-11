@@ -138,11 +138,11 @@ const sdkFamilies = [
     owner: "sdkwork-notary",
     authority: "sdkwork-notary.app",
     input: "generated/openapi/notary-app-api.openapi.json",
+    generationInput: "sdks/sdkwork-notary-app-sdk/openapi/notary-app-api.sdkgen.json",
+    generationInputSpec: "openapi/notary-app-api.sdkgen.json",
     apiPrefix: "/app/v3/api",
     dependencies: [
       ["sdkwork-iam-app-sdk", "sdkwork-iam-app-api"],
-      ["sdkwork-catalog-app-sdk", "sdkwork-catalog-app-api"],
-      ["sdkwork-order-app-sdk", "sdkwork-order-app-api"],
       ["sdkwork-drive-app-sdk", "sdkwork-drive.app"],
     ],
   },
@@ -151,6 +151,8 @@ const sdkFamilies = [
     owner: "sdkwork-notary",
     authority: "sdkwork-notary.backend",
     input: "generated/openapi/notary-backend-api.openapi.json",
+    generationInput: "sdks/sdkwork-notary-backend-sdk/openapi/notary-backend-api.sdkgen.json",
+    generationInputSpec: "openapi/notary-backend-api.sdkgen.json",
     apiPrefix: "/backend/v3/api",
     dependencies: [
       ["sdkwork-iam-backend-sdk", "sdkwork-iam-backend-api"],
@@ -182,6 +184,45 @@ function operationEntries(openapi) {
 
 function operationCount(openapi) {
   return operationEntries(openapi).length;
+}
+
+function materializeExpectedSdkgenDocument(authority) {
+  const expected = structuredClone(authority);
+  const sharedResponses = expected.components?.responses ?? {};
+  let expandedResponseRefCount = 0;
+
+  for (const { operation } of operationEntries(expected)) {
+    for (const [statusCode, response] of Object.entries(operation.responses ?? {})) {
+      const responseRef = response?.$ref;
+      if (typeof responseRef !== "string" || !responseRef.startsWith("#/components/responses/")) {
+        continue;
+      }
+      const responseName = responseRef.slice("#/components/responses/".length);
+      const sharedResponse = sharedResponses[responseName];
+      assert(sharedResponse, `${operation.operationId} ${statusCode} references missing ${responseName}`);
+      const materializedResponse = structuredClone(sharedResponse);
+      const schema = materializedResponse.content?.["application/json"]?.schema;
+      const dataOverlay = schema?.allOf
+        ?.map((part) => part?.properties?.data)
+        .filter(Boolean)
+        .at(-1);
+      const dataRequired = new Set(dataOverlay?.required ?? []);
+      const dataSchemaName = responseName.replace(/Response$/u, "");
+      if (
+        dataOverlay
+        && dataRequired.has("items")
+        && dataRequired.has("pageInfo")
+        && expected.components?.schemas?.[dataSchemaName]
+      ) {
+        const overlay = schema.allOf.find((part) => part?.properties?.data === dataOverlay);
+        overlay.properties.data = { $ref: `#/components/schemas/${dataSchemaName}` };
+      }
+      operation.responses[statusCode] = materializedResponse;
+      expandedResponseRefCount += 1;
+    }
+  }
+
+  return { expected, expandedResponseRefCount };
 }
 
 function requireOperation(openapi, expectedOperations, pathKey) {
@@ -556,25 +597,53 @@ test("every notary OpenAPI operation declares web-framework contract extensions"
 
 test("notary SDK family manifests declare dependency SDKs without copying dependency operations", () => {
   for (const family of sdkFamilies) {
-    const assembly = readJson(path.join("sdks", family.root, ".sdkwork-assembly.json"));
+    const familyRoot = path.join("sdks", family.root);
     const manifest = readJson(path.join("sdks", family.root, "sdk-manifest.json"));
     const componentSpec = readJson(path.join("sdks", family.root, "specs/component.spec.json"));
     const openapi = readJson(family.input);
 
-    assert.equal(assembly.sdkOwner, family.owner);
-    assert.equal(assembly.apiAuthority, family.authority);
-    assert.equal(assembly.sdkFamily, family.root);
+    assert.equal(
+      existsSync(path.join(workspaceRoot, familyRoot, ".sdkwork-assembly.json")),
+      false,
+      `${family.root} must use sdk-manifest.json as its per-family metadata SSOT`,
+    );
     assert.equal(manifest.sdkName, family.root);
+    assert.equal(manifest.sdkOwner, family.owner);
+    assert.equal(manifest.apiAuthority, family.authority);
     assert.equal(manifest.sdkFamily, family.root);
     assert.equal(manifest.apiPrefix, family.apiPrefix);
     assert.equal(manifest.standardProfile, "sdkwork-v3");
-    assert.equal(manifest.generationInputSpec, `../../${family.input}`);
+    assert.equal(manifest.generationInputSpec, family.generationInputSpec);
     assert.equal(manifest.ownerOnlyOperationCount, operationCount(openapi));
-    assert.deepEqual(assembly.sdkDependencies, manifest.sdkDependencies);
     assert.deepEqual(componentSpec.contracts.sdkDependencies, manifest.sdkDependencies);
-    assert.deepEqual(assembly.dependencyApiExports, []);
     assert.deepEqual(manifest.dependencyApiExports, []);
     assert.deepEqual(componentSpec.contracts.dependencyApiExports, []);
+    assert.deepEqual(componentSpec.component.manifests, ["sdk-manifest.json"]);
+    assert.deepEqual(
+      componentSpec.contracts.apiAuthority.derivedOpenApi,
+      [family.generationInputSpec],
+    );
+
+    const generationInput = readJson(family.generationInput);
+    const { expected, expandedResponseRefCount } = materializeExpectedSdkgenDocument(openapi);
+    assert(expandedResponseRefCount > 0, `${family.root} authority must exercise response ref expansion`);
+    assert.deepEqual(
+      generationInput,
+      expected,
+      `${family.root} derived input may only expand operation-level component response refs`,
+    );
+    assert.equal(operationCount(generationInput), operationCount(openapi));
+    for (const { operation } of operationEntries(generationInput)) {
+      for (const [statusCode, response] of Object.entries(operation.responses ?? {})) {
+        const status = Number(statusCode);
+        if (status >= 200 && status < 300 && status !== 204) {
+          assert.ok(
+            response.content?.["application/json"]?.schema,
+            `${operation.operationId} ${statusCode} must materialize an inline JSON success response`,
+          );
+        }
+      }
+    }
 
     assert.deepEqual(
       manifest.sdkDependencies.map((dependency) => [
@@ -629,6 +698,13 @@ test("notary generated TypeScript SDK output is present and remains generator-ow
     assert(!generatedMetadataText.includes('"dependencyApiExports"'));
     assert(existsSync(path.join(workspaceRoot, generatedRoot, ".sdkwork", "sdkwork-generator-manifest.json")));
     assert(existsSync(path.join(workspaceRoot, generatedRoot, "custom", "README.md")));
+
+    const generatedApi = readText(path.join(generatedRoot, "src", "api", "notary.ts"));
+    assert.doesNotMatch(
+      generatedApi,
+      /Promise<Record<string, unknown>>/u,
+      `${family.root} list operations must expose typed page/list models`,
+    );
   }
 });
 
@@ -648,7 +724,6 @@ test("notary TypeScript composed facades expose injected dependency ports and no
     assert(!source.includes("Access-Token"), `${relativePath} must not assemble access headers`);
     assert(source.includes("notary"), `${relativePath} must inject notary SDK client`);
     assert(source.includes("drive"), `${relativePath} must inject drive SDK client`);
-    assert(source.includes("commerce"), `${relativePath} must inject commerce SDK client`);
     assert(source.includes("appbase"), `${relativePath} must inject appbase SDK client`);
   }
 
@@ -661,7 +736,7 @@ test("notary TypeScript composed facades expose injected dependency ports and no
 
   const backendSource = readText(backendFacadePath);
   assert(backendSource.includes("createNotaryBackendApi"));
-  assert(backendSource.includes("createMatterSku"));
+  assert(backendSource.includes("createMatter"));
   assert(backendSource.includes("listStaffMembers"));
   assert(
     !backendSource.includes("drive.spaces.create"),

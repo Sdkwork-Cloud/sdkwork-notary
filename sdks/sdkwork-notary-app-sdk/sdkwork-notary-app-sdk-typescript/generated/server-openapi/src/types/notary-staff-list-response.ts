@@ -1,9 +1,8 @@
-import type { NotaryStaffMember } from './notary-staff-member';
-import type { PageInfo } from './page-info';
+import type { NotaryStaffMemberPage } from './notary-staff-member-page';
 
 export interface NotaryStaffListResponse {
   code: 0;
-  data: unknown & Record<string, unknown>;
+  data: unknown & NotaryStaffMemberPage;
   /** Server-owned request correlation id. */
   traceId: string;
 }

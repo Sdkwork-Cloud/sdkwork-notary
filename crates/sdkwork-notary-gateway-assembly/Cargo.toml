@@ -12,7 +12,7 @@ path = "src/lib.rs"
 [dependencies]
 axum.workspace = true
 tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
-sdkwork-notary-embedded-bootstrap = { path = "../sdkwork-notary-embedded-bootstrap" }
-sdkwork_routes_notary_app_api = { package = "sdkwork-routes-notary-app-api", path = "../sdkwork-routes-notary-app-api" }
-sdkwork_routes_notary_backend_api = { package = "sdkwork-routes-notary-backend-api", path = "../sdkwork-routes-notary-backend-api" }
-sdkwork_routes_notary_http_auth = { package = "sdkwork-routes-notary-http-auth", path = "../sdkwork-routes-notary-http-auth" }
+sdkwork-notary-embedded-bootstrap.workspace = true
+sdkwork-routes-notary-app-api.workspace = true
+sdkwork-routes-notary-backend-api.workspace = true
+sdkwork-routes-notary-http-auth.workspace = true

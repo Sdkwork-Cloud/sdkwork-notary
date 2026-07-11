@@ -22,7 +22,15 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-shell",
     "publicExports": ["@sdkwork/notary-h5-shell"],
+    "providedPorts": [
+      {
+        "name": "notaryH5AppShell",
+        "export": "@sdkwork/notary-h5-shell"
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": ["AppLayout"],
     "sdkClients": [],
     "dependencyApiSurfaces": []

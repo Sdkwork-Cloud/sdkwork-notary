@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { resolveDevProfileId } from '../lib/notary-topology.mjs';
+
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const scanRoots = [
@@ -110,9 +112,12 @@ for (const { id, pattern } of bannedPatterns) {
 
 assert.ok(fs.existsSync(path.join(repoRoot, 'specs/topology.spec.json')), 'topology spec required');
 const spec = JSON.parse(readText('specs/topology.spec.json'));
-assert.equal(spec.schemaVersion, 2);
+assert.equal(spec.schemaVersion, 4);
 assert.equal(spec.archetype, 'application-http-gateway');
-assert.equal(spec.defaults.developmentProfileId, 'standalone.split-services.development');
+assert.equal(spec.defaults.developmentProfileId, 'standalone.development');
+assert.equal(resolveDevProfileId('standalone'), 'standalone.development');
+assert.equal(resolveDevProfileId('cloud', 'production'), 'cloud.production');
+assert.throws(() => resolveDevProfileId('standalone', 'invalid'));
 
 const profileDir = path.join(repoRoot, 'configs/topology');
 const profileFiles = fs.readdirSync(profileDir).filter((name) => name.endsWith('.env'));

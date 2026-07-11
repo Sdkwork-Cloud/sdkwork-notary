@@ -1,9 +1,8 @@
-import type { NotaryDocument } from './notary-document';
-import type { PageInfo } from './page-info';
+import type { NotaryDocumentList } from './notary-document-list';
 
 export interface NotaryCasesFilesListResponse {
   code: 0;
-  data: unknown & Record<string, unknown>;
+  data: unknown & NotaryDocumentList;
   /** Server-owned request correlation id. */
   traceId: string;
 }

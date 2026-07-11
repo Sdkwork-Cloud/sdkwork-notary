@@ -1,0 +1,10 @@
+{
+  "brand": "SDKWork Notary",
+  "surface": "Internal administration",
+  "operations": "Operations",
+  "matters": "Matter management",
+  "operator": "Operator",
+  "accessDeniedTitle": "Access restricted",
+  "accessDeniedDescription": "Your operator account does not have permission to open this administration page.",
+  "loading": "Loading administration workspace"
+}

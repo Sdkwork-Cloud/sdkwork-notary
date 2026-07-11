@@ -13,7 +13,9 @@ pub mod service_port;
 pub use manifest::{notary_app_api_http_route_manifest, sdkwork_notary_app_api_route_manifest};
 pub use routes::build_sdkwork_notary_app_api_router;
 pub use runtime_service::NotaryAppRuntimeService;
-pub use service_port::{NotaryAppApiServicePort, NotaryRequestContext, NotaryRouteError};
+pub use service_port::{
+    NotaryAppApiServicePort, NotaryOperationMetadata, NotaryRequestContext, NotaryRouteError,
+};
 
 pub fn gateway_route_manifest() -> HttpRouteManifest {
     notary_app_api_http_route_manifest()

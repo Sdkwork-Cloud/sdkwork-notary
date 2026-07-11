@@ -10,11 +10,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --test src/__tests__/pc-architecture.contract.test.mjs"
+    "test": "node --test src/__tests__/pc-architecture.contract.test.mjs packages/sdkwork-notary-pc-admin-core/tests/*.test.mjs packages/sdkwork-notary-pc-admin-shell/tests/*.test.mjs packages/sdkwork-notary-pc-admin-merchandise/tests/*.test.mjs"
   },
   "dependencies": {
     "@sdkwork/notary-pc-commons": "workspace:*",
     "@sdkwork/notary-pc-core": "workspace:*",
+    "@sdkwork/notary-pc-admin-core": "workspace:*",
+    "@sdkwork/notary-pc-admin-shell": "workspace:*",
     "@sdkwork/notary-pc-notary": "workspace:*",
     "@sdkwork/notary-pc-shell": "workspace:*",
     "@sdkwork/sdk-common": "^1.0.3",

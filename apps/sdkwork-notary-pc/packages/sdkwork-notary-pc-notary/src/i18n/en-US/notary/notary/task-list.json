@@ -1,0 +1,55 @@
+{
+  "filter": {
+    "searchPlaceholder": "Search case no. / institution / subject...",
+    "allBusinessTypes": "All Business Types",
+    "allTypes": "All Business Types",
+    "allNodeStatus": "All Node Status",
+    "allStatuses": "All Node Status",
+    "electronicContract": "Electronic Contract",
+    "iprConfirmation": "IPR Confirmation",
+    "ipr": "IPR Confirmation",
+    "evidencePreservation": "Evidence Preservation",
+    "evidence": "Evidence Preservation",
+    "pendingReview": "Pending Review / Risk",
+    "processing": "Processing",
+    "completed": "Blockchain Certified"
+  },
+  "table": {
+    "notaryNo": "Case No.",
+    "title": "Title",
+    "business": "Business",
+    "party": "Party",
+    "notary": "Notary",
+    "status": "Status",
+    "fee": "Fee",
+    "createTime": "Created",
+    "actions": "Actions",
+    "totalRecords": "{{count}} electronic records found",
+    "perPage": "Per page",
+    "items": "items",
+    "remarks": "Remarks",
+    "viewDetails": "View Details",
+    "delete": "Delete",
+    "cancelConfirm": "Cancel this notary case? This action cannot be undone.",
+    "noTasks": "No matching notary cases found"
+  },
+  "status": {
+    "pendingReview": "Pending",
+    "processing": "Processing",
+    "completed": "Certified",
+    "rejected": "Rejected",
+    "PENDING_REVIEW": "Pending",
+    "PROCESSING": "Processing",
+    "COMPLETED": "Certified",
+    "REJECTED": "Rejected",
+    "CANCELLED": "Cancelled",
+    "CREATE_FAILED": "Failed"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "printPartyInfo": "Print Party Info",
+    "monthlyReport": "Monthly Report",
+    "createTask": "New Notary",
+    "videoCall": "Video Call"
+  }
+}

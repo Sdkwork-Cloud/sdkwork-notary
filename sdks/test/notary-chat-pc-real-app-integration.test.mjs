@@ -2,7 +2,13 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { imPcRoot, imPcTest, notaryPcRoot, workspaceRoot } from "./helpers/im-pc-root.mjs";
+import {
+  imPcRoot,
+  imPcTest,
+  imRepoRoot,
+  notaryPcRoot,
+  workspaceRoot,
+} from "./helpers/im-pc-root.mjs";
 
 function readText(root, relativePath) {
   return readFileSync(path.join(root, relativePath), "utf8");
@@ -31,9 +37,9 @@ test("notary workspace does not host a duplicate IM PC integration fork", () => 
 imPcTest("real sdkwork-im-pc app root wires the notary app SDK through core bootstrap", () => {
   assert(exists(imPcRoot, "package.json"), `${imPcRoot} must be the real sdkwork-im-pc app root`);
 
-  const workspace = readText(imPcRoot, "pnpm-workspace.yaml");
+  const workspace = readText(imRepoRoot, "pnpm-workspace.yaml");
   assert(
-    workspace.includes("../../../sdkwork-notary/sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript"),
+    workspace.includes("../sdkwork-notary/sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript"),
     "real IM PC workspace must include the sdkwork-notary app SDK workspace",
   );
   assert(
@@ -74,7 +80,7 @@ imPcTest("real sdkwork-im-pc app root wires the notary app SDK through core boot
     "packages/sdkwork-im-pc-core/src/sdk/notaryAppSdkClient.ts",
   );
   for (const token of [
-    "createNotaryAppClient",
+    "notaryAppSdkClient = createClient(config)",
     "resolveAppSdkBaseUrl",
     "createSdkworkChatRequestContextInterceptors",
     "getSdkworkChatGlobalTokenManager",
@@ -112,8 +118,9 @@ imPcTest("real sdkwork-notary-pc-notary service uses generated SDK clients inste
     "getConfiguredNotaryAppSdkClient",
     "getConfiguredDriveAppSdkClient",
     "getConfiguredAppbaseAppSdkClient",
-    "driveSpaceType: 'notary'",
-    "listCaseFiles",
+    "notaryApi.getCase",
+    "notaryApi.uploadCaseFile",
+    "uploadIntentId",
     "createDownloadPackage",
     "createCaseFileDownloadUrl",
     "createPartyVideoInvite",
@@ -374,7 +381,10 @@ imPcTest("real chat shell exposes notary entries while notary workflows stay SDK
   assert(workspaceService.includes("nameKey: 'apps.notary'"));
   assert(workspaceService.includes("iconName: 'ShieldCheck'"));
 
-  const workspaceView = readText(imPcRoot, "packages/sdkwork-im-pc-workspace/src/index.tsx");
+  const workspaceView = readText(
+    imPcRoot,
+    "packages/sdkwork-im-pc-workspace/src/WorkspaceView.tsx",
+  );
   assert(workspaceView.includes("onAppSelect"));
 
   const capabilitySurface = readText(

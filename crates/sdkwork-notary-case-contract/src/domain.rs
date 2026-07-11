@@ -64,6 +64,7 @@ pub struct NotaryCaseRecord {
     pub remarks: Option<String>,
     pub request_no: String,
     pub idempotency_key: String,
+    pub version: i64,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -86,8 +87,8 @@ impl NotaryCaseStatus {
             Self::Processing => "PROCESSING",
             Self::Completed => "COMPLETED",
             Self::Rejected => "REJECTED",
-            Self::Cancelled => "REJECTED",
-            Self::CreateFailed => "REJECTED",
+            Self::Cancelled => "CANCELLED",
+            Self::CreateFailed => "CREATE_FAILED",
         }
     }
 
@@ -137,5 +138,24 @@ impl NotaryCaseStatus {
             self,
             Self::Completed | Self::Rejected | Self::Cancelled | Self::CreateFailed
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::NotaryCaseStatus;
+
+    #[test]
+    fn case_status_frontend_values_preserve_each_public_state() {
+        for (status, expected) in [
+            (NotaryCaseStatus::PendingReview, "PENDING_REVIEW"),
+            (NotaryCaseStatus::Processing, "PROCESSING"),
+            (NotaryCaseStatus::Completed, "COMPLETED"),
+            (NotaryCaseStatus::Rejected, "REJECTED"),
+            (NotaryCaseStatus::Cancelled, "CANCELLED"),
+            (NotaryCaseStatus::CreateFailed, "CREATE_FAILED"),
+        ] {
+            assert_eq!(status.as_frontend_value(), expected);
+        }
     }
 }

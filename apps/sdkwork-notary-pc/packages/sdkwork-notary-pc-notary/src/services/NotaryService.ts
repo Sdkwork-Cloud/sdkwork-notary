@@ -8,17 +8,18 @@ import {
   type CreateNotaryApiOptions,
 } from '@sdkwork/notary-pc-core';
 import { SYSTEM_ASSIGNED_NOTARY_LABEL } from '../constants';
+import { resolveNotaryCaseIdempotencyKey } from '../utils/createCaseIdempotencyKey';
 
 export interface NotaryService {
   getDashboardStatistics(): Promise<NotaryStats>;
   getMonthlyReport(monthOrFilters?: string | { month?: string; format?: 'pdf' | 'excel' | 'csv' }): Promise<MonthlyReportResult>;
   getMatters(filters?: { searchTerm?: string; pageSize?: number; cursor?: string }): Promise<NotaryMatterOption[]>;
-  getTasks(filters?: { businessType?: string; status?: string; searchTerm?: string; pageSize?: number; cursor?: string }): Promise<NotaryTask[]>;
+  getTasks(filters?: { businessType?: string; status?: string; searchTerm?: string; pageSize?: number; cursor?: string }): Promise<NotaryTaskPage>;
   getTaskById(taskId: string): Promise<NotaryTask | null>;
   getStaff(filters?: { staffRole?: 'notary' | 'assistant' | 'reviewer' | 'approver'; searchTerm?: string; pageSize?: number; cursor?: string }): Promise<NotaryStaffOption[]>;
   createTask(data: CreateNotaryTaskInput): Promise<NotaryTask>;
   assignNotary(taskId: string, membershipId: string): Promise<NotaryTask>;
-  updateTaskStatus(taskId: string, status: NotaryTask['status']): Promise<NotaryTask>;
+  updateTaskStatus(taskId: string, status: NotaryTask['status'], version?: string): Promise<NotaryTask>;
   updateTask(taskId: string, updates: Partial<NotaryTask>): Promise<NotaryTask>;
   addParty(taskId: string, party: Omit<Party, 'id'>): Promise<NotaryTask>;
   addDocument(taskId: string, doc: Omit<NotaryDocument, 'status'>): Promise<NotaryTask>;
@@ -35,7 +36,7 @@ export interface NotaryService {
   downloadDocuments(taskId: string): Promise<{ downloadUrl?: string; packageId?: string; status?: string }>;
   getDocumentUrl(
     taskId: string,
-    documentName: string,
+    document: NotaryDocument | string,
     options?: { disposition?: 'inline' | 'attachment' },
   ): Promise<{ url?: string; downloadUrl?: string; previewUrl?: string }>;
   getPartyIdentityMediaUrls(
@@ -48,6 +49,7 @@ export interface NotaryService {
 }
 
 export interface CreateNotaryTaskInput extends Partial<NotaryTask> {
+  idempotencyKey?: string;
   skuId?: string;
   primaryNotaryMembershipId?: string;
   notaryMembershipId?: string;
@@ -69,24 +71,37 @@ export interface NotaryStaffOption {
 export interface createNotaryPcServiceOptions {
   notary: CreateNotaryApiOptions['notary'];
   drive: unknown;
-  commerce?: CreateNotaryApiOptions['commerce'];
   appbase: unknown;
   defaultSkuId?: string;
   skuIdsByType?: Record<string, string>;
 }
 
+export interface NotaryTaskPageInfo {
+  mode: 'cursor';
+  pageSize: number;
+  nextCursor?: string;
+  hasMore: boolean;
+  totalItems?: string;
+  totalPages?: number;
+}
+
+export interface NotaryTaskPage {
+  items: NotaryTask[];
+  pageInfo: NotaryTaskPageInfo;
+}
+
 const CASE_REJECTION_REASON = 'materials_need_correction';
-const CASE_COMPLETION_RESULT = 'manual_verification_completed';
+const CASE_COMPLETION_REMARKS = 'manual_verification_completed';
 const FALLBACK_APPLICANT_NAME = 'unknown_applicant';
 const FALLBACK_CASE_TITLE_SUFFIX = 'notary_case';
 
 const DEFAULT_SKU_IDS_BY_TYPE: Record<string, string> = {
-  '���Ӻ�ͬ��֤': 'sku-notary-electronic-contract',
-  '֪ʶ��ȨȷȨ��֤': 'sku-notary-ipr',
-  '����֤�ݹ̻�': 'sku-notary-evidence',
-  '��ҵ����ȷȨ': 'sku-notary-trade-secret',
-  '�齱����ҡ�Ź�֤': 'sku-notary-lottery',
-  '������֤': 'sku-notary-will',
+  '电子合同公证': 'sku-notary-electronic-contract',
+  '知识产权确权公证': 'sku-notary-ipr',
+  '电子证据固化': 'sku-notary-evidence',
+  '商业秘密确权': 'sku-notary-trade-secret',
+  '抽奖摇号公证': 'sku-notary-lottery',
+  '遗嘱公证': 'sku-notary-will',
   'Electronic Contract Preservation': 'sku-notary-electronic-contract',
   'Intellectual Property Confirmation': 'sku-notary-ipr',
   'Electronic Evidence Preservation': 'sku-notary-evidence',
@@ -123,7 +138,6 @@ export function createNotaryPcService(
   const notaryApi = createNotaryApi({
     notary: options.notary,
     drive: options.drive as CreateNotaryApiOptions['drive'],
-    commerce: options.commerce,
     appbase: options.appbase as CreateNotaryApiOptions['appbase'],
   });
   const defaultSkuId = options.defaultSkuId ?? 'sku-notary-general';
@@ -131,19 +145,21 @@ export function createNotaryPcService(
     ...DEFAULT_SKU_IDS_BY_TYPE,
     ...(options.skuIdsByType ?? {}),
   };
-  const driveListScope = { driveSpaceType: 'notary' };
 
   async function loadTask(taskId: string): Promise<NotaryTask> {
-    const caseRecord = await notaryApi.getCase(taskId);
-    const [fileResponse, eventsResponse] = await Promise.all([
-      notaryApi.listCaseFiles(taskId, driveListScope),
-      notaryApi.listCaseEvents(taskId, { pageSize: 100 }),
-    ]);
-    return mapCaseToTask({
-      ...asRecord(caseRecord),
-      documents: extractItems(fileResponse),
-      timeline: extractItems(eventsResponse),
-    });
+    return mapCaseToTask(await notaryApi.getCase(taskId));
+  }
+
+  async function uploadCaseFileUnlessRegistered(
+    input: Parameters<typeof notaryApi.uploadCaseFile>[0],
+    existingDocumentKeys?: Set<string>,
+  ): Promise<void> {
+    const registrationKey = caseDocumentRegistrationKey(input);
+    if (existingDocumentKeys?.has(registrationKey)) {
+      return;
+    }
+    await notaryApi.uploadCaseFile(input);
+    existingDocumentKeys?.add(registrationKey);
   }
 
   async function syncParties(taskId: string, parties: Party[]): Promise<void> {
@@ -162,12 +178,14 @@ export function createNotaryPcService(
         await notaryApi.updateParty(taskId, party.id, mapPartyToUpdateRequest(party));
         await syncPartySignature(taskId, party.id, party, currentById.get(party.id));
         await syncPartyIdentityMedia(taskId, party.id, party);
+        await syncPartyAuxiliaryAttachments(taskId, party.id, party);
       } else {
         const detail = mapCaseToTask(await notaryApi.addParty(taskId, mapPartyToCreateRequest(party)));
         const createdParty = findMatchingParty(detail.parties ?? [], party);
         if (createdParty?.id) {
           await syncPartySignature(taskId, createdParty.id, party);
           await syncPartyIdentityMedia(taskId, createdParty.id, party);
+          await syncPartyAuxiliaryAttachments(taskId, createdParty.id, party);
         }
       }
     }
@@ -193,7 +211,12 @@ export function createNotaryPcService(
     }
   }
 
-  async function syncInitialPartyIdentityMedia(taskId: string, parties: Party[]): Promise<void> {
+  async function syncInitialPartyIdentityMedia(
+    taskId: string,
+    parties: Party[],
+    existingDocumentKeys: Set<string>,
+    uploadIntentPrefix: string,
+  ): Promise<void> {
     const partiesWithIdentityMedia = parties.filter(
       (party) => extractPartyIdentityDocuments(party).length > 0,
     );
@@ -204,7 +227,40 @@ export function createNotaryPcService(
     for (const party of partiesWithIdentityMedia) {
       const createdParty = findMatchingParty(createdTask.parties ?? [], party);
       if (createdParty?.id) {
-        await syncPartyIdentityMedia(taskId, createdParty.id, party);
+        await syncPartyIdentityMedia(
+          taskId,
+          createdParty.id,
+          party,
+          existingDocumentKeys,
+          uploadIntentPrefix,
+        );
+      }
+    }
+  }
+
+  async function syncInitialPartyAuxiliaryAttachments(
+    taskId: string,
+    parties: Party[],
+    existingDocumentKeys: Set<string>,
+    uploadIntentPrefix: string,
+  ): Promise<void> {
+    const partiesWithAttachments = parties.filter(
+      (party) => extractPartyAuxiliaryAttachments(party).length > 0,
+    );
+    if (partiesWithAttachments.length === 0) {
+      return;
+    }
+    const createdTask = mapCaseToTask(await notaryApi.getCase(taskId));
+    for (const party of partiesWithAttachments) {
+      const createdParty = findMatchingParty(createdTask.parties ?? [], party);
+      if (createdParty?.id) {
+        await syncPartyAuxiliaryAttachments(
+          taskId,
+          createdParty.id,
+          party,
+          existingDocumentKeys,
+          uploadIntentPrefix,
+        );
       }
     }
   }
@@ -228,34 +284,49 @@ export function createNotaryPcService(
     taskId: string,
     partyId: string,
     party: Partial<Party>,
+    existingDocumentKeys?: Set<string>,
+    uploadIntentPrefix = 'party-identity',
   ): Promise<void> {
     const documents = extractPartyIdentityDocuments(party);
     if (documents.length === 0) {
       return;
     }
-    await Promise.all(
-      documents.map((document) =>
-        notaryApi.uploadCaseFile({
-          caseId: taskId,
-          file: document.file,
-          category: 'identity',
-          materialCode: document.materialCode,
-          partyId,
-          source: 'sdkwork-im-pc',
-        }),
-      ),
-    );
+    for (const document of documents) {
+      await uploadCaseFileUnlessRegistered({
+        caseId: taskId,
+        file: document.file,
+        category: 'identity',
+        materialCode: document.materialCode,
+        partyId,
+        uploadIntentId: `${uploadIntentPrefix}:${partyId}:${document.materialCode}`,
+        source: 'sdkwork-im-pc',
+      }, existingDocumentKeys);
+    }
   }
 
-  async function syncCaseAssignments(taskId: string, data: CreateNotaryTaskInput): Promise<void> {
-    const primaryNotaryMembershipId = resolvePrimaryNotaryMembershipId(data);
-    if (!primaryNotaryMembershipId) {
+  async function syncPartyAuxiliaryAttachments(
+    taskId: string,
+    partyId: string,
+    party: Partial<Party>,
+    existingDocumentKeys?: Set<string>,
+    uploadIntentPrefix = 'party-attachment',
+  ): Promise<void> {
+    const files = extractPartyAuxiliaryAttachments(party);
+    if (files.length === 0) {
       return;
     }
-    await notaryApi.assignCase(taskId, {
-      organizationMembershipId: primaryNotaryMembershipId,
-      assignmentRole: 'primary_notary',
-    });
+    for (const [index, file] of files.entries()) {
+      const materialCode = resolveFileMaterialCode(file);
+      await uploadCaseFileUnlessRegistered({
+        caseId: taskId,
+        file,
+        category: 'evidence',
+        materialCode,
+        partyId,
+        uploadIntentId: `${uploadIntentPrefix}:${partyId}:${index}:${materialCode}`,
+        source: 'sdkwork-im-pc',
+      }, existingDocumentKeys);
+    }
   }
 
   return {
@@ -297,15 +368,20 @@ export function createNotaryPcService(
     ): Promise<NotaryMatterOption[]> {
       const response = await notaryApi.listMatters({
         q: filters.searchTerm,
-        pageSize: filters.pageSize ?? 50,
+        pageSize: normalizePageSize(filters.pageSize, 20),
         cursor: filters.cursor,
       });
       return extractItems(response).map(mapMatterOption);
     },
 
-    async getTasks(filters?: { businessType?: string; status?: string; searchTerm?: string; pageSize?: number; cursor?: string }): Promise<NotaryTask[]> {
-      const response = await notaryApi.listCases(resolveListCaseQuery(filters));
-      return extractItems(response).map(mapCaseToTask);
+    async getTasks(filters?: { businessType?: string; status?: string; searchTerm?: string; pageSize?: number; cursor?: string }): Promise<NotaryTaskPage> {
+      const pageSize = normalizePageSize(filters?.pageSize, 20);
+      const response = await notaryApi.listCases(resolveListCaseQuery({ ...filters, pageSize }));
+      const pageData = extractPageData(response);
+      return {
+        items: pageData.items.map(mapCaseToTask),
+        pageInfo: mapTaskPageInfo(pageData.pageInfo, pageSize),
+      };
     },
 
     async getTaskById(taskId: string): Promise<NotaryTask | null> {
@@ -323,7 +399,7 @@ export function createNotaryPcService(
       const response = await notaryApi.listStaff({
         staffRole: filters.staffRole,
         q: filters.searchTerm,
-        pageSize: filters.pageSize,
+        pageSize: normalizePageSize(filters.pageSize, 20),
         cursor: filters.cursor,
       });
       return extractItems(response).map(mapStaffMember);
@@ -333,6 +409,7 @@ export function createNotaryPcService(
       const creationContext = {
         documents: data.documents ?? [],
       };
+      const idempotencyKey = resolveNotaryCaseIdempotencyKey(data.idempotencyKey);
       const caseRecord = await notaryApi.createCase({
         skuId: optionalString(data.skuId) ?? resolveSkuId(data.type, defaultSkuId, skuIdsByType),
         title: data.title ?? `${data.type ?? 'general'}_${FALLBACK_CASE_TITLE_SUFFIX}`,
@@ -341,36 +418,50 @@ export function createNotaryPcService(
         parties: (data.parties ?? []).map(mapPartyToCreateRequest),
         driveFolderName: data.title ?? data.type ?? 'Notary Case',
         primaryNotaryMembershipId: resolvePrimaryNotaryMembershipId(data),
-        idempotencyKey: buildIdempotencyKey(data),
+        idempotencyKey,
       });
       const createdTask = mapCaseToTask(caseRecord);
-      await syncCaseAssignments(createdTask.id, data);
+      const existingDocumentKeys = new Set(
+        createdTask.documents.map(caseDocumentRegistrationKey),
+      );
       await syncInitialPartySignatures(createdTask.id, data.parties ?? []);
-      await syncInitialPartyIdentityMedia(createdTask.id, data.parties ?? []);
+      await syncInitialPartyIdentityMedia(
+        createdTask.id,
+        data.parties ?? [],
+        existingDocumentKeys,
+        idempotencyKey,
+      );
+      await syncInitialPartyAuxiliaryAttachments(
+        createdTask.id,
+        data.parties ?? [],
+        existingDocumentKeys,
+        idempotencyKey,
+      );
       const documents = creationContext.documents;
       if (documents.length > 0) {
         const createdTaskForDocumentUpload = documents.some(hasDocumentPartyId)
           ? await loadTask(createdTask.id)
           : createdTask;
+        for (const document of createdTaskForDocumentUpload.documents) {
+          existingDocumentKeys.add(caseDocumentRegistrationKey(document));
+        }
         const createdPartyIdByClientPartyId = mapCreatedPartyIds(data.parties, createdTaskForDocumentUpload.parties ?? []);
-        await Promise.all(
-          documents.map((document) =>
-            notaryApi.uploadCaseFile({
-              caseId: createdTask.id,
-              file: document.file ?? document,
-              category: document.category,
-              materialCode: document.materialCode ?? document.name,
-              partyId: resolveCreationDocumentPartyId(document, createdPartyIdByClientPartyId),
-              source: 'sdkwork-im-pc',
-            }),
-          ),
-        );
-        const refreshedCase = await notaryApi.getCase(createdTask.id);
-        const fileResponse = await notaryApi.listCaseFiles(createdTask.id, driveListScope);
-        return mapCaseToTask({
-          ...asRecord(refreshedCase),
-          documents: extractItems(fileResponse),
-        });
+        for (const [index, document] of documents.entries()) {
+          const materialCode = document.materialCode ?? document.name;
+          const partyId = resolveCreationDocumentPartyId(document, createdPartyIdByClientPartyId);
+          const documentRecord = asRecord(document);
+          await uploadCaseFileUnlessRegistered({
+            caseId: createdTask.id,
+            file: document.file ?? document,
+            category: document.category,
+            materialCode,
+            partyId,
+            uploadIntentId: optionalString(documentRecord.uploadIntentId)
+              ?? `${idempotencyKey}:document:${index}`,
+            source: 'sdkwork-im-pc',
+          }, existingDocumentKeys);
+        }
+        return loadTask(createdTask.id);
       }
       return loadTask(createdTask.id);
     },
@@ -383,25 +474,31 @@ export function createNotaryPcService(
       return loadTask(taskId);
     },
 
-    async updateTaskStatus(taskId: string, status: NotaryTask['status']): Promise<NotaryTask> {
+    async updateTaskStatus(
+      taskId: string,
+      status: NotaryTask['status'],
+      version?: string,
+    ): Promise<NotaryTask> {
       if (status === 'PROCESSING') {
-        return mapCaseToTask(await notaryApi.acceptCase(taskId));
+        return mapCaseToTask(await notaryApi.acceptCase(taskId, { version }));
       }
       if (status === 'REJECTED') {
         return mapCaseToTask(
           await notaryApi.rejectCase(taskId, {
             reason: CASE_REJECTION_REASON,
+            version,
           }),
         );
       }
       if (status === 'COMPLETED') {
         return mapCaseToTask(
           await notaryApi.completeCase(taskId, {
-            result: CASE_COMPLETION_RESULT,
+            remarks: CASE_COMPLETION_REMARKS,
+            version,
           }),
         );
       }
-      return mapCaseToTask(await notaryApi.updateCase(taskId, { status }));
+      throw new Error(`Unsupported notary task status transition: ${status}`);
     },
 
     async updateTask(taskId: string, updates: Partial<NotaryTask>): Promise<NotaryTask> {
@@ -409,6 +506,7 @@ export function createNotaryPcService(
         await notaryApi.updateCase(taskId, {
           title: updates.title,
           remarks: updates.remarks,
+          version: updates.version,
         });
       }
       if (updates.parties) {
@@ -423,6 +521,7 @@ export function createNotaryPcService(
       if (createdParty?.id) {
         await syncPartySignature(taskId, createdParty.id, party);
         await syncPartyIdentityMedia(taskId, createdParty.id, party);
+        await syncPartyAuxiliaryAttachments(taskId, createdParty.id, party);
       }
       return loadTask(taskId);
     },
@@ -434,17 +533,15 @@ export function createNotaryPcService(
         category: doc.category,
         materialCode: doc.materialCode ?? doc.name,
         partyId: doc.partyId,
+        uploadIntentId: doc.uploadIntentId ?? `manual:${doc.partyId ?? 'case'}:${doc.materialCode ?? doc.name}`,
         source: 'sdkwork-im-pc',
       });
       return loadTask(taskId);
     },
 
     async listPartyDocuments(taskId: string, partyId: string): Promise<NotaryDocument[]> {
-      const fileResponse = await notaryApi.listCaseFiles(taskId, driveListScope);
-      return extractItems(fileResponse)
-        .map(asRecord)
-        .filter((document) => stringValue(document.partyId) === partyId)
-        .map(mapDocument);
+      const task = await loadTask(taskId);
+      return task.documents.filter((document) => document.partyId === partyId);
     },
 
     async uploadPartyDocument(taskId: string, partyId: string, file: unknown): Promise<NotaryTask> {
@@ -454,6 +551,7 @@ export function createNotaryPcService(
         category: 'evidence',
         materialCode: resolveFileMaterialCode(file),
         partyId,
+        uploadIntentId: `manual:${partyId}:${resolveFileMaterialCode(file)}`,
         source: 'sdkwork-im-pc',
       });
       return loadTask(taskId);
@@ -508,12 +606,18 @@ export function createNotaryPcService(
 
     async getDocumentUrl(
       taskId: string,
-      documentName: string,
+      document: NotaryDocument | string,
       options: { disposition?: 'inline' | 'attachment' } = {},
     ): Promise<{ url?: string; downloadUrl?: string; previewUrl?: string }> {
-      const fileResponse = await notaryApi.listCaseFiles(taskId, driveListScope);
-      const document = findDocumentRecord(fileResponse, documentName);
-      const nodeId = optionalString(document?.nodeId ?? document?.driveNodeId ?? document?.id);
+      const documentName = typeof document === 'string' ? document : document.name;
+      let nodeId = typeof document === 'string'
+        ? undefined
+        : optionalString(document.nodeId ?? document.driveNodeId);
+      if (!nodeId) {
+        const task = await loadTask(taskId);
+        const documentRecord = task.documents.find((item) => item.name === documentName);
+        nodeId = optionalString(documentRecord?.nodeId ?? documentRecord?.driveNodeId);
+      }
       if (!nodeId) {
         throw new Error(`Notary document is missing a Drive node id: ${documentName}`);
       }
@@ -537,10 +641,10 @@ export function createNotaryPcService(
       partyId: string,
       options: { disposition?: 'inline' | 'attachment' } = {},
     ): Promise<{ identityFrontUrl?: string; identityBackUrl?: string; faceImageUrl?: string }> {
-      const fileResponse = await notaryApi.listCaseFiles(taskId, { ...driveListScope, category: 'identity' });
-      const documents = extractItems(fileResponse)
-        .map(asRecord)
-        .filter((document) => stringValue(document.partyId) === partyId);
+      const task = await loadTask(taskId);
+      const documents = task.documents
+        .filter((document) => document.partyId === partyId && document.category === 'identity')
+        .map((document) => asRecord(document));
 
       async function resolveMaterialUrl(materialCode: string): Promise<string | undefined> {
         const document = documents.find((item) => stringValue(item.materialCode) === materialCode);
@@ -567,13 +671,17 @@ export function createNotaryPcService(
     },
 
     async deleteTask(taskId: string): Promise<void> {
-      await notaryApi.updateCase(taskId, { status: 'CANCELLED' });
+      const current = asRecord(await notaryApi.getCase(taskId));
+      await notaryApi.updateCase(taskId, {
+        status: 'CANCELLED',
+        version: optionalString(current.version),
+      });
     },
 
     async removeDocument(taskId: string, documentName: string): Promise<NotaryTask> {
-      const fileResponse = await notaryApi.listCaseFiles(taskId, driveListScope);
-      const document = findDocumentRecord(fileResponse, documentName);
-      const nodeId = optionalString(document?.nodeId ?? document?.driveNodeId ?? document?.id);
+      const task = await loadTask(taskId);
+      const document = task.documents.find((item) => item.name === documentName);
+      const nodeId = optionalString(document?.nodeId ?? document?.driveNodeId);
       if (!nodeId) {
         throw new Error(`Notary document is missing a Drive node id: ${documentName}`);
       }
@@ -588,7 +696,7 @@ export function createNotaryPcService(
 function resolveListCaseQuery(filters?: { businessType?: string; status?: string; searchTerm?: string; pageSize?: number; cursor?: string }): Record<string, unknown> {
   const query: Record<string, unknown> = {
     q: filters?.searchTerm,
-    pageSize: filters?.pageSize ?? 50,
+    pageSize: normalizePageSize(filters?.pageSize, 20),
     cursor: filters?.cursor,
   };
 
@@ -657,8 +765,8 @@ export const notaryService: NotaryService = {
   assignNotary(taskId, membershipId) {
     return getDelegate().assignNotary(taskId, membershipId);
   },
-  updateTaskStatus(taskId, status) {
-    return getDelegate().updateTaskStatus(taskId, status);
+  updateTaskStatus(taskId, status, version) {
+    return getDelegate().updateTaskStatus(taskId, status, version);
   },
   updateTask(taskId, updates) {
     return getDelegate().updateTask(taskId, updates);
@@ -690,8 +798,8 @@ export const notaryService: NotaryService = {
   removeDocument(taskId, documentName) {
     return getDelegate().removeDocument(taskId, documentName);
   },
-  getDocumentUrl(taskId, documentName, options) {
-    return getDelegate().getDocumentUrl(taskId, documentName, options);
+  getDocumentUrl(taskId, document, options) {
+    return getDelegate().getDocumentUrl(taskId, document, options);
   },
   getPartyIdentityMediaUrls(taskId, partyId, options) {
     return getDelegate().getPartyIdentityMediaUrls(taskId, partyId, options);
@@ -728,6 +836,7 @@ function mapCaseToTask(caseRecord: unknown): NotaryTask {
     primaryNotaryMembershipId: optionalString(
       record.primaryNotaryMembershipId ?? record.primaryNotaryOrganizationMembershipId,
     ),
+    version: optionalString(record.version),
   };
 
   return task;
@@ -773,6 +882,15 @@ function mapParty(value: unknown): Party {
     identityValidDateStart: optionalString(record.identityValidDateStart),
     identityValidDateEnd: optionalString(record.identityValidDateEnd),
     signatureUrl: optionalString(record.signatureUrl),
+    identityVerificationScore: optionalNumber(
+      record.identityVerificationScore ?? record.verificationScore,
+    ),
+    identityVerificationStatus: optionalString(
+      record.identityVerificationStatus ?? record.verificationStatus,
+    ),
+    faceCaptureTime: optionalString(
+      record.faceCaptureTime ?? record.faceCapturedAt ?? record.verifiedAt,
+    ),
   };
 }
 
@@ -851,19 +969,6 @@ function resolveSkuId(
   return skuIdsByType[normalized] ?? defaultSkuId;
 }
 
-function buildIdempotencyKey(data: Partial<NotaryTask>): string {
-  const seed = [
-    data.type,
-    data.title,
-    data.applicant,
-    firstPartyName(data.parties),
-    data.createTime,
-  ]
-    .filter(Boolean)
-    .join(':');
-  return `notary-pc:${seed || Date.now().toString(36)}`;
-}
-
 function firstPartyName(parties: Party[] | undefined): string | undefined {
   return parties?.find((party) => party.name)?.name;
 }
@@ -882,10 +987,13 @@ function findMatchingParty(parties: Party[], target: Partial<Party>): Party | un
   ) ?? parties.find((party) => party.name === target.name && party.role === target.role);
 }
 
-function findDocumentRecord(fileResponse: unknown, documentName: string): Record<string, unknown> | undefined {
-  return extractItems(fileResponse)
-    .map(asRecord)
-    .find((item) => stringValue(item.name ?? item.nodeName) === documentName);
+function caseDocumentRegistrationKey(value: unknown): string {
+  const record = asRecord(value);
+  const category = optionalString(record.category) ?? 'evidence';
+  const partyId = optionalString(record.partyId) ?? 'case';
+  const materialCode = optionalString(record.materialCode ?? record.name ?? record.nodeName)
+    ?? 'material';
+  return `${category}:${partyId}:${materialCode}`.toLowerCase();
 }
 
 function hasDocumentPartyId(document: unknown): boolean {
@@ -943,6 +1051,12 @@ function extractPartyIdentityDocuments(party: Partial<Party>): Array<{ file: unk
     .map((item) => ({ file: item.file, materialCode: item.materialCode }));
 }
 
+function extractPartyAuxiliaryAttachments(party: Partial<Party>): File[] {
+  return Array.isArray(party.auxiliaryAttachments)
+    ? party.auxiliaryAttachments.filter((file): file is File => Boolean(file))
+    : [];
+}
+
 function hasSignature(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -958,7 +1072,45 @@ function extractItems(value: unknown): unknown[] {
   if (Array.isArray(record.data)) {
     return record.data;
   }
+  const data = asRecord(record.data);
+  if (Array.isArray(data.items)) {
+    return data.items;
+  }
   return [];
+}
+
+function extractPageData(value: unknown): { items: unknown[]; pageInfo: unknown } {
+  const record = asRecord(value);
+  const data = asRecord(record.data);
+  const page = Array.isArray(record.items) ? record : data;
+  return {
+    items: extractItems(value),
+    pageInfo: page.pageInfo,
+  };
+}
+
+function mapTaskPageInfo(value: unknown, requestedPageSize: number): NotaryTaskPageInfo {
+  const pageInfo = asRecord(value);
+  const nextCursor = optionalString(pageInfo.nextCursor);
+  const totalItems = typeof pageInfo.totalItems === 'string' && /^\d+$/.test(pageInfo.totalItems)
+    ? pageInfo.totalItems
+    : undefined;
+  const totalPages = optionalNumber(pageInfo.totalPages);
+  return {
+    mode: 'cursor',
+    pageSize: normalizePageSize(optionalNumber(pageInfo.pageSize), requestedPageSize),
+    nextCursor,
+    hasMore: typeof pageInfo.hasMore === 'boolean' ? pageInfo.hasMore : Boolean(nextCursor),
+    totalItems,
+    totalPages: typeof totalPages === 'number' ? Math.max(0, Math.trunc(totalPages)) : undefined,
+  };
+}
+
+function normalizePageSize(value: number | undefined, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.min(100, Math.max(1, Math.trunc(value)));
 }
 
 function arrayOfStrings(value: unknown): string[] {
@@ -974,15 +1126,14 @@ function mapStatus(value: unknown): NotaryTask['status'] {
   if (value === 'COMPLETED' || value === 'completed') {
     return 'COMPLETED';
   }
-  if (
-    value === 'REJECTED' ||
-    value === 'rejected' ||
-    value === 'CANCELLED' ||
-    value === 'cancelled' ||
-    value === 'CREATE_FAILED' ||
-    value === 'create_failed'
-  ) {
+  if (value === 'REJECTED' || value === 'rejected') {
     return 'REJECTED';
+  }
+  if (value === 'CREATE_FAILED' || value === 'create_failed') {
+    return 'CREATE_FAILED';
+  }
+  if (value === 'CANCELLED' || value === 'cancelled') {
+    return 'CANCELLED';
   }
   return 'PENDING_REVIEW';
 }
@@ -1042,5 +1193,8 @@ function numberValue(value: unknown): number {
 
 function isNotFound(error: unknown): boolean {
   const record = asRecord(error);
-  return record.code === 'not-found' || record.status === 404;
+  return record.code === 'NOT_FOUND'
+    || record.code === 'not-found'
+    || record.httpStatus === 404
+    || record.status === 404;
 }

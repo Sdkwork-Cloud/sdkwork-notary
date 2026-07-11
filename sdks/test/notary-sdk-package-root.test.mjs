@@ -27,8 +27,6 @@ const packageRoots = [
     configType: "SdkworkAppConfig",
     dependencies: [
       "@sdkwork/iam-app-sdk",
-      "@sdkwork/catalog-app-sdk",
-      "@sdkwork/order-app-sdk",
       "@sdkwork/drive-app-sdk",
     ],
   },
@@ -87,19 +85,9 @@ test("notary TypeScript SDK package roots expose generated clients and composed 
     );
     if (sdkPackage.packageName === '@sdkwork/notary-app-sdk') {
       assert.equal(
-        packageJson.peerDependenciesMeta[sdkPackage.dependencies[3]].optional,
+        packageJson.peerDependenciesMeta[sdkPackage.dependencies[1]].optional,
         false,
         `${sdkPackage.packageName} must require drive dependency SDK peer`,
-      );
-      assert.equal(
-        packageJson.peerDependenciesMeta[sdkPackage.dependencies[1]].optional,
-        true,
-        `${sdkPackage.packageName} must keep catalog dependency SDK peer optional for composed runtime-owned SKU lookup`,
-      );
-      assert.equal(
-        packageJson.peerDependenciesMeta[sdkPackage.dependencies[2]].optional,
-        true,
-        `${sdkPackage.packageName} must keep order dependency SDK peer optional for composed runtime-owned order creation`,
       );
     } else {
       assert.equal(
@@ -147,10 +135,12 @@ test("notary app composed facade accepts real Drive SDK upload results", () => {
   assert(source.includes("resolveDriveUploadNodeId"));
   assert(source.includes("uploadSession"));
   assert(source.includes("uploadItem"));
-  assert(source.includes("commerce?: CommerceT1AppSdkPort"));
   assert(source.includes("driveNodeId"));
   assert(source.includes("nodeId"));
-  assert(source.includes("drive.nodes.files.create"));
-  assert(source.includes("drive.drive.nodes.files.create"));
+  assert(source.includes("uploadThroughDrive"));
+  assert(source.includes("drive.uploader.upload"));
+  assert(source.includes("notary.cases.files.create"));
+  assert(!source.includes("drive.nodes.files.create"));
+  assert(!source.includes("drive.drive.nodes.files.create"));
   assert(source.includes("driveSpaceType: \"notary\""));
 });

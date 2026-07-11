@@ -48,8 +48,15 @@ export type { NotaryAccessRetrieveResponse } from './notary-access-retrieve-resp
 export type { NotaryMattersListResponse } from './notary-matters-list-response';
 export type { NotaryCasesListResponse } from './notary-cases-list-response';
 export type { NotaryCasesCreateResponse201 } from './notary-cases-create-response201';
+export type { NotaryCasesRetrieveResponse } from './notary-cases-retrieve-response';
+export type { NotaryCasesUpdateResponse } from './notary-cases-update-response';
+export type { NotaryCasesAcceptancesCreateResponse201 } from './notary-cases-acceptances-create-response201';
+export type { NotaryCasesRejectionsCreateResponse201 } from './notary-cases-rejections-create-response201';
+export type { NotaryCasesCompletionsCreateResponse201 } from './notary-cases-completions-create-response201';
 export type { NotaryCasesPartiesListResponse } from './notary-cases-parties-list-response';
 export type { NotaryCasesPartiesCreateResponse201 } from './notary-cases-parties-create-response201';
+export type { NotaryCasesPartiesUpdateResponse } from './notary-cases-parties-update-response';
+export type { NotaryCasesPartiesSignaturesCreateResponse201 } from './notary-cases-parties-signatures-create-response201';
 export type { NotaryCasesPartiesVideoInvitesCreateResponse201 } from './notary-cases-parties-video-invites-create-response201';
 export type { NotaryCasesPartiesSignatureInvitesCreateResponse201 } from './notary-cases-parties-signature-invites-create-response201';
 export type { NotaryCasesFilesListResponse } from './notary-cases-files-list-response';

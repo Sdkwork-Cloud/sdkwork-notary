@@ -50,10 +50,15 @@ export const notaryPcAuthService: NotaryPcAuthService = {
       clearNotaryPcIamRuntimeSession();
       return null;
     }
+    const storedRefreshToken = storedSession?.refreshToken;
 
     try {
       const session = await getNotaryPcIamRuntime().service.auth.sessions.current.retrieve();
-      return applyNotaryPcSessionTokens(toSession(session as RuntimeSessionPayload));
+      const currentSession = toSession(session as RuntimeSessionPayload);
+      return applyNotaryPcSessionTokens({
+        ...currentSession,
+        refreshToken: currentSession.refreshToken ?? storedRefreshToken,
+      });
     } catch {
       clearNotaryPcIamRuntimeSession();
       resetNotaryPcIamRuntime();

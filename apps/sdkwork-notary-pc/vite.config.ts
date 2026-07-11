@@ -36,6 +36,9 @@ export default defineConfig(({ mode }) => {
         { find: '@sdkwork/utils', replacement: path.resolve(utilsRoot, 'index.ts') },
         { find: '@sdkwork/notary-pc-core', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-core/src/index.ts') },
         { find: '@sdkwork/notary-pc-commons', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-commons/src/index.ts') },
+        { find: '@sdkwork/notary-pc-admin-core', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-admin-core/src/index.ts') },
+        { find: '@sdkwork/notary-pc-admin-shell', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-admin-shell/src/index.ts') },
+        { find: '@sdkwork/notary-pc-admin-merchandise', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-admin-merchandise/src/index.ts') },
         { find: '@sdkwork/notary-pc-shell', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-shell/src/index.ts') },
         { find: '@sdkwork/notary-pc-notary', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-notary/src/index.ts') },
         {
@@ -43,6 +46,13 @@ export default defineConfig(({ mode }) => {
           replacement: path.resolve(
             repoRoot,
             'sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/src/index.ts',
+          ),
+        },
+        {
+          find: '@sdkwork/notary-backend-sdk',
+          replacement: path.resolve(
+            repoRoot,
+            'sdks/sdkwork-notary-backend-sdk/sdkwork-notary-backend-sdk-typescript/src/index.ts',
           ),
         },
         { find: '@sdkwork/drive-app-sdk', replacement: generatedDriveAppSdkEntry },
@@ -63,6 +73,7 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       exclude: [
         '@sdkwork/notary-app-sdk',
+        '@sdkwork/notary-backend-sdk',
         '@sdkwork/drive-app-sdk',
         '@sdkwork/iam-app-sdk',
         '@sdkwork/auth-pc-react',

@@ -16,6 +16,129 @@ function readChatPcText(relativePath) {
   return readFileSync(path.join(imPcRoot, relativePath), "utf8");
 }
 
+test("backend composed matter management delegates only through Notary owner orchestration", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-backend-sdk/sdkwork-notary-backend-sdk-typescript/composed/index.ts",
+  );
+  const source = readFileSync(modulePath, "utf8");
+  const { createNotaryBackendApi } = await import(pathToFileURL(modulePath).href);
+  const calls = [];
+  const api = createNotaryBackendApi({
+    notary: {
+      matters: {
+        create: async (body, options) => {
+          calls.push({ method: "matters.create", body, options });
+          return { skuId: "sku-1", ...body };
+        },
+        update: async () => ({}),
+        management: {
+          list: async (input) => {
+            calls.push({ method: "matters.management.list", input });
+            return { items: [], pageInfo: { mode: "cursor", pageSize: 20, hasMore: false } };
+          },
+        },
+      },
+      organizationProfiles: {
+        list: async () => ({}),
+        create: async () => ({}),
+        retrieve: async () => ({}),
+        update: async () => ({}),
+      },
+      staff: { list: async () => ({}) },
+      cases: {
+        management: { list: async () => ({}), retrieve: async () => ({}) },
+        assignments: { create: async () => ({}), delete: async () => undefined },
+      },
+    },
+    appbase: {},
+    drive: {},
+  });
+
+  await api.createMatter({
+    organizationId: "org-1",
+    title: "Evidence preservation",
+    priceAmount: "99.00",
+    originalPriceAmount: "129.00",
+    currencyCode: "CNY",
+    status: "active",
+    idempotencyKey: "matter-intent-1",
+  });
+  await api.listMatters({ pageSize: 20, q: "evidence" });
+
+  assert.deepEqual(calls, [
+    {
+      method: "matters.create",
+      body: {
+        organizationId: "org-1",
+        title: "Evidence preservation",
+        description: undefined,
+        priceAmount: "99.00",
+        originalPriceAmount: "129.00",
+        currencyCode: "CNY",
+        status: "active",
+        spec: undefined,
+      },
+      options: { idempotencyKey: "matter-intent-1" },
+    },
+    {
+      method: "matters.management.list",
+      input: { pageSize: 20, q: "evidence" },
+    },
+  ]);
+  assert(!source.includes("CommerceBackendSdkPort"));
+  assert(!source.includes("commerce,"));
+  assert(!source.includes("productType: \"notary\""));
+  assert(!source.includes("skuPolicy: \"one_spu_one_sku\""));
+});
+
+test("backend composed staff list uses generated camelCase parameter names", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-backend-sdk/sdkwork-notary-backend-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryBackendApi } = await import(pathToFileURL(modulePath).href);
+  const calls = [];
+  const api = createNotaryBackendApi({
+    notary: {
+      organizationProfiles: {
+        list: async () => ({}), create: async () => ({}), retrieve: async () => ({}), update: async () => ({}),
+      },
+      matters: {
+        create: async () => ({}), update: async () => ({}), management: { list: async () => ({}) },
+      },
+      staff: {
+        list: async (input) => {
+          calls.push(input);
+          return { items: [], pageInfo: { mode: "cursor", pageSize: 20, hasMore: false } };
+        },
+      },
+      cases: {
+        management: { list: async () => ({}), retrieve: async () => ({}) },
+        assignments: { create: async () => ({}), delete: async () => undefined },
+      },
+    },
+    appbase: {},
+    drive: {},
+  });
+
+  await api.listStaffMembers({
+    organizationId: "org-1",
+    staffRole: "notary",
+    q: "Li",
+    pageSize: 50,
+    cursor: "cursor-2",
+  });
+
+  assert.deepEqual(calls, [{
+    organizationId: "org-1",
+    staffRole: "notary",
+    q: "Li",
+    pageSize: 50,
+    cursor: "cursor-2",
+  }]);
+});
+
 test("app composed notary API exposes high-level workflow methods for IM PC integration", () => {
   const source = readText(
     "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
@@ -61,6 +184,7 @@ test("app composed notary API exposes high-level workflow methods for IM PC inte
   assert(source.includes("notary.cases.parties.signatureInvites.create"));
   assert(source.includes("driveSpaceType: \"notary\""));
   assert(source.includes("deleteDriveNode"));
+  assert(source.includes("ensureMutableNotaryCase"));
 });
 
 test("app composed notary API exposes typed paginated list inputs", () => {
@@ -124,7 +248,7 @@ test("app composed listStaff delegates to app notary staff resource", async () =
       cases: {
         create: async () => ({}),
         list: async () => ({ items: [] }),
-        retrieve: async () => ({}),
+        retrieve: async () => ({ status: "PROCESSING" }),
         update: async () => ({}),
         assignments: { create: async () => ({}) },
         acceptances: { create: async () => ({}) },
@@ -177,7 +301,7 @@ test("app composed assignCase delegates to app notary assignment resource", asyn
       cases: {
         create: async () => ({}),
         list: async () => ({ items: [] }),
-        retrieve: async () => ({}),
+        retrieve: async () => ({ status: "PROCESSING" }),
         update: async () => ({}),
         assignments: {
           create: async (caseId, body) => {
@@ -316,10 +440,11 @@ test("app composed createCase always passes generated SDK params object", async 
     skuId: "sku-notary-evidence",
     title: "Electronic Evidence Preservation",
     applicantName: "Applicant",
+    idempotencyKey: "case-intent-1",
   });
 
   assert.equal(calls.length, 1);
-  assert.deepEqual(calls[0].params, {});
+  assert.deepEqual(calls[0].params, { idempotencyKey: "case-intent-1" });
 });
 
 test("app composed deleteCaseFile delegates to Drive node deletion and refreshes through notary file list", async () => {
@@ -329,6 +454,7 @@ test("app composed deleteCaseFile delegates to Drive node deletion and refreshes
   );
   const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
   const calls = [];
+  let fileListCall = 0;
   const api = createNotaryApi({
     notary: {
       access: { retrieve: async () => ({}) },
@@ -336,7 +462,7 @@ test("app composed deleteCaseFile delegates to Drive node deletion and refreshes
       cases: {
         create: async () => ({}),
         list: async () => ({ items: [] }),
-        retrieve: async () => ({}),
+        retrieve: async () => ({ status: "PROCESSING" }),
         update: async () => ({}),
         acceptances: { create: async () => ({}) },
         rejections: { create: async () => ({}) },
@@ -353,7 +479,13 @@ test("app composed deleteCaseFile delegates to Drive node deletion and refreshes
         files: {
           list: async (caseId, params) => {
             calls.push({ method: "notary.files.list", caseId, params });
-            return { items: [{ nodeId: "node-kept", name: "kept.pdf" }] };
+            fileListCall += 1;
+            return fileListCall === 1
+              ? {
+                  items: [{ nodeId: "node-delete", name: "delete.pdf" }],
+                  pageInfo: { hasMore: false },
+                }
+              : { items: [{ nodeId: "node-kept", name: "kept.pdf" }] };
           },
           create: async () => ({}),
         },
@@ -363,8 +495,8 @@ test("app composed deleteCaseFile delegates to Drive node deletion and refreshes
     drive: {
       drive: {
         nodes: {
-          delete: async (nodeId, params) => {
-            calls.push({ method: "drive.nodes.delete", nodeId, params });
+          delete: async (nodeId) => {
+            calls.push({ method: "drive.nodes.delete", nodeId });
             return { deleted: true };
           },
         },
@@ -379,9 +511,13 @@ test("app composed deleteCaseFile delegates to Drive node deletion and refreshes
 
   assert.deepEqual(calls, [
     {
+      method: "notary.files.list",
+      caseId: "case-1",
+      params: { driveSpaceType: "notary", pageSize: 100 },
+    },
+    {
       method: "drive.nodes.delete",
       nodeId: "node-delete",
-      params: {},
     },
     {
       method: "notary.files.list",
@@ -406,7 +542,11 @@ test("app composed attachPartySignature uploads signature image through Drive an
       cases: {
         create: async () => ({}),
         list: async () => ({ items: [] }),
-        retrieve: async () => ({}),
+        retrieve: async () => ({
+          status: "PROCESSING",
+          driveSpaceId: "space-case-1",
+          driveFolderNodeId: "folder-case-1",
+        }),
         update: async () => ({}),
         acceptances: { create: async () => ({}) },
         rejections: { create: async () => ({}) },
@@ -436,7 +576,7 @@ test("app composed attachPartySignature uploads signature image through Drive an
       uploader: {
         upload: async (input) => {
           calls.push({ method: "drive.uploader.upload", input });
-          return { nodeId: "signature-node-1" };
+          return { uploadItem: { nodeId: "signature-node-1" } };
         },
       },
     },
@@ -449,12 +589,28 @@ test("app composed attachPartySignature uploads signature image through Drive an
   });
 
   assert.equal(calls[0].method, "drive.uploader.upload");
-  assert.equal(calls[0].input.profile, "image");
-  assert.equal(calls[0].input.scene, "notary.party_signature");
-  assert.deepEqual(calls[0].input.target, {
-    driveSpaceType: "notary",
+  assert.match(calls[0].input.taskId, /^notary-case-file-case-1-party-1-signature-/);
+  assert.deepEqual(Object.keys(calls[0].input).sort(), [
+    "appResourceId",
+    "appResourceType",
+    "file",
+    "parentNodeId",
+    "scene",
+    "source",
+    "spaceId",
+    "taskId",
+    "uploadProfileCode",
+  ].sort());
+  assert.deepEqual({ ...calls[0].input, file: "<file>", taskId: "<taskId>" }, {
+    file: "<file>",
     appResourceType: "notary_case_party_signature",
     appResourceId: "case-1:party-1",
+    uploadProfileCode: "image",
+    scene: "notary.party_signature",
+    source: "sdkwork-im-pc",
+    spaceId: "space-case-1",
+    parentNodeId: "folder-case-1",
+    taskId: "<taskId>",
   });
   assert.deepEqual(calls[1], {
     method: "notary.signatures.create",
@@ -620,7 +776,11 @@ test("app composed uploadCaseFile keeps party identity files scoped to notary ca
       cases: {
         create: async () => ({}),
         list: async () => ({ items: [] }),
-        retrieve: async () => ({}),
+        retrieve: async () => ({
+          status: "PROCESSING",
+          driveSpaceId: "space-explicit-case-1",
+          driveFolderNodeId: "folder-explicit-case-1",
+        }),
         update: async () => ({}),
         acceptances: { create: async () => ({}) },
         rejections: { create: async () => ({}) },
@@ -648,7 +808,7 @@ test("app composed uploadCaseFile keeps party identity files scoped to notary ca
       uploader: {
         upload: async (input) => {
           calls.push({ method: "drive.uploader.upload", input });
-          return { nodeId: "identity-front-node-1" };
+          return { uploadItem: { nodeId: "identity-front-node-1" } };
         },
       },
     },
@@ -658,19 +818,37 @@ test("app composed uploadCaseFile keeps party identity files scoped to notary ca
   const result = await api.uploadCaseFile({
     caseId: "case-1",
     partyId: "party-1",
-    file: { name: "id-front.png" },
+    file: new Blob(["identity-front"], { type: "image/png" }),
     category: "identity",
     materialCode: "identity_front",
     source: "sdkwork-im-pc",
+    driveSpaceId: "space-explicit-case-1",
+    driveFolderNodeId: "folder-explicit-case-1",
   });
 
   assert.equal(calls[0].method, "drive.uploader.upload");
-  assert.equal(calls[0].input.profile, "document");
-  assert.equal(calls[0].input.scene, "notary.case_file");
-  assert.deepEqual(calls[0].input.target, {
-    driveSpaceType: "notary",
+  assert.match(calls[0].input.taskId, /^notary-case-file-case-1-party-1-identity_front-/);
+  assert.deepEqual(Object.keys(calls[0].input).sort(), [
+    "appResourceId",
+    "appResourceType",
+    "file",
+    "parentNodeId",
+    "scene",
+    "source",
+    "spaceId",
+    "taskId",
+    "uploadProfileCode",
+  ].sort());
+  assert.deepEqual({ ...calls[0].input, file: "<file>", taskId: "<taskId>" }, {
+    file: "<file>",
     appResourceType: "notary_case_party_file",
     appResourceId: "case-1:party-1",
+    uploadProfileCode: "document",
+    scene: "notary.case_file",
+    source: "sdkwork-im-pc",
+    spaceId: "space-explicit-case-1",
+    parentNodeId: "folder-explicit-case-1",
+    taskId: "<taskId>",
   });
   assert.deepEqual(calls[1], {
     method: "notary.files.create",
@@ -690,6 +868,189 @@ test("app composed uploadCaseFile keeps party identity files scoped to notary ca
   });
 });
 
+test("app composed uploadCaseFile fails closed when the notary case has no Drive target", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  let uploadCalled = false;
+  const api = createNotaryApi({
+    notary: {
+      cases: {
+        retrieve: async () => ({ id: "case-missing-target", status: "PROCESSING" }),
+        files: { create: async () => ({}) },
+      },
+    },
+    drive: {
+      uploader: {
+        upload: async () => {
+          uploadCalled = true;
+          return {};
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  await assert.rejects(
+    api.uploadCaseFile({
+      caseId: "case-missing-target",
+      file: new Blob(["evidence"], { type: "application/pdf" }),
+      category: "evidence",
+    }),
+    /missing driveSpaceId or driveFolderNodeId/,
+  );
+  assert.equal(uploadCalled, false);
+});
+
+test("app composed case file mutations reject terminal cases before Drive side effects", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  let uploadCalled = false;
+  let deleteCalled = false;
+  let registerCalled = false;
+  const api = createNotaryApi({
+    notary: {
+      cases: {
+        retrieve: async () => ({
+          id: "case-cancelled",
+          status: "CANCELLED",
+          driveSpaceId: "space-case-cancelled",
+          driveFolderNodeId: "folder-case-cancelled",
+        }),
+        files: {
+          list: async () => ({ items: [] }),
+          create: async () => {
+            registerCalled = true;
+            return {};
+          },
+        },
+      },
+    },
+    drive: {
+      uploader: {
+        upload: async () => {
+          uploadCalled = true;
+          return {};
+        },
+      },
+      nodes: {
+        delete: async () => {
+          deleteCalled = true;
+          return {};
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  await assert.rejects(
+    api.uploadCaseFile({
+      caseId: "case-cancelled",
+      file: new Blob(["evidence"], { type: "application/pdf" }),
+      category: "evidence",
+    }),
+    /terminal and cannot be modified/,
+  );
+  await assert.rejects(
+    api.deleteCaseFile("case-cancelled", { nodeId: "node-1" }),
+    /terminal and cannot be modified/,
+  );
+  assert.equal(uploadCalled, false);
+  assert.equal(deleteCalled, false);
+  assert.equal(registerCalled, false);
+});
+
+test("app composed uploadCaseFile rejects Drive targets that do not belong to the case", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  let uploadCalled = false;
+  const api = createNotaryApi({
+    notary: {
+      cases: {
+        retrieve: async () => ({
+          status: "PROCESSING",
+          driveSpaceId: "space-case-1",
+          driveFolderNodeId: "folder-case-1",
+        }),
+        files: { create: async () => ({}) },
+      },
+    },
+    drive: {
+      uploader: {
+        upload: async () => {
+          uploadCalled = true;
+          return {};
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  await assert.rejects(
+    api.uploadCaseFile({
+      caseId: "case-1",
+      file: new Blob(["evidence"], { type: "application/pdf" }),
+      category: "evidence",
+      driveSpaceId: "space-other-case",
+      driveFolderNodeId: "folder-case-1",
+    }),
+    /Drive space does not match the case/,
+  );
+  assert.equal(uploadCalled, false);
+});
+
+test("app composed uploadCaseFile never falls back to direct Drive node creation", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  let directNodeCreationCalled = false;
+  const api = createNotaryApi({
+    notary: {
+      cases: {
+        retrieve: async () => ({
+          status: "PROCESSING",
+          driveSpaceId: "space-case-1",
+          driveFolderNodeId: "folder-case-1",
+        }),
+        files: { create: async () => ({}) },
+      },
+    },
+    drive: {
+      nodes: {
+        files: {
+          create: async () => {
+            directNodeCreationCalled = true;
+            return { nodeId: "bypassed-node" };
+          },
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  await assert.rejects(
+    api.uploadCaseFile({
+      caseId: "case-1",
+      file: new Blob(["evidence"], { type: "application/pdf" }),
+      category: "evidence",
+      driveSpaceId: "space-case-1",
+      driveFolderNodeId: "folder-case-1",
+    }),
+    /Drive uploader capability is required/,
+  );
+  assert.equal(directNodeCreationCalled, false);
+});
+
 test("app composed createCaseFileDownloadUrl delegates to Drive node download URL SDK", async () => {
   const modulePath = path.join(
     workspaceRoot,
@@ -704,7 +1065,7 @@ test("app composed createCaseFileDownloadUrl delegates to Drive node download UR
       cases: {
         create: async () => ({}),
         list: async () => ({ items: [] }),
-        retrieve: async () => ({}),
+        retrieve: async () => ({ status: "PROCESSING" }),
         update: async () => ({}),
         acceptances: { create: async () => ({}) },
         rejections: { create: async () => ({}) },
@@ -719,7 +1080,7 @@ test("app composed createCaseFileDownloadUrl delegates to Drive node download UR
           signatureInvites: { create: async () => ({}) },
         },
         files: {
-          list: async () => ({ items: [] }),
+          list: async () => ({ items: [{ nodeId: "node-1" }] }),
           create: async () => ({}),
         },
         downloadPackages: { create: async () => ({}) },
@@ -729,8 +1090,8 @@ test("app composed createCaseFileDownloadUrl delegates to Drive node download UR
       drive: {
         nodes: {
           downloadUrls: {
-            create: async (nodeId, params) => {
-              calls.push({ method: "drive.nodes.downloadUrls.create", nodeId, params });
+            retrieve: async (nodeId, params) => {
+              calls.push({ method: "drive.nodes.downloadUrls.retrieve", nodeId, params });
               return {
                 downloadUrl: `https://download.example/${nodeId}`,
                 expiresAt: "2026-06-10T10:00:00Z",
@@ -750,7 +1111,7 @@ test("app composed createCaseFileDownloadUrl delegates to Drive node download UR
 
   assert.deepEqual(calls, [
     {
-      method: "drive.nodes.downloadUrls.create",
+      method: "drive.nodes.downloadUrls.retrieve",
       nodeId: "node-1",
       params: {
         requestedTtlSeconds: 300,
@@ -762,4 +1123,244 @@ test("app composed createCaseFileDownloadUrl delegates to Drive node download UR
     url: "https://download.example/node-1",
     expiresAt: "2026-06-10T10:00:00Z",
   });
+});
+
+test("app composed deleteCaseFile uses Drive trash.create and never falls back to hard delete", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  const trashCalls = [];
+  let hardDeleteCalled = false;
+  const notary = {
+    cases: {
+      retrieve: async () => ({ status: "PROCESSING" }),
+      files: {
+        list: async () => ({ items: [{ nodeId: "node-trash" }] }),
+      },
+    },
+  };
+  const api = createNotaryApi({
+    notary,
+    drive: {
+      drive: {
+        trash: {
+          create: async (nodeId, body) => {
+            trashCalls.push({ nodeId, body });
+            return { nodeId, trashed: true };
+          },
+        },
+        nodes: {
+          delete: async () => {
+            hardDeleteCalled = true;
+          },
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  await api.deleteCaseFile("case-1", {
+    nodeId: "node-trash",
+    operatorId: "operator-1",
+    strategy: "trash",
+  });
+
+  assert.deepEqual(trashCalls, [
+    {
+      nodeId: "node-trash",
+      body: { operatorId: "operator-1" },
+    },
+  ]);
+  assert.equal(hardDeleteCalled, false);
+
+  const apiWithoutTrash = createNotaryApi({
+    notary,
+    drive: {
+      drive: {
+        nodes: {
+          delete: async () => {
+            hardDeleteCalled = true;
+          },
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  await assert.rejects(
+    apiWithoutTrash.deleteCaseFile("case-1", {
+      nodeId: "node-trash",
+      strategy: "trash",
+    }),
+    /Drive trash capability is required/,
+  );
+  assert.equal(hardDeleteCalled, false);
+});
+
+test("app composed uploadCaseFile isolates task ids by case and keeps retry intent stable", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  const uploads = [];
+  const api = createNotaryApi({
+    notary: {
+      cases: {
+        retrieve: async (caseId) => ({
+          status: "PROCESSING",
+          driveSpaceId: `space-${caseId}`,
+          driveFolderNodeId: `folder-${caseId}`,
+        }),
+        files: {
+          create: async (caseId, body) => ({ caseId, nodeId: body.driveNodeId }),
+        },
+      },
+    },
+    drive: {
+      uploader: {
+        upload: async (input) => {
+          uploads.push(input);
+          return { uploadItem: { nodeId: `node-${uploads.length}` } };
+        },
+      },
+    },
+    appbase: {},
+  });
+  const file = new Blob(["same-file"], { type: "application/pdf" });
+  const commonInput = {
+    file,
+    category: "evidence",
+    materialCode: "evidence_document",
+    uploadIntentId: "wizard-attachment-1",
+  };
+
+  await api.uploadCaseFile({ caseId: "case-a", ...commonInput });
+  await api.uploadCaseFile({ caseId: "case-a", ...commonInput });
+  await api.uploadCaseFile({ caseId: "case-b", ...commonInput });
+
+  assert.equal(uploads[0].taskId, uploads[1].taskId);
+  assert.notEqual(uploads[0].taskId, uploads[2].taskId);
+  assert.match(uploads[0].taskId, /case-a-case-wizard-attachment-1/);
+  assert.match(uploads[2].taskId, /case-b-case-wizard-attachment-1/);
+});
+
+test("app composed case file ownership follows cursor pagination before Drive access", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  const fileListCalls = [];
+  const downloadCalls = [];
+  const api = createNotaryApi({
+    notary: {
+      cases: {
+        files: {
+          list: async (caseId, params) => {
+            fileListCalls.push({ caseId, params });
+            if (!params.cursor) {
+              return {
+                data: {
+                  items: [{ driveNodeId: "node-page-1" }],
+                  pageInfo: { hasMore: true, nextCursor: "cursor-2" },
+                },
+              };
+            }
+            return {
+              data: {
+                items: [{ driveNodeId: "node-page-2" }],
+                pageInfo: { hasMore: false },
+              },
+            };
+          },
+        },
+      },
+    },
+    drive: {
+      drive: {
+        nodes: {
+          downloadUrls: {
+            retrieve: async (nodeId, params) => {
+              downloadCalls.push({ nodeId, params });
+              return { downloadUrl: `https://download.example/${nodeId}` };
+            },
+          },
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  const result = await api.createCaseFileDownloadUrl("case-1", {
+    nodeId: "node-page-2",
+    requestedTtlSeconds: 120,
+  });
+
+  assert.deepEqual(fileListCalls, [
+    {
+      caseId: "case-1",
+      params: { driveSpaceType: "notary", pageSize: 100 },
+    },
+    {
+      caseId: "case-1",
+      params: { driveSpaceType: "notary", pageSize: 100, cursor: "cursor-2" },
+    },
+  ]);
+  assert.deepEqual(downloadCalls, [
+    { nodeId: "node-page-2", params: { requestedTtlSeconds: 120 } },
+  ]);
+  assert.equal(result.downloadUrl, "https://download.example/node-page-2");
+});
+
+test("app composed rejects download and delete for nodes outside the notary case", async () => {
+  const modulePath = path.join(
+    workspaceRoot,
+    "sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts",
+  );
+  const { createNotaryApi } = await import(pathToFileURL(modulePath).href);
+  let downloadCalled = false;
+  let deleteCalled = false;
+  const api = createNotaryApi({
+    notary: {
+      cases: {
+        retrieve: async () => ({ status: "PROCESSING" }),
+        files: {
+          list: async () => ({
+            items: [{ driveNodeId: "owned-node" }],
+            pageInfo: { hasMore: false },
+          }),
+        },
+      },
+    },
+    drive: {
+      drive: {
+        nodes: {
+          downloadUrls: {
+            retrieve: async () => {
+              downloadCalled = true;
+              return {};
+            },
+          },
+          delete: async () => {
+            deleteCalled = true;
+          },
+        },
+      },
+    },
+    appbase: {},
+  });
+
+  await assert.rejects(
+    api.createCaseFileDownloadUrl("case-1", { nodeId: "foreign-node" }),
+    /Drive node foreign-node is not registered to notary case case-1/,
+  );
+  await assert.rejects(
+    api.deleteCaseFile("case-1", { nodeId: "foreign-node" }),
+    /Drive node foreign-node is not registered to notary case case-1/,
+  );
+  assert.equal(downloadCalled, false);
+  assert.equal(deleteCalled, false);
 });

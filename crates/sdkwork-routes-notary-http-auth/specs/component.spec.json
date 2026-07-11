@@ -37,7 +37,15 @@
     }
   ],
   "contracts": {
+    "layerRole": "backend-provider",
     "publicExports": ["sdkwork_routes_notary_http_auth::*"],
+    "providedPorts": [
+      {
+        "name": "with_dual_token_request_context",
+        "export": "sdkwork_routes_notary_http_auth::*"
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": ["with_dual_token_request_context"],
     "sdkClients": [],
     "dependencyApiSurfaces": []

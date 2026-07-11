@@ -4,16 +4,21 @@ use async_trait::async_trait;
 use sdkwork_notary_case_contract::{NotaryCaseRecord, NotaryPartyCommand, NotaryServiceError};
 use sdkwork_notary_case_service::{
     AppbaseOrganizationMember, AppbasePort, CommerceCreateOrderCommand, CommerceMatterCommand,
-    CommerceMatterListQuery, CommerceMatterRecord, CommerceMatterUpdateCommand,
-    CommerceOrderReference, CommercePort, DriveCreateDownloadPackageCommand,
-    DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveDownloadPackageReference,
-    DriveFolderReference, DriveListNodesPage, DriveListNodesQuery, DriveNodeReference, DrivePort,
-    DriveRegisterCaseFileCommand, NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord,
-    NotaryCaseEventListPage, NotaryCaseEventListQuery, NotaryCaseEventRecord, NotaryCaseListPage,
-    NotaryCaseListQuery, NotaryCaseRepositoryPort, NotaryCaseUpdateCommand,
-    NotaryOrganizationProfile, NotaryOrganizationProfileListPage,
-    NotaryOrganizationProfileUpdateCommand, NotaryPartyListPage, NotaryPartyListQuery,
-    NotaryPartyRecord, NotaryPartyUpdateCommand, NotaryStaffListPage, NotaryStaffListQuery,
+    CommerceMatterListPage, CommerceMatterListQuery, CommerceMatterRecord,
+    CommerceMatterUpdateCommand, CommerceOrderFulfillmentState, CommerceOrderReference,
+    CommercePort, DriveCreateDownloadPackageCommand, DriveCreateFolderCommand,
+    DriveCreateMonthlyReportCommand, DriveCreatePartySignatureInviteCommand,
+    DriveCreatePartyVideoInviteCommand, DriveCreateSpaceCommand, DriveDownloadPackageReference,
+    DriveFolderReference, DriveListNodesPage, DriveListNodesQuery, DriveMonthlyReportReference,
+    DriveNodeReference, DrivePartySignatureInviteReference, DrivePartyVideoInviteReference,
+    DrivePort, DriveRegisterCaseFileCommand, NotaryCaseAssignmentCommand,
+    NotaryCaseAssignmentRecord, NotaryCaseEventListPage, NotaryCaseEventListQuery,
+    NotaryCaseEventRecord, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
+    NotaryCaseUpdateCommand, NotaryDashboardStatisticsAggregate, NotaryDashboardStatisticsQuery,
+    NotaryMonthlyCaseCount, NotaryMonthlyCaseCountQuery, NotaryOrganizationProfile,
+    NotaryOrganizationProfileListPage, NotaryOrganizationProfileUpdateCommand, NotaryPartyListPage,
+    NotaryPartyListQuery, NotaryPartyRecord, NotaryPartyUpdateCommand, NotaryStaffListPage,
+    NotaryStaffListQuery,
 };
 use serde_json::json;
 
@@ -74,16 +79,19 @@ impl AppbasePort for RecordingAppbase {
         &self,
         query: NotaryStaffListQuery,
     ) -> Result<NotaryStaffListPage, NotaryServiceError> {
-        let members = self.list_organization_members(&query.organization_id).await?;
+        let members = self
+            .list_organization_members(&query.organization_id)
+            .await?;
         let page_size = query.page_size.max(1);
         let offset = query.offset.max(0) as usize;
         let filtered: Vec<_> = members
             .into_iter()
             .filter(|member| member.enterprise_verified && member.notary_enabled)
             .filter(|member| {
-                query.staff_role.as_ref().is_none_or(|role| {
-                    member.roles.iter().any(|value| value == role)
-                })
+                query
+                    .staff_role
+                    .as_ref()
+                    .is_none_or(|role| member.roles.iter().any(|value| value == role))
             })
             .skip(offset)
             .take((page_size + 1) as usize)
@@ -93,10 +101,11 @@ impl AppbasePort for RecordingAppbase {
             .into_iter()
             .take(page_size as usize)
             .collect::<Vec<_>>();
+        let next_offset = query.offset + items.len() as i64;
         Ok(NotaryStaffListPage {
             items,
             has_more,
-            next_offset: query.offset + items.len() as i64,
+            next_offset,
         })
     }
 }
@@ -110,11 +119,34 @@ pub struct RecordingCommerce {
 struct RecordingCommerceState {
     events: Vec<String>,
     matters: Vec<CommerceMatterRecord>,
+    order_states: Vec<RecordingCommerceOrderState>,
+    strict_order_state_lookup: bool,
+}
+
+struct RecordingCommerceOrderState {
+    organization_id: String,
+    state: CommerceOrderFulfillmentState,
 }
 
 impl RecordingCommerce {
     pub fn with_matter(self, record: CommerceMatterRecord) -> Self {
         lock(&self.inner).matters.push(record);
+        self
+    }
+
+    pub fn with_order_fulfillment_state(
+        self,
+        organization_id: &str,
+        state: CommerceOrderFulfillmentState,
+    ) -> Self {
+        {
+            let mut inner = lock(&self.inner);
+            inner.strict_order_state_lookup = true;
+            inner.order_states.push(RecordingCommerceOrderState {
+                organization_id: organization_id.to_owned(),
+                state,
+            });
+        }
         self
     }
 
@@ -148,17 +180,48 @@ impl CommercePort for RecordingCommerce {
         })
     }
 
-    async fn cancel_notary_order(&self, order_id: &str) -> Result<(), NotaryServiceError> {
+    async fn cancel_notary_order(
+        &self,
+        _organization_id: &str,
+        order_id: &str,
+    ) -> Result<(), NotaryServiceError> {
         lock(&self.inner)
             .events
             .push(format!("cancel_order:{order_id}"));
         Ok(())
     }
 
+    async fn get_notary_order_fulfillment_state(
+        &self,
+        organization_id: &str,
+        order_id: &str,
+    ) -> Result<CommerceOrderFulfillmentState, NotaryServiceError> {
+        let mut state = lock(&self.inner);
+        state.events.push(format!(
+            "get_order_fulfillment_state:{organization_id}:{order_id}"
+        ));
+        if let Some(order_state) = state.order_states.iter().find(|order_state| {
+            order_state.organization_id == organization_id && order_state.state.order_id == order_id
+        }) {
+            return Ok(order_state.state.clone());
+        }
+        if state.strict_order_state_lookup {
+            return Err(NotaryServiceError::not_found(
+                "commerce order was not found for the notary organization",
+            ));
+        }
+        Ok(CommerceOrderFulfillmentState {
+            order_id: order_id.to_owned(),
+            order_status: "paid".to_owned(),
+            payment_status: Some("success".to_owned()),
+            payable_amount: "50000".to_owned(),
+        })
+    }
+
     async fn list_notary_matters(
         &self,
         query: CommerceMatterListQuery,
-    ) -> Result<Vec<CommerceMatterRecord>, NotaryServiceError> {
+    ) -> Result<CommerceMatterListPage, NotaryServiceError> {
         let mut state = lock(&self.inner);
         state.events.push(format!(
             "list_matters:{}:{}:{}:{}:{}",
@@ -168,7 +231,7 @@ impl CommercePort for RecordingCommerce {
             query.page_size,
             query.offset
         ));
-        Ok(state
+        let mut items = state
             .matters
             .iter()
             .filter(|record| {
@@ -186,9 +249,12 @@ impl CommercePort for RecordingCommerce {
                 })
             })
             .skip(query.offset.max(0) as usize)
-            .take(query.page_size.max(0) as usize)
+            .take(query.page_size.max(0).saturating_add(1) as usize)
             .cloned()
-            .collect())
+            .collect::<Vec<_>>();
+        let has_more = items.len() as i64 > query.page_size;
+        items.truncate(query.page_size.max(0) as usize);
+        Ok(CommerceMatterListPage { items, has_more })
     }
 
     async fn create_notary_matter(
@@ -232,13 +298,13 @@ impl CommercePort for RecordingCommerce {
             record.title = title;
         }
         if let Some(description) = command.description {
-            record.description = Some(description);
+            record.description = description;
         }
         if let Some(price_amount) = command.price_amount {
             record.price_amount = price_amount;
         }
         if let Some(original_price_amount) = command.original_price_amount {
-            record.original_price_amount = Some(original_price_amount);
+            record.original_price_amount = original_price_amount;
         }
         if let Some(currency_code) = command.currency_code {
             record.currency_code = currency_code;
@@ -265,6 +331,7 @@ pub struct RecordingDrive {
 #[derive(Default)]
 struct RecordingDriveState {
     events: Vec<String>,
+    files: Vec<DriveNodeReference>,
 }
 
 impl RecordingDrive {
@@ -317,7 +384,8 @@ impl DrivePort for RecordingDrive {
         &self,
         query: DriveListNodesQuery,
     ) -> Result<DriveListNodesPage, NotaryServiceError> {
-        lock(&self.inner).events.push(format!(
+        let mut state = lock(&self.inner);
+        state.events.push(format!(
             "list_nodes:{}:{}:{}:{}:{}:{}",
             query.space_type,
             query.space_id,
@@ -326,6 +394,24 @@ impl DrivePort for RecordingDrive {
             query.page_size,
             query.cursor.clone().unwrap_or_default()
         ));
+        if !state.files.is_empty() {
+            let items = state
+                .files
+                .iter()
+                .filter(|file| {
+                    query
+                        .category
+                        .as_deref()
+                        .is_none_or(|category| file.category == category)
+                })
+                .cloned()
+                .collect();
+            return Ok(DriveListNodesPage {
+                items,
+                has_more: false,
+                next_cursor: None,
+            });
+        }
         Ok(DriveListNodesPage {
             items: vec![DriveNodeReference {
                 node_id: format!("node-{}", query.parent_node_id),
@@ -333,6 +419,8 @@ impl DrivePort for RecordingDrive {
                 category: query.category.unwrap_or_else(|| "evidence".to_string()),
                 size_label: "2.4 MB".to_string(),
                 status: "verified".to_string(),
+                material_code: None,
+                party_id: None,
             }],
             has_more: false,
             next_cursor: None,
@@ -343,10 +431,23 @@ impl DrivePort for RecordingDrive {
         &self,
         command: DriveRegisterCaseFileCommand,
     ) -> Result<(), NotaryServiceError> {
-        lock(&self.inner).events.push(format!(
+        let mut state = lock(&self.inner);
+        state.events.push(format!(
             "register_case_file:{}:{}:{}:{}",
             command.space_id, command.node_id, command.category, command.review_status
         ));
+        state.files.push(DriveNodeReference {
+            node_name: command
+                .material_code
+                .clone()
+                .unwrap_or_else(|| command.node_id.clone()),
+            node_id: command.node_id,
+            category: command.category,
+            size_label: String::new(),
+            status: command.review_status,
+            material_code: command.material_code,
+            party_id: command.party_id,
+        });
         Ok(())
     }
 
@@ -368,6 +469,79 @@ impl DrivePort for RecordingDrive {
             download_url: None,
         })
     }
+
+    async fn create_party_video_invite(
+        &self,
+        command: DriveCreatePartyVideoInviteCommand,
+    ) -> Result<DrivePartyVideoInviteReference, NotaryServiceError> {
+        let invite_id = format!("video-invite-{}-{}", command.case_id, command.party_id);
+        let conversation_id = format!("notary-{}-{}-video", command.case_id, command.party_id);
+        let invite_url = format!(
+            "sdkwork://notary/video-invite?inviteId={invite_id}&conversationId={conversation_id}&caseId={}&partyId={}",
+            command.case_id, command.party_id
+        );
+        lock(&self.inner).events.push(format!(
+            "create_party_video_invite:{}:{}:{}",
+            command.case_id, command.party_id, command.purpose
+        ));
+        Ok(DrivePartyVideoInviteReference {
+            invite_id,
+            case_id: command.case_id,
+            party_id: command.party_id,
+            party_name: command.party_name,
+            purpose: command.purpose,
+            conversation_id,
+            invite_url,
+            drive_space_id: command.drive_space_id,
+            drive_space_type: command.drive_space_type,
+            drive_folder_node_id: command.drive_folder_node_id,
+        })
+    }
+
+    async fn create_party_signature_invite(
+        &self,
+        command: DriveCreatePartySignatureInviteCommand,
+    ) -> Result<DrivePartySignatureInviteReference, NotaryServiceError> {
+        let invite_id = format!("signature-invite-{}-{}", command.case_id, command.party_id);
+        let invite_url = format!(
+            "sdkwork://notary/signature-invite?inviteId={invite_id}&caseId={}&partyId={}",
+            command.case_id, command.party_id
+        );
+        lock(&self.inner).events.push(format!(
+            "create_party_signature_invite:{}:{}:{}",
+            command.case_id, command.party_id, command.purpose
+        ));
+        Ok(DrivePartySignatureInviteReference {
+            invite_id,
+            case_id: command.case_id,
+            party_id: command.party_id,
+            party_name: command.party_name,
+            purpose: command.purpose,
+            invite_url,
+            drive_space_id: command.drive_space_id,
+            drive_space_type: command.drive_space_type,
+            drive_folder_node_id: command.drive_folder_node_id,
+        })
+    }
+
+    async fn create_monthly_report(
+        &self,
+        command: DriveCreateMonthlyReportCommand,
+    ) -> Result<DriveMonthlyReportReference, NotaryServiceError> {
+        let report_id = format!("notary-monthly-{}-{}", command.month, command.format);
+        lock(&self.inner).events.push(format!(
+            "create_monthly_report:{}:{}:{}",
+            command.month, command.format, command.case_count
+        ));
+        Ok(DriveMonthlyReportReference {
+            download_url: format!("sdkwork://notary/reports/{report_id}.{}", command.format),
+            report_id,
+            month: command.month,
+            format: command.format,
+            file_size: 1_024,
+            case_count: command.case_count,
+        })
+    }
 }
 
 #[derive(Clone, Default)]
@@ -378,11 +552,14 @@ pub struct RecordingNotaryCaseRepository {
 #[derive(Default)]
 struct RecordingNotaryCaseRepositoryState {
     events: Vec<String>,
+    case_update_commands: Vec<NotaryCaseUpdateCommand>,
     profiles: Vec<(String, String, String)>,
     cases: Vec<NotaryCaseRecord>,
     parties: Vec<NotaryPartyRecord>,
     case_events: Vec<NotaryCaseEventRecord>,
     assignments: Vec<NotaryCaseAssignmentRecord>,
+    dashboard_statistics: NotaryDashboardStatisticsAggregate,
+    monthly_case_count: i64,
     insert_party_failure_case_id: Option<String>,
 }
 
@@ -411,6 +588,16 @@ impl RecordingNotaryCaseRepository {
         self
     }
 
+    pub fn with_dashboard_statistics(self, statistics: NotaryDashboardStatisticsAggregate) -> Self {
+        lock(&self.inner).dashboard_statistics = statistics;
+        self
+    }
+
+    pub fn with_monthly_case_count(self, count: i64) -> Self {
+        lock(&self.inner).monthly_case_count = count;
+        self
+    }
+
     pub fn with_insert_party_failure(self, case_id: &str) -> Self {
         lock(&self.inner).insert_party_failure_case_id = Some(case_id.to_string());
         self
@@ -418,6 +605,10 @@ impl RecordingNotaryCaseRepository {
 
     pub fn events(&self) -> Vec<String> {
         lock(&self.inner).events.clone()
+    }
+
+    pub fn case_update_commands(&self) -> Vec<NotaryCaseUpdateCommand> {
+        lock(&self.inner).case_update_commands.clone()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -641,27 +832,50 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
         command: NotaryCaseUpdateCommand,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
         let mut state = lock(&self.inner);
-        let record = state
+        let record_index = state
             .cases
-            .iter_mut()
-            .find(|record| record.case_id == command.case_id)
+            .iter()
+            .position(|record| record.case_id == command.case_id)
             .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+        if state.cases[record_index].version != command.expected_version {
+            return Err(NotaryServiceError::conflict("notary case version conflict"));
+        }
 
-        if let Some(title) = command.title {
-            record.title = title;
-        }
-        if let Some(remarks) = command.remarks {
-            record.remarks = Some(remarks);
-        }
-        if let Some(status) = command.status {
-            record.status = status;
-        }
-        if let Some(chain_hash) = command.chain_hash {
-            record.chain_hash = Some(chain_hash);
-        }
-        record.updated_at = "2026-06-10 10:30".to_string();
+        state.case_update_commands.push(command.clone());
+        let event_type = command.event_type.clone();
+        let case_id = command.case_id.clone();
+        let updated = {
+            let record = &mut state.cases[record_index];
 
-        Ok(record.clone())
+            if let Some(title) = command.title {
+                record.title = title;
+            }
+            if let Some(remarks) = command.remarks {
+                record.remarks = Some(remarks);
+            }
+            if let Some(status) = command.status {
+                record.status = status;
+            }
+            if let Some(chain_hash) = command.chain_hash {
+                record.chain_hash = Some(chain_hash);
+            }
+            record.version += 1;
+            record.updated_at = "2026-06-10 10:30".to_string();
+            record.clone()
+        };
+
+        state.events.push(format!("update_case:{event_type}"));
+        let next_event_order = state.case_events.len() + 1;
+        state.case_events.push(NotaryCaseEventRecord {
+            event_id: format!("event-{case_id}-{next_event_order}"),
+            case_id,
+            event_type: event_type.clone(),
+            event_title: event_type,
+            actor_user_id: Some("1".to_string()),
+            occurred_at: updated.updated_at.clone(),
+        });
+
+        Ok(updated)
     }
 
     async fn update_party(
@@ -784,7 +998,7 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
             query.cursor.clone().unwrap_or_default()
         ));
         let page_size = query.page_size.max(1);
-        let mut items: Vec<NotaryCaseRecord> = state
+        let filtered_items: Vec<NotaryCaseRecord> = state
             .cases
             .iter()
             .filter(|record| record.organization_id == query.organization_id)
@@ -812,6 +1026,11 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
                             .contains(&search_term.to_ascii_lowercase())
                 })
             })
+            .cloned()
+            .collect();
+        let total_items = filtered_items.len() as i64;
+        let mut items = filtered_items
+            .into_iter()
             .filter(|record| {
                 query
                     .cursor
@@ -819,18 +1038,44 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
                     .is_none_or(|cursor| record.case_id.as_str() < cursor.as_str())
             })
             .take((page_size + 1) as usize)
-            .cloned()
-            .collect();
+            .collect::<Vec<_>>();
         let has_more = items.len() as i64 > page_size;
         if has_more {
             items.truncate(page_size as usize);
         }
+        let next_cursor = items.last().map(|record| record.case_id.clone());
         Ok(NotaryCaseListPage {
             items,
             has_more,
-            next_cursor: items
-                .last()
-                .map(|record| record.case_id.clone()),
+            next_cursor,
+            total_items,
+        })
+    }
+
+    async fn get_dashboard_statistics(
+        &self,
+        query: NotaryDashboardStatisticsQuery,
+    ) -> Result<NotaryDashboardStatisticsAggregate, NotaryServiceError> {
+        let mut state = lock(&self.inner);
+        state.events.push(format!(
+            "get_dashboard_statistics:{}",
+            query.organization_id
+        ));
+        Ok(state.dashboard_statistics.clone())
+    }
+
+    async fn count_cases_for_month(
+        &self,
+        query: NotaryMonthlyCaseCountQuery,
+    ) -> Result<NotaryMonthlyCaseCount, NotaryServiceError> {
+        let mut state = lock(&self.inner);
+        state.events.push(format!(
+            "count_cases_for_month:{}:{}",
+            query.organization_id(),
+            query.month()
+        ));
+        Ok(NotaryMonthlyCaseCount {
+            count: state.monthly_case_count,
         })
     }
 
@@ -881,12 +1126,11 @@ impl NotaryCaseRepositoryPort for RecordingNotaryCaseRepository {
         if has_more {
             items.truncate(page_size as usize);
         }
+        let next_cursor = items.last().map(|record| record.event_id.clone());
         Ok(NotaryCaseEventListPage {
             items,
             has_more,
-            next_cursor: items
-                .last()
-                .map(|record| record.event_id.clone()),
+            next_cursor,
         })
     }
 }

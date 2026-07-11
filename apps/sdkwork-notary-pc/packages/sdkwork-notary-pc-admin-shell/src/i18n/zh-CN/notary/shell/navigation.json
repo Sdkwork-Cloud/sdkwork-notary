@@ -1,0 +1,10 @@
+{
+  "brand": "SDKWork 公证",
+  "surface": "内部管理后台",
+  "operations": "运营管理",
+  "matters": "事项管理",
+  "operator": "当前操作员",
+  "accessDeniedTitle": "无访问权限",
+  "accessDeniedDescription": "当前操作员账号没有访问该管理页面的权限。",
+  "loading": "正在加载管理工作台"
+}

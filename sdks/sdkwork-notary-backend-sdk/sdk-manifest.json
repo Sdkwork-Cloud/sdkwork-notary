@@ -6,7 +6,7 @@
   "sdkFamily": "sdkwork-notary-backend-sdk",
   "sdkType": "backend",
   "apiPrefix": "/backend/v3/api",
-  "generationInputSpec": "../../generated/openapi/notary-backend-api.openapi.json",
+  "generationInputSpec": "openapi/notary-backend-api.sdkgen.json",
   "generatedPackages": {
     "typescript": {
       "language": "typescript",
@@ -89,7 +89,7 @@
   "openapiVersion": "3.1.2",
   "authoritySpec": "../../generated/openapi/notary-backend-api.openapi.json",
   "derivedSpecs": {
-    "default": "../../generated/openapi/notary-backend-api.openapi.json"
+    "default": "openapi/notary-backend-api.sdkgen.json"
   },
   "discoverySurface": {
     "sdkTarget": "backend",

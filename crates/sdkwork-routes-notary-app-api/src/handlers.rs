@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 use axum::{
     extract::{Path, Query, State},
+    http::HeaderMap,
     response::Response,
     Json,
 };
@@ -10,11 +11,11 @@ use serde_json::{Map, Value};
 use sdkwork_routes_notary_http_auth::{
     envelope_success_data, finish_success, finish_success_no_content,
     is_delete_no_content_operation, notary_request_context_from_web,
-    success_status_for_notary_app_operation,
+    success_status_for_notary_app_operation, validate_list_query,
 };
 use sdkwork_web_core::WebRequestContext;
 
-use crate::service_port::NotaryAppApiState;
+use crate::service_port::{NotaryAppApiState, NotaryOperationMetadata};
 
 pub async fn retrieve_access(
     State(state): State<NotaryAppApiState>,
@@ -49,6 +50,9 @@ pub async fn list_matters(
     app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_operation(
         state,
         app_ctx,
@@ -79,6 +83,9 @@ pub async fn list_staff(
     app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_operation(
         state,
         app_ctx,
@@ -99,6 +106,9 @@ pub async fn list_cases(
     app_ctx: WebRequestContext,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_operation(
         state,
         app_ctx,
@@ -117,9 +127,20 @@ pub async fn list_cases(
 pub async fn create_case(
     State(state): State<NotaryAppApiState>,
     app_ctx: WebRequestContext,
+    headers: HeaderMap,
     Json(body): Json<Value>,
 ) -> Response {
-    call_operation(state, app_ctx, "notary.cases.create", BTreeMap::new(), body).await
+    call_operation_with_metadata(
+        state,
+        app_ctx,
+        "notary.cases.create",
+        BTreeMap::new(),
+        body,
+        NotaryOperationMetadata {
+            idempotency_key: sdkwork_web_core::extractors::idempotency_key(&headers),
+        },
+    )
+    .await
 }
 
 pub async fn retrieve_case(
@@ -324,6 +345,9 @@ pub async fn list_case_files(
     Path(case_id): Path<String>,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_case_operation(
         state,
         app_ctx,
@@ -365,6 +389,9 @@ pub async fn list_case_events(
     Path(case_id): Path<String>,
     Query(query): Query<BTreeMap<String, String>>,
 ) -> Response {
+    if let Err(error) = validate_list_query(&query) {
+        return error.into_response_for(&app_ctx);
+    }
     call_case_operation(
         state,
         app_ctx,
@@ -408,11 +435,30 @@ async fn call_operation(
     path_params: BTreeMap<String, String>,
     body: Value,
 ) -> Response {
+    call_operation_with_metadata(
+        state,
+        app_ctx,
+        operation_id,
+        path_params,
+        body,
+        NotaryOperationMetadata::default(),
+    )
+    .await
+}
+
+async fn call_operation_with_metadata(
+    state: NotaryAppApiState,
+    app_ctx: WebRequestContext,
+    operation_id: &'static str,
+    path_params: BTreeMap<String, String>,
+    body: Value,
+    metadata: NotaryOperationMetadata,
+) -> Response {
     let result = async {
         let request_context = notary_request_context_from_web(&app_ctx)?;
         let service = state.service().clone();
         let response = service
-            .handle(request_context, operation_id, path_params, body)
+            .handle(request_context, operation_id, path_params, body, metadata)
             .await?;
         if is_delete_no_content_operation(operation_id) {
             return finish_success_no_content(&app_ctx);

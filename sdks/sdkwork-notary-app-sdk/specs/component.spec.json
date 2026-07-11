@@ -13,7 +13,7 @@
     "languages": ["typescript", "rust", "java", "python", "go"],
     "generated": true,
     "private": false,
-    "manifests": [".sdkwork-assembly.json", "sdk-manifest.json"]
+    "manifests": ["sdk-manifest.json"]
   },
   "canonicalSpecs": [
     {
@@ -62,6 +62,7 @@
       "name": "sdkwork-notary.app",
       "prefix": "/app/v3/api",
       "authorityOpenApi": "../../generated/openapi/notary-app-api.openapi.json",
+      "derivedOpenApi": ["openapi/notary-app-api.sdkgen.json"],
       "owner": "sdkwork-notary"
     },
     "sdkDependencies": [
@@ -79,38 +80,6 @@
           "java": "com.sdkwork:sdkwork-iam-app-sdk",
           "python": "sdkwork-iam-app-sdk",
           "go": "github.com/sdkwork/sdkwork-iam-app-sdk"
-        }
-      },
-      {
-        "workspace": "sdkwork-catalog-app-sdk",
-        "role": "catalog-app-capability",
-        "required": false,
-        "dependencyMode": "consumer-sdk",
-        "apiPrefix": "/app/v3/api/catalog",
-        "apiAuthority": "sdkwork-catalog-app-api",
-        "generatedTransportImportPolicy": "forbidden",
-        "packageByLanguage": {
-          "typescript": "@sdkwork/catalog-app-sdk",
-          "rust": "sdkwork-catalog-app-sdk",
-          "java": "com.sdkwork:sdkwork-catalog-app-sdk",
-          "python": "sdkwork-catalog-app-sdk",
-          "go": "github.com/sdkwork/sdkwork-catalog-app-sdk"
-        }
-      },
-      {
-        "workspace": "sdkwork-order-app-sdk",
-        "role": "order-app-capability",
-        "required": false,
-        "dependencyMode": "consumer-sdk",
-        "apiPrefix": "/app/v3/api/orders",
-        "apiAuthority": "sdkwork-order-app-api",
-        "generatedTransportImportPolicy": "forbidden",
-        "packageByLanguage": {
-          "typescript": "@sdkwork/order-app-sdk",
-          "rust": "sdkwork-order-app-sdk",
-          "java": "com.sdkwork:sdkwork-order-app-sdk",
-          "python": "sdkwork-order-app-sdk",
-          "go": "github.com/sdkwork/sdkwork-order-app-sdk"
         }
       },
       {

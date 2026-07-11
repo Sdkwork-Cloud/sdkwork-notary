@@ -1,11 +1,14 @@
 use sdkwork_notary_case_contract::{
-    NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand, NotaryRuntimeContext,
+    now_iso8601, NotaryCaseCommand, NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand,
+    NotaryRuntimeContext,
 };
 use sdkwork_notary_case_service::{
     create_notary_case, ensure_notary_business_open, handle_notary_app_operation,
-    handle_notary_backend_operation, list_case_files, notary_runtime_contract,
-    AppbaseOrganizationMember, NotaryCaseEventRecord, NotaryPartyRecord, NotaryRuntimePorts,
-    NOTARY_CASE_REPOSITORY_PORT, NOTARY_COMMERCE_PORT, NOTARY_DRIVE_PORT, NOTARY_IAM_PORT,
+    handle_notary_app_operation_with_metadata, handle_notary_backend_operation, list_case_files,
+    notary_runtime_contract, AppbaseOrganizationMember, CommerceOrderFulfillmentState,
+    NotaryCaseEventRecord, NotaryDashboardStatisticsAggregate, NotaryOperationMetadata,
+    NotaryPartyRecord, NotaryRuntimePorts, NOTARY_CASE_REPOSITORY_PORT, NOTARY_COMMERCE_PORT,
+    NOTARY_DRIVE_PORT, NOTARY_IAM_PORT,
 };
 use serde_json::json;
 use std::collections::BTreeMap;
@@ -500,6 +503,411 @@ async fn accepting_case_rejects_invalid_status_transitions() {
 }
 
 #[tokio::test]
+async fn accepting_case_rejects_unpaid_order_before_repository_mutation() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default().with_order_fulfillment_state(
+        "200001",
+        CommerceOrderFulfillmentState {
+            order_id: "order-1".to_string(),
+            order_status: "pending_payment".to_string(),
+            payment_status: Some("pending".to_string()),
+            payable_amount: "50000".to_string(),
+        },
+    );
+    let drive = RecordingDrive::default();
+    let mut case = sample_case_record("case-1");
+    case.status = NotaryCaseStatus::PendingReview;
+    let repository = RecordingNotaryCaseRepository::default().with_case(case);
+
+    let error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.acceptances.create",
+        BTreeMap::from([(String::from("caseId"), String::from("case-1"))]),
+        json!({}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect_err("unpaid order must not be accepted");
+
+    assert_eq!(error.code(), "conflict");
+    assert!(error.message().contains("payment succeeds"));
+    assert!(repository.case_update_commands().is_empty());
+    assert!(repository.events().is_empty());
+    assert_eq!(
+        commerce.events(),
+        vec!["get_order_fulfillment_state:200001:order-1"]
+    );
+}
+
+#[tokio::test]
+async fn accepting_case_allows_paid_order_and_writes_one_acceptance_event() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default().with_order_fulfillment_state(
+        "200001",
+        CommerceOrderFulfillmentState {
+            order_id: "order-1".to_string(),
+            order_status: "paid".to_string(),
+            payment_status: Some("success".to_string()),
+            payable_amount: "50000".to_string(),
+        },
+    );
+    let drive = RecordingDrive::default();
+    let mut case = sample_case_record("case-1");
+    case.status = NotaryCaseStatus::PendingReview;
+    let repository = RecordingNotaryCaseRepository::default().with_case(case);
+
+    let accepted = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.acceptances.create",
+        BTreeMap::from([(String::from("caseId"), String::from("case-1"))]),
+        json!({}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect("paid order must be accepted");
+
+    assert_eq!(accepted["status"], "PROCESSING");
+    assert_eq!(accepted["version"], "2");
+    let updates = repository.case_update_commands();
+    assert_eq!(updates.len(), 1);
+    assert_eq!(updates[0].event_type, "notary.case.accepted");
+    assert_eq!(
+        commerce.events(),
+        vec!["get_order_fulfillment_state:200001:order-1"]
+    );
+}
+
+#[tokio::test]
+async fn accepting_case_rejects_terminal_order_even_after_payment_succeeds() {
+    for terminal_status in [
+        "fulfilled",
+        "completed",
+        "finished",
+        "cancelled",
+        "canceled",
+        "closed",
+        "expired",
+        "refunded",
+    ] {
+        let appbase = appbase_with_notary_staff();
+        let commerce = RecordingCommerce::default().with_order_fulfillment_state(
+            "200001",
+            CommerceOrderFulfillmentState {
+                order_id: "order-1".to_string(),
+                order_status: terminal_status.to_string(),
+                payment_status: Some("success".to_string()),
+                payable_amount: "50000".to_string(),
+            },
+        );
+        let drive = RecordingDrive::default();
+        let mut case = sample_case_record("case-1");
+        case.status = NotaryCaseStatus::PendingReview;
+        let repository = RecordingNotaryCaseRepository::default().with_case(case);
+
+        let error = handle_notary_app_operation(
+            &runtime_context(),
+            "notary.cases.acceptances.create",
+            BTreeMap::from([(String::from("caseId"), String::from("case-1"))]),
+            json!({}),
+            &NotaryRuntimePorts {
+                appbase: &appbase,
+                commerce: &commerce,
+                drive: &drive,
+                repository: &repository,
+            },
+        )
+        .await
+        .expect_err("terminal commerce order must not be accepted");
+
+        assert_eq!(error.code(), "conflict", "status: {terminal_status}");
+        assert!(error.message().contains("terminal commerce order"));
+        assert!(repository.case_update_commands().is_empty());
+        assert!(repository.events().is_empty());
+    }
+}
+
+#[tokio::test]
+async fn accepting_case_allows_zero_total_order_without_success_payment_status() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default().with_order_fulfillment_state(
+        "200001",
+        CommerceOrderFulfillmentState {
+            order_id: "order-1".to_string(),
+            order_status: "pending_payment".to_string(),
+            payment_status: Some("pending".to_string()),
+            payable_amount: "0".to_string(),
+        },
+    );
+    let drive = RecordingDrive::default();
+    let mut case = sample_case_record("case-1");
+    case.status = NotaryCaseStatus::PendingReview;
+    let repository = RecordingNotaryCaseRepository::default().with_case(case);
+
+    let accepted = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.acceptances.create",
+        BTreeMap::from([(String::from("caseId"), String::from("case-1"))]),
+        json!({}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect("zero-total order must be accepted");
+
+    assert_eq!(accepted["status"], "PROCESSING");
+    assert_eq!(repository.case_update_commands().len(), 1);
+}
+
+#[tokio::test]
+async fn accepting_case_scopes_order_lookup_to_case_organization() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default().with_order_fulfillment_state(
+        "200002",
+        CommerceOrderFulfillmentState {
+            order_id: "order-1".to_string(),
+            order_status: "paid".to_string(),
+            payment_status: Some("success".to_string()),
+            payable_amount: "50000".to_string(),
+        },
+    );
+    let drive = RecordingDrive::default();
+    let mut case = sample_case_record("case-1");
+    case.status = NotaryCaseStatus::PendingReview;
+    let repository = RecordingNotaryCaseRepository::default().with_case(case);
+
+    let error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.acceptances.create",
+        BTreeMap::from([(String::from("caseId"), String::from("case-1"))]),
+        json!({}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect_err("order from another organization must not authorize acceptance");
+
+    assert_eq!(error.code(), "not-found");
+    assert!(repository.case_update_commands().is_empty());
+    assert!(repository.events().is_empty());
+    assert_eq!(
+        commerce.events(),
+        vec!["get_order_fulfillment_state:200001:order-1"]
+    );
+}
+
+#[tokio::test]
+async fn completing_processing_case_does_not_query_order_payment_again() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default();
+    let drive = RecordingDrive::default();
+    let repository =
+        RecordingNotaryCaseRepository::default().with_case(sample_case_record("case-1"));
+
+    let completed = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.completions.create",
+        BTreeMap::from([(String::from("caseId"), String::from("case-1"))]),
+        json!({}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect("processing case must be completable");
+
+    assert_eq!(completed["status"], "COMPLETED");
+    assert!(commerce.events().is_empty());
+    assert_eq!(repository.case_update_commands().len(), 1);
+}
+
+#[tokio::test]
+async fn case_status_mutations_reject_malformed_wire_versions_before_repository_updates() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default();
+    let drive = RecordingDrive::default();
+    let path_params = BTreeMap::from([("caseId".to_string(), "case-1".to_string())]);
+
+    for (body, expected_message) in [
+        (json!({"version": 1}), "version must be an int64 string"),
+        (
+            json!({"version": "not-an-integer"}),
+            "version must be an int64 string",
+        ),
+        (json!({"version": "0"}), "version must be greater than zero"),
+        (
+            json!({"version": "-1"}),
+            "version must be greater than zero",
+        ),
+    ] {
+        let mut case = sample_case_record("case-1");
+        case.status = NotaryCaseStatus::PendingReview;
+        let repository = RecordingNotaryCaseRepository::default().with_case(case);
+
+        let error = handle_notary_app_operation(
+            &runtime_context(),
+            "notary.cases.acceptances.create",
+            path_params.clone(),
+            body,
+            &NotaryRuntimePorts {
+                appbase: &appbase,
+                commerce: &commerce,
+                drive: &drive,
+                repository: &repository,
+            },
+        )
+        .await
+        .expect_err("malformed version must be rejected");
+
+        assert_eq!(error.code(), "validation");
+        assert_eq!(error.message(), expected_message);
+        assert!(repository.case_update_commands().is_empty());
+    }
+}
+
+#[tokio::test]
+async fn rejecting_case_requires_a_reason_and_passes_it_into_the_atomic_update() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default();
+    let drive = RecordingDrive::default();
+    let mut case = sample_case_record("case-1");
+    case.status = NotaryCaseStatus::PendingReview;
+    let repository = RecordingNotaryCaseRepository::default().with_case(case);
+    let path_params = BTreeMap::from([("caseId".to_string(), "case-1".to_string())]);
+
+    let missing_reason_error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.rejections.create",
+        path_params.clone(),
+        json!({"reason": "  ", "version": "1"}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect_err("blank rejection reason");
+    assert_eq!(missing_reason_error.code(), "validation");
+    assert_eq!(missing_reason_error.message(), "reason is required");
+    assert!(repository.case_update_commands().is_empty());
+
+    let rejected = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.rejections.create",
+        path_params,
+        json!({"reason": "  identity document expired  ", "version": "1"}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap();
+
+    assert_eq!(rejected["status"], "REJECTED");
+    assert_eq!(rejected["version"], "2");
+    let commands = repository.case_update_commands();
+    assert_eq!(commands.len(), 1);
+    assert_eq!(commands[0].expected_version, 1);
+    assert_eq!(commands[0].event_type, "notary.case.rejected");
+    assert_eq!(
+        commands[0].reject_reason.as_deref(),
+        Some("identity document expired")
+    );
+}
+
+#[tokio::test]
+async fn case_status_mutation_surfaces_a_stale_version_as_conflict() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default();
+    let drive = RecordingDrive::default();
+    let mut case = sample_case_record("case-1");
+    case.status = NotaryCaseStatus::PendingReview;
+    case.version = 2;
+    let repository = RecordingNotaryCaseRepository::default().with_case(case);
+
+    let error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.acceptances.create",
+        BTreeMap::from([("caseId".to_string(), "case-1".to_string())]),
+        json!({"version": "1"}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect_err("stale version must fail compare-and-swap");
+
+    assert_eq!(error.code(), "conflict");
+    assert_eq!(error.message(), "notary case version conflict");
+    assert!(repository.case_update_commands().is_empty());
+    assert!(repository.events().is_empty());
+}
+
+#[tokio::test]
+async fn terminal_cases_reject_content_mutations_before_repository_writes() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default();
+    let drive = RecordingDrive::default();
+    let mut cancelled_case = sample_case_record("case-cancelled");
+    cancelled_case.status = NotaryCaseStatus::Cancelled;
+    let repository = RecordingNotaryCaseRepository::default().with_case(cancelled_case);
+    let path_params = BTreeMap::from([
+        ("caseId".to_string(), "case-cancelled".to_string()),
+        ("partyId".to_string(), "party-1".to_string()),
+    ]);
+
+    let error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.parties.update",
+        path_params,
+        json!({"name": "Changed party"}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect_err("terminal cases must reject party mutations");
+
+    assert_eq!(error.code(), "invalid-state");
+    assert!(error.message().contains("terminal"));
+    assert!(!repository
+        .events()
+        .iter()
+        .any(|event| event.starts_with("update_party:")));
+}
+
+#[tokio::test]
 async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() {
     let appbase = RecordingAppbase::default();
     let commerce = RecordingCommerce::default();
@@ -527,6 +935,7 @@ async fn case_file_listing_uses_denormalized_drive_space_type_without_joining() 
         remarks: None,
         request_no: "REQ-20260610-001".to_string(),
         idempotency_key: "idem-case-1".to_string(),
+        version: 1,
         created_at: "2026-06-10 10:00".to_string(),
         updated_at: "2026-06-10 10:00".to_string(),
     });
@@ -571,7 +980,7 @@ async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
         RecordingNotaryCaseRepository::default().with_profile("200001", "space-notary-200001");
     let context = runtime_context();
 
-    let created = handle_notary_app_operation(
+    let created = handle_notary_app_operation_with_metadata(
         &context,
         "notary.cases.create",
         BTreeMap::new(),
@@ -581,7 +990,6 @@ async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
             "title": "Electronic contract preservation",
             "applicantName": "Zhang San Network",
             "primaryNotaryMembershipId": "member-notary-1",
-            "idempotencyKey": "idem-route-case-1",
             "parties": [
                 {
                     "name": "Zhang San",
@@ -591,6 +999,9 @@ async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
                 }
             ]
         }),
+        &NotaryOperationMetadata {
+            idempotency_key: Some("idem-route-case-1".to_string()),
+        },
         &NotaryRuntimePorts {
             appbase: &appbase,
             commerce: &commerce,
@@ -630,6 +1041,33 @@ async fn app_operation_dispatcher_creates_case_and_lists_drive_files() {
         files["items"][0]["parentNodeId"],
         "folder-order-sku-electronic-contract"
     );
+}
+
+#[tokio::test]
+async fn app_operation_dispatcher_does_not_accept_body_idempotency_key() {
+    let error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.create",
+        BTreeMap::new(),
+        json!({
+            "organizationId": "200001",
+            "skuId": "sku-electronic-contract",
+            "title": "Electronic contract preservation",
+            "applicantName": "Zhang San Network",
+            "idempotencyKey": "legacy-body-key"
+        }),
+        &NotaryRuntimePorts {
+            appbase: &appbase_with_notary_staff(),
+            commerce: &RecordingCommerce::default(),
+            drive: &RecordingDrive::default(),
+            repository: &RecordingNotaryCaseRepository::default(),
+        },
+    )
+    .await
+    .expect_err("body idempotency key must not satisfy the header requirement");
+
+    assert_eq!(error.code(), "validation");
+    assert_eq!(error.message(), "Idempotency-Key header is required");
 }
 
 #[tokio::test]
@@ -705,9 +1143,10 @@ async fn app_operation_dispatcher_returns_frontend_case_details_from_notary_and_
     .await
     .unwrap();
     assert_eq!(listed["items"][0]["id"], "case-1");
+    assert_eq!(listed["pageInfo"]["totalItems"], "1");
     assert_eq!(
         repository.events().last().unwrap(),
-        "list_cases:200001:processing::contract:50:"
+        "list_cases:200001:processing::contract:20:"
     );
 }
 
@@ -831,7 +1270,16 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
     let repository = RecordingNotaryCaseRepository::default()
         .with_case(sample_case_record("case-1"))
         .with_case(completed_case)
-        .with_case(rejected_case);
+        .with_case(rejected_case)
+        .with_dashboard_statistics(NotaryDashboardStatisticsAggregate {
+            pending_review_count: 2,
+            today_completed_count: 4,
+            yesterday_completed_count: 6,
+            monthly_case_count: 3,
+            anomaly_intercepted_count: 1,
+            unsynced_completed_count: 0,
+        })
+        .with_monthly_case_count(3);
 
     let statistics = handle_notary_app_operation(
         &runtime_context(),
@@ -848,15 +1296,20 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
     .await
     .unwrap();
 
-    assert_eq!(statistics["pendingReviewQueue"]["count"], 0);
-    assert_eq!(statistics["todayCompleted"]["count"], 1);
+    assert_eq!(statistics["pendingReviewQueue"]["count"], 2);
+    assert_eq!(
+        statistics["pendingReviewQueue"]["estimatedProcessHours"],
+        4.0
+    );
+    assert_eq!(statistics["todayCompleted"]["count"], 4);
+    assert_eq!(statistics["todayCompleted"]["comparedToYesterday"], -2);
     assert_eq!(statistics["anomalyIntercepted"]["count"], 1);
     assert_eq!(statistics["monthlyPreservationTotal"]["count"], 3);
     assert_eq!(
         statistics["monthlyPreservationTotal"]["blockchainSyncStatus"],
         "OK"
     );
-    assert_eq!(repository.events()[0], "list_cases:200001::::100:");
+    assert_eq!(repository.events(), vec!["get_dashboard_statistics:200001"]);
 
     let report = handle_notary_app_operation(
         &runtime_context(),
@@ -881,7 +1334,74 @@ async fn app_operation_dispatcher_returns_dashboard_statistics_and_monthly_repor
         report["downloadUrl"],
         "sdkwork://notary/reports/notary-monthly-2026-06-csv.csv"
     );
-    assert_eq!(repository.events()[1], "list_cases:200001::::100:");
+    assert_eq!(
+        repository.events()[1],
+        "count_cases_for_month:200001:2026-06"
+    );
+}
+
+#[tokio::test]
+async fn monthly_report_defaults_to_current_utc_month_and_uses_repository_count() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default();
+    let drive = RecordingDrive::default();
+    let repository = RecordingNotaryCaseRepository::default().with_monthly_case_count(7);
+    let before_month = now_iso8601()[..7].to_string();
+
+    let report = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.reports.monthly.retrieve",
+        BTreeMap::new(),
+        serde_json::Value::Null,
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap();
+
+    let after_month = now_iso8601()[..7].to_string();
+    let report_month = report["month"].as_str().unwrap();
+    assert!(report_month == before_month || report_month == after_month);
+    assert_eq!(report["caseCount"], 7);
+    assert_eq!(
+        repository.events(),
+        vec![format!("count_cases_for_month:200001:{report_month}")]
+    );
+}
+
+#[tokio::test]
+async fn monthly_report_rejects_invalid_calendar_month_before_repository_or_drive_calls() {
+    let appbase = appbase_with_notary_staff();
+    let commerce = RecordingCommerce::default();
+    let drive = RecordingDrive::default();
+    let repository = RecordingNotaryCaseRepository::default();
+
+    let error = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.reports.monthly.retrieve",
+        BTreeMap::new(),
+        json!({"month": "2026-13", "format": "csv"}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .expect_err("invalid calendar month");
+
+    assert_eq!(error.code(), "validation");
+    assert_eq!(
+        error.message(),
+        "month must use YYYY-MM with a calendar month from 01 to 12"
+    );
+    assert!(repository.is_empty());
+    assert!(drive.events().is_empty());
 }
 
 #[tokio::test]
@@ -910,9 +1430,10 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
     .await
     .unwrap();
     assert_eq!(accepted["status"], "PROCESSING");
+    assert_eq!(accepted["version"], "2");
     assert!(repository
         .events()
-        .contains(&"append_event:notary.case.accepted".to_string()));
+        .contains(&"update_case:notary.case.accepted".to_string()));
 
     let with_party = handle_notary_app_operation(
         &runtime_context(),
@@ -933,12 +1454,12 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
     )
     .await
     .unwrap();
-    assert_eq!(with_party["parties"][0]["name"], "Li Si");
+    assert_eq!(with_party["name"], "Li Si");
     assert!(repository
         .events()
         .contains(&"append_event:notary.party.created".to_string()));
 
-    let party_id = with_party["parties"][0]["id"].as_str().unwrap().to_string();
+    let party_id = with_party["id"].as_str().unwrap().to_string();
     let mut invite_params = path_params.clone();
     invite_params.insert("partyId".to_string(), party_id.clone());
     let invite = handle_notary_app_operation(
@@ -1012,6 +1533,7 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
             "driveNodeId": "drive-node-1",
             "category": "evidence",
             "materialCode": "contract.pdf",
+            "partyId": party_id,
             "reviewStatus": "pending"
         }),
         &NotaryRuntimePorts {
@@ -1026,6 +1548,25 @@ async fn app_operation_dispatcher_mutates_case_party_and_drive_file_workflows() 
     assert_eq!(file["nodeId"], "drive-node-1");
     assert_eq!(file["driveSpaceType"], "notary");
     assert_eq!(file["parentNodeId"], "folder-case-1");
+    assert_eq!(file["materialCode"], "contract.pdf");
+    assert_eq!(file["partyId"], party_id);
+
+    let listed_files = handle_notary_app_operation(
+        &runtime_context(),
+        "notary.cases.files.list",
+        path_params.clone(),
+        json!({"page_size": "20"}),
+        &NotaryRuntimePorts {
+            appbase: &appbase,
+            commerce: &commerce,
+            drive: &drive,
+            repository: &repository,
+        },
+    )
+    .await
+    .unwrap();
+    assert_eq!(listed_files["items"][0]["materialCode"], "contract.pdf");
+    assert_eq!(listed_files["items"][0]["partyId"], party_id);
 
     let package = handle_notary_app_operation(
         &runtime_context(),
@@ -1120,7 +1661,7 @@ async fn backend_operation_dispatcher_opens_business_lists_staff_cases_and_summa
     assert_eq!(profiles["items"][0]["organizationId"], "200001");
     assert!(repository
         .events()
-        .contains(&"list_profiles:200001:20".to_string()));
+        .contains(&"list_profiles:200001:20:".to_string()));
 
     let staff = handle_notary_backend_operation(
         &runtime_context(),
@@ -1240,7 +1781,7 @@ async fn app_operation_dispatcher_returns_access_and_sku_backed_matters() {
     assert_eq!(matters["items"][0]["priceAmount"], "500.00");
     assert_eq!(
         commerce.events().last().unwrap(),
-        "list_matters:200001:contract::21:0"
+        "list_matters:200001:contract::20:0"
     );
 }
 
@@ -1447,7 +1988,12 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
         &admin_runtime_context(),
         "notary.matters.update",
         matter_path,
-        json!({"title": "Updated evidence preservation", "status": "inactive"}),
+        json!({
+            "title": "Updated evidence preservation",
+            "description": null,
+            "originalPriceAmount": null,
+            "status": "inactive"
+        }),
         &NotaryRuntimePorts {
             appbase: &appbase,
             commerce: &commerce,
@@ -1458,6 +2004,8 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
     .await
     .unwrap();
     assert_eq!(updated_matter["title"], "Updated evidence preservation");
+    assert!(updated_matter["description"].is_null());
+    assert!(updated_matter["originalPriceAmount"].is_null());
     assert_eq!(updated_matter["status"], "inactive");
 
     let mut assignment_path = BTreeMap::new();
@@ -1505,7 +2053,7 @@ async fn backend_operation_dispatcher_manages_profile_matters_and_assignments() 
     )
     .await
     .unwrap();
-    assert_eq!(released["released"], true);
+    assert!(released.is_null());
     assert_eq!(
         repository.events().last().unwrap(),
         "append_event:notary.case.assignment_released"
@@ -1600,6 +2148,7 @@ fn sample_case_record(case_id: &str) -> NotaryCaseRecord {
         remarks: Some("priority".to_string()),
         request_no: "REQ-20260610-001".to_string(),
         idempotency_key: "idem-case-1".to_string(),
+        version: 1,
         created_at: "2026-06-10 10:00".to_string(),
         updated_at: "2026-06-10 10:00".to_string(),
     }

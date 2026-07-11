@@ -6,6 +6,7 @@ use axum::Router;
 
 pub struct ApplicationAssembly {
     pub router: Router,
+    _embedded_notary: sdkwork_notary_embedded_bootstrap::EmbeddedNotaryAssembly,
 }
 
 pub async fn assemble_application_business_router() -> Result<ApplicationAssembly, String> {
@@ -14,6 +15,10 @@ pub async fn assemble_application_business_router() -> Result<ApplicationAssembl
             .await?;
     let router = embedded
         .router
+        .clone()
         .merge(sdkwork_routes_notary_http_auth::gateway_mount());
-    Ok(ApplicationAssembly { router })
+    Ok(ApplicationAssembly {
+        router,
+        _embedded_notary: embedded,
+    })
 }

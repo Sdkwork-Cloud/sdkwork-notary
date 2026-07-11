@@ -27,10 +27,30 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-feature",
     "publicExports": ["@sdkwork/notary-pc-notary"],
+    "providedPorts": [
+      {
+        "name": "notaryPcNotaryFeature",
+        "export": "@sdkwork/notary-pc-notary"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "notaryPcSdkRuntime",
+        "export": "@sdkwork/notary-pc-notary"
+      },
+      {
+        "name": "notaryPcHostRuntime",
+        "export": "@sdkwork/notary-pc-notary"
+      },
+      {
+        "name": "notaryPcCommonsUi",
+        "export": "@sdkwork/notary-pc-notary"
+      }
+    ],
     "runtimeEntrypoints": ["NotaryView", "createNotaryPcService", "configureNotaryPcRuntime"],
     "sdkClients": ["@sdkwork/notary-pc-core"],
-    "requiredPorts": ["@sdkwork/notary-pc-commons"],
     "dependencyApiSurfaces": []
   },
   "verification": {

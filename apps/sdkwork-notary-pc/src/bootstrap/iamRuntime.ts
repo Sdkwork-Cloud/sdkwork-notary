@@ -1,7 +1,6 @@
 import {
   createNotaryPcTokenManager,
   enableNotaryPcSessionLifecycle,
-  getTokenManager,
   refreshAuthenticatedNotaryPcSdkClients,
   registerNotaryPcServiceReset,
   resetAuthenticatedNotaryPcSdkClients,
@@ -9,8 +8,10 @@ import {
 } from '@sdkwork/notary-pc-core';
 import { resetNotaryService } from '@sdkwork/notary-pc-notary';
 
+let iamRuntimeInitialized = false;
+
 export function createIamRuntime(): void {
-  if (getTokenManager()) {
+  if (iamRuntimeInitialized) {
     return;
   }
 
@@ -20,6 +21,7 @@ export function createIamRuntime(): void {
   });
   setTokenManager(manager);
   registerNotaryPcServiceReset(resetNotaryService);
+  iamRuntimeInitialized = true;
 }
 
 export function finalizeIamRuntime(): void {

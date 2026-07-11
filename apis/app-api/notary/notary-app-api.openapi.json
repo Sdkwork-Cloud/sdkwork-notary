@@ -3,7 +3,7 @@
   "info": {
     "title": "SDKWork Notary App API",
     "version": "0.1.0",
-    "description": "User-facing notary API. Commerce owns orders and SKU-backed matters, Drive owns files and folders, and Appbase owns organization members."
+    "description": "User-facing notary API. Merchandise owns sellable SPU/SKU matter definitions, Order owns checkout and order-item state, Payment remains behind Order for payment execution, Drive owns files and folders, and IAM owns organization members."
   },
   "servers": [
     {
@@ -210,7 +210,7 @@
           "notary"
         ],
         "operationId": "notary.cases.create",
-        "summary": "Create a notary case, Commerce order item, and Drive notary folder",
+        "summary": "Create a notary case through Order checkout and a Drive notary folder",
         "security": [
           {
             "AuthToken": [],
@@ -463,7 +463,8 @@
           "notary"
         ],
         "operationId": "notary.cases.acceptances.create",
-        "summary": "Accept a pending notary case",
+        "summary": "Accept a paid, non-terminal notary case",
+        "description": "A case can be accepted only when its Order owner state is non-terminal and payment_status is success, unless the payable amount is zero.",
         "security": [
           {
             "AuthToken": [],
@@ -487,7 +488,7 @@
           "$ref": "#/components/requestBodies/CaseCommandRequestBody"
         },
         "responses": {
-          "200": {
+          "201": {
             "$ref": "#/components/responses/NotaryCaseResponse"
           },
           "401": {
@@ -511,6 +512,16 @@
             }
           },
           "404": {
+            "description": "Problem detail",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "409": {
             "description": "Problem detail",
             "content": {
               "application/problem+json": {
@@ -565,7 +576,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "$ref": "#/components/responses/NotaryCaseResponse"
           },
           "400": {
@@ -653,7 +664,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "$ref": "#/components/responses/NotaryCaseResponse"
           },
           "400": {
@@ -2891,10 +2902,15 @@
             "type": "string"
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "priceAmount": {
             "type": "string",
+            "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,3})?$",
+            "description": "Major-unit decimal amount projected from the Merchandise owner smallest-unit representation.",
             "x-sdkwork-decimal-string": true
           },
           "currencyCode": {

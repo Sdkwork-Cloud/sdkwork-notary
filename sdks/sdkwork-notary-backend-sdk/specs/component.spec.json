@@ -13,7 +13,7 @@
     "languages": ["typescript", "rust", "java", "python", "go"],
     "generated": true,
     "private": false,
-    "manifests": [".sdkwork-assembly.json", "sdk-manifest.json"]
+    "manifests": ["sdk-manifest.json"]
   },
   "canonicalSpecs": [
     {
@@ -62,6 +62,7 @@
       "name": "sdkwork-notary.backend",
       "prefix": "/backend/v3/api",
       "authorityOpenApi": "../../generated/openapi/notary-backend-api.openapi.json",
+      "derivedOpenApi": ["openapi/notary-backend-api.sdkgen.json"],
       "owner": "sdkwork-notary"
     },
     "sdkDependencies": [

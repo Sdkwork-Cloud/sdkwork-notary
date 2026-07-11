@@ -97,7 +97,10 @@ export const PartyDrawer: React.FC<PartyDrawerProps> = ({
     setIdBackFile(null);
     clearFaceImage();
     resetAttachments();
-  }, [clearFaceImage, emptyForm, isOpen, party, resetAttachments, t]);
+    if (party?.auxiliaryAttachments?.length) {
+      addFiles(party.auxiliaryAttachments);
+    }
+  }, [addFiles, clearFaceImage, emptyForm, isOpen, party, resetAttachments, t]);
 
   const drawerTitle = readOnly
     ? t('party.viewInfo')
@@ -137,6 +140,7 @@ export const PartyDrawer: React.FC<PartyDrawerProps> = ({
       identityFrontFile: idFrontFile ?? undefined,
       identityBackFile: idBackFile ?? undefined,
       faceImageDataUrl: faceImage ?? undefined,
+      auxiliaryAttachments: attachments.map((attachment) => attachment.file),
     };
     onSave(submittedParty);
   };

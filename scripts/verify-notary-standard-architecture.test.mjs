@@ -249,7 +249,8 @@ test('declares topology profiles for host application wiring', () => {
   }
 
   assert.equal(topology.database?.appPrefix, 'SDKWORK_NOTARY');
-  assert.equal(topology.defaults?.developmentProfileId, 'standalone.split-services.development');
+  assert.equal(topology.schemaVersion, 4);
+  assert.equal(topology.defaults?.developmentProfileId, 'standalone.development');
   assert.deepEqual(topology.surfaces?.['application.public-ingress']?.protocols, ['http']);
 });
 
@@ -327,8 +328,8 @@ test('declares IMF registry config with notary module enabled', () => {
 
 test('production topology profiles document PII vault secret injection', () => {
   for (const profile of [
-    'configs/topology/standalone.split-services.production.env',
-    'configs/topology/cloud.split-services.production.env',
+    'configs/topology/standalone.production.env',
+    'configs/topology/cloud.production.env',
   ]) {
     const env = read(profile);
     assert.match(env, /NOTARY_PII_VAULT_KEY/);

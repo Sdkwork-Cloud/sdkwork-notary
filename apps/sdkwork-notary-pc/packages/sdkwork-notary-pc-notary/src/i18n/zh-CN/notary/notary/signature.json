@@ -1,0 +1,16 @@
+{
+  "signaturePad": {
+    "cancelSign": "取消签署",
+    "writeSmoothly": "请平滑书写，签署您的全名",
+    "clearRewrite": "清除重写",
+    "confirmSubmit": "确认并提交签名",
+    "signHereHint": "请在此处完成签名",
+    "remoteSignature": "离座/异地签名",
+    "scanQRHint": "使用手机扫描二维码，在移动端完成签名",
+    "copyLink": "复制签名链接",
+    "black": "黑色",
+    "blue": "蓝色",
+    "red": "红色",
+    "signatureSaved": "签名已保存"
+  }
+}

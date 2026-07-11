@@ -47,19 +47,6 @@ export interface AppbaseBackendSdkPort {
   };
 }
 
-export interface CommerceBackendSdkPort {
-  catalog?: {
-    products?: {
-      create(input: unknown): Promise<unknown>;
-      update(productId: string, input: unknown): Promise<unknown>;
-    };
-    skus?: {
-      create(input: unknown): Promise<unknown>;
-      update(skuId: string, input: unknown): Promise<unknown>;
-    };
-  };
-}
-
 export interface DriveBackendSdkPort {
   spaces?: {
     create(input: unknown): Promise<unknown>;
@@ -73,11 +60,10 @@ export interface DriveBackendSdkPort {
 export interface CreateNotaryBackendApiOptions {
   notary: NotaryBackendSdkPort;
   appbase: AppbaseBackendSdkPort;
-  commerce: CommerceBackendSdkPort;
   drive: DriveBackendSdkPort;
 }
 
-export interface CreateMatterSkuInput {
+export interface CreateNotaryMatterInput {
   title: string;
   priceAmount: string;
   currencyCode: string;
@@ -100,7 +86,6 @@ export interface ListStaffMembersInput {
 export function createNotaryBackendApi({
   notary,
   appbase,
-  commerce,
   drive
 }: CreateNotaryBackendApiOptions) {
   async function openNotaryBusiness(input: {
@@ -122,7 +107,7 @@ export function createNotaryBackendApi({
     );
   }
 
-  async function createMatterSku(input: CreateMatterSkuInput) {
+  async function createMatter(input: CreateNotaryMatterInput) {
     return notary.matters.create(
       {
         organizationId: input.organizationId,
@@ -132,26 +117,22 @@ export function createNotaryBackendApi({
         originalPriceAmount: input.originalPriceAmount,
         currencyCode: input.currencyCode,
         status: input.status ?? "active",
-        spec: {
-          ...input.spec,
-          productType: "notary",
-          skuPolicy: "one_spu_one_sku"
-        }
+        spec: input.spec
       },
       input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined
     );
   }
 
-  async function listMatterSkus(input?: unknown) {
+  async function listMatters(input?: unknown) {
     return notary.matters.management.list(input);
   }
 
   async function listStaffMembers(input?: ListStaffMembersInput) {
     return notary.staff.list({
-      organization_id: input?.organizationId,
+      organizationId: input?.organizationId,
       q: input?.q,
-      staff_role: input?.staffRole,
-      page_size: input?.pageSize,
+      staffRole: input?.staffRole,
+      pageSize: input?.pageSize,
       cursor: input?.cursor
     });
   }
@@ -177,7 +158,7 @@ export function createNotaryBackendApi({
       spaceType: "notary",
       spaceId: input.driveSpaceId,
       parentNodeId: input.driveFolderNodeId,
-      page_size: input.pageSize,
+      pageSize: input.pageSize,
       cursor: input.cursor
     });
   }
@@ -185,11 +166,10 @@ export function createNotaryBackendApi({
   return {
     notary,
     appbase,
-    commerce,
     drive,
     openNotaryBusiness,
-    createMatterSku,
-    listMatterSkus,
+    createMatter,
+    listMatters,
     listStaffMembers,
     assignCase,
     listCaseFilesByFolder

@@ -8,7 +8,7 @@ repository-kind: application
 Notary owns only notary-specific facts:
 
 - `notary_organization_profile`: enables notary business for an enterprise-verified organization and stores its `space_type='notary'` Drive space.
-- `notary_case`: one notary case per Commerce order item, with `order_id`, `order_item_id`, `sku_id`, `drive_space_id`, and `drive_folder_node_id`.
+- `notary_case`: one notary case per Order order item, with `order_id`, `order_item_id`, `sku_id`, `drive_space_id`, and `drive_folder_node_id`.
 - `notary_party`: parties for a case, including encrypted identity and contact fields plus logical order/SKU references.
 - `notary_case_assignment`: case assignment facts for IAM organization members.
 - `notary_case_event`: timeline and process events.
@@ -18,8 +18,10 @@ The system deliberately does not create `notary_document`, `notary_order`, `nota
 ## Reused Capabilities
 
 - Staff: Appbase/IAM `iam_organization_membership`, roles, positions, and departments.
-- Notary matters: Commerce `commerce_product_spu` and `commerce_product_sku`; one notary product maps to one SKU.
-- Orders: Commerce `commerce_order` and `commerce_order_item`; every notary case is an order item.
+- Notary matters: Merchandise-owned `commerce_product_spu` and `commerce_product_sku`; one notary matter maps to one SPU and one SKU.
+- Orders: Order-owned `commerce_order` and `commerce_order_item`; every notary case is an order item.
+- Payments: Payment owns payment intents, attempts, callbacks, and refunds; Order remains the orchestration boundary.
+- Case acceptance: Notary queries the Order owner state and rejects unpaid or terminal orders without copying payment state or adding tables.
 - Files: Drive `dr_drive_space` and `dr_drive_node`; every case stores one `drive_folder_node_id` under `space_type='notary'`.
 
 Notary tables keep performance-critical logical references, but dependency-owned tables remain dependency-owned and are validated through service/SDK boundaries rather than physical cross-service foreign keys.
@@ -42,7 +44,7 @@ All operations are dual-token protected and carry SDKWork owner, authority, perm
 
 Dependency SDKs are declared explicitly:
 
-- App: `sdkwork-iam-app-sdk`, `sdkwork-catalog-app-sdk`, `sdkwork-order-app-sdk`, `sdkwork-drive-app-sdk`
+- App: `sdkwork-iam-app-sdk`, `sdkwork-drive-app-sdk`
 - Backend: `sdkwork-iam-backend-sdk`, `sdkwork-drive-backend-sdk`
 
 The TypeScript package roots and composed facades are authored outside `generated/server-openapi`:
@@ -57,16 +59,18 @@ These package roots export generated clients, generated types, and approved comp
 ## Runtime Crates
 
 - `crates/sdkwork-notary-case-contract`: shared domain records, commands, status values, typed service errors, runtime context, and service contract metadata.
-- `crates/sdkwork-notary-case-service`: orchestration service over explicit Appbase, Commerce, Drive, and Notary repository ports.
+- `crates/sdkwork-notary-case-service`: orchestration service over explicit IAM, Merchandise/Order, Drive, and Notary repository ports.
 - `crates/sdkwork-notary-case-repository-sqlx`: SQLx-backed Notary repository implementations (`SqliteNotaryCaseRepository`, `PostgresNotaryCaseRepository`) with schema sourced from `database/migrations/`.
 - `crates/sdkwork-notary-database-host`: database lifecycle bootstrap via `sdkwork-database-lifecycle` SPI.
+- `crates/sdkwork-notary-embedded-bootstrap`: same-process IAM, Merchandise/Order, and Drive adapters with an assembly-owned Snowflake node lease.
+- `crates/sdkwork-notary-gateway-assembly`: app/backend route composition that retains embedded runtime lifecycles.
 
 The runtime layer implements the main notary workflow without owning dependency facts:
 
-- app access retrieval checks the current Appbase Organization member, enterprise verification, notary enablement, organization profile status, and `drive_space_type='notary'` before returning menu visibility and notary permissions;
-- opening notary business validates Appbase Organization membership, enterprise verification, notary enablement, and role/position authority before creating the Drive `space_type='notary'` space and upserting `notary_organization_profile`;
-- notary matter listing and backend matter management delegate to Commerce SKU/SPU ports (`fulfillment_type='notary'`); embedded bootstrap reads `commerce_product_sku` directly with offset pagination;
-- creating a notary case validates the notary staff member, creates a Commerce order/order item from a notary `sku_id`, creates the Drive case folder, persists `notary_case`, persists parties, and appends the submitted timeline event;
+- app access retrieval checks the current IAM organization member, enterprise verification, notary enablement, organization profile status, and `drive_space_type='notary'` before returning menu visibility and notary permissions;
+- opening notary business validates IAM organization membership, enterprise verification, notary enablement, and role/position authority before creating the Drive `space_type='notary'` space and upserting `notary_organization_profile`;
+- notary matter listing and backend matter management delegate to the Merchandise owner service (`fulfillment_type='notary'`) with server-side pagination; embedded bootstrap does not query Merchandise tables directly;
+- creating a notary case validates the notary staff member, asks Order to create the checkout/order item from a notary `sku_id`, creates the Drive case folder, persists `notary_case`, persists parties, and appends the submitted timeline event; payment remains behind Order and Payment;
 - case updates, status commands, party add/update/delete, party signature attachment, file registration (Drive node properties `notary.category` / `notary.review_status`), download package requests, and timeline events are exposed through the app runtime dispatcher;
 - backend organization profile update, case management list/retrieve, staff list, assignment create/release, and case summary operations are exposed through the backend runtime dispatcher;
 - listing case files loads the case and calls Drive by denormalized `drive_space_type`, `drive_space_id`, and `drive_folder_node_id` with offset pagination and category filtering, avoiding cross-domain online joins.
@@ -91,6 +95,8 @@ SDKWork IM PC integrates the package directly:
 The IM app root includes `@sdkwork/notary-app-sdk` and `@sdkwork/notary-pc-notary` as workspace dependencies. IM core constructs the generated Notary App SDK client with the shared TokenManager, while `sdkwork-notary-pc-notary` owns the UI and service facade over `createNotaryApi`.
 
 Contract tests `sdks/test/notary-im-pc-real-app-integration.test.mjs` and `apps/sdkwork-notary-pc/src/__tests__/pc-architecture.contract.test.mjs` verify the notary-owned PC package and IM integration wiring.
+
+The PC root also exposes `/admin/notary/matters` through the independent `sdkwork-notary-pc-admin-core`, `sdkwork-notary-pc-admin-shell`, and `sdkwork-notary-pc-admin-merchandise` packages. Only admin core constructs `@sdkwork/notary-backend-sdk`, using the shared TokenManager and the topology backend HTTP root.
 
 Standalone PC client commands from the repository root:
 

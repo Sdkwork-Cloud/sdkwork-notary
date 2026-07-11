@@ -42,7 +42,15 @@
     }
   ],
   "contracts": {
+    "layerRole": "runtime-service-host",
     "publicExports": ["sdkwork_notary_database_host::*"],
+    "providedPorts": [
+      {
+        "name": "bootstrap_notary_database",
+        "export": "sdkwork_notary_database_host::*"
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": [
       "bootstrap_notary_database_from_env",
       "bootstrap_notary_database"

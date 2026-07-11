@@ -88,7 +88,7 @@ Build scripts, dev runners, and `pnpm clean` must follow `CODE_STYLE_SPEC.md` §
 
 Run commands from this directory unless a command explicitly targets another path.
 
-- `pnpm dev`: load the default standalone split-services development topology profile.
+- `pnpm dev`: load the default `standalone.development` topology profile.
 - `pnpm test:topology-validate`: validate `specs/topology.spec.json` against `@sdkwork/app-topology`.
 - `pnpm test:contracts`: contract tests for OpenAPI, SDK packages, runtime standards, standard architecture, topology baggage, and optional Chat PC integration.
 - `pnpm test:rust` or `cargo test --workspace --target-dir target-codex-test`: Rust workspace tests.

@@ -22,10 +22,26 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-shell",
     "publicExports": ["@sdkwork/notary-pc-shell"],
+    "providedPorts": [
+      {
+        "name": "notaryPcAppRoutes",
+        "export": "@sdkwork/notary-pc-shell"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "notaryPcNotaryFeature",
+        "export": "@sdkwork/notary-pc-shell"
+      },
+      {
+        "name": "notaryPcCommonsUi",
+        "export": "@sdkwork/notary-pc-shell"
+      }
+    ],
     "runtimeEntrypoints": ["NotaryPcRoutes", "NOTARY_PC_HOME_PATH"],
     "sdkClients": [],
-    "requiredPorts": ["@sdkwork/notary-pc-notary"],
     "dependencyApiSurfaces": []
   },
   "verification": {

@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "@sdkwork/notary-pc-admin-core",
+    "displayName": "SDKWork Notary PC Admin Core",
+    "version": "0.1.0",
+    "type": "react-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-admin-core",
+    "domain": "notary",
+    "declaredDomain": "notary",
+    "capability": "admin-core",
+    "surface": "backend-admin",
+    "status": "ready",
+    "languages": ["typescript"],
+    "generated": false,
+    "private": true,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_PC_ARCHITECTURE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md",
+      "purpose": "PC backend-admin runtime, SDK provider, and operator context ownership."
+    },
+    {
+      "file": "APP_SDK_INTEGRATION_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
+      "purpose": "Composed backend SDK consumption and shared TokenManager binding."
+    },
+    {
+      "file": "BACKEND_UI_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/BACKEND_UI_SPEC.md",
+      "purpose": "Backend-admin SDK, permission, and operator boundaries."
+    },
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component manifest and public port contract."
+    },
+    {
+      "file": "TYPESCRIPT_CODE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md",
+      "purpose": "Strict TypeScript exports and dependency injection."
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored module structure and generated SDK boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "Canonical package, capability, and backend-admin naming."
+    }
+  ],
+  "contracts": {
+    "layerRole": "frontend-core",
+    "publicExports": [".", "./sdk", "./modules", "./host", "./session", "./composition"],
+    "providedPorts": [
+      {
+        "name": "notaryPcAdminBackendSdkRuntime",
+        "export": "./sdk"
+      },
+      {
+        "name": "notaryPcAdminOperatorRuntime",
+        "export": "."
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "notaryPcTokenManager",
+        "export": "."
+      }
+    ],
+    "runtimeEntrypoints": [
+      "createNotaryPcAdminBackendSdkClient",
+      "NotaryPcAdminRuntimeProvider",
+      "useNotaryPcAdminBackendSdkClient",
+      "useNotaryPcAdminOperator"
+    ],
+    "sdkClients": [],
+    "sdkDependencies": [
+      {
+        "workspace": "sdkwork-notary-backend-sdk",
+        "permissionModuleId": "notary",
+        "surface": "backend-api",
+        "credentialMode": "authenticated-backend-admin"
+      }
+    ],
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": [],
+    "permissionComposition": {
+      "inheritanceMode": "module-catalog-with-overrides",
+      "applicationModule": {
+        "manifestRef": "../../../../../specs/iam.module.manifest.json"
+      },
+      "moduleCatalogRefs": [
+        {
+          "moduleId": "notary",
+          "manifestRef": "../../../../../specs/iam.module.manifest.json",
+          "inheritPermissions": true,
+          "inheritRoles": true
+        }
+      ],
+      "bootstrapAccessTokenScope": {
+        "inheritFrom": "sdkwork.app.config.json#backend.accessTokenPermissionScope",
+        "supplement": [],
+        "overrideReplace": false
+      },
+      "routePermissionHints": {
+        "inheritFromOpenApi": true,
+        "inheritFromModuleManifests": true,
+        "overrides": []
+      },
+      "consumerPolicy": {
+        "forbidLocalPermissionCatalogForDependencyDomains": true,
+        "allowExplicitOverridesOnly": true,
+        "allowFrontendHintsWithoutServerDuplication": true
+      }
+    }
+  },
+  "integration": {
+    "authority": "Notary PC admin core owns backend SDK construction, TokenManager binding, operator context, and frontend permission hints.",
+    "dependencyPolicy": "Admin shell and capability packages consume public exports; app and console packages do not import this backend-admin boundary.",
+    "sdkPolicy": "Only the composed @sdkwork/notary-backend-sdk is constructed, with the application global TokenManager and no raw HTTP escape hatch.",
+    "languagePolicy": "TypeScript source uses strict public exports and injected runtime dependencies."
+  },
+  "verification": {
+    "commands": [
+      "pnpm --dir apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-admin-core typecheck",
+      "node ../sdkwork-specs/tools/check-app-sdk-consumer-imports.mjs --workspace ."
+    ]
+  },
+  "metadata": {
+    "managedBy": "codex",
+    "standardVersion": "2026-07-11"
+  }
+}

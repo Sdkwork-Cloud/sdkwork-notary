@@ -1,9 +1,8 @@
-import type { PageInfo } from './page-info';
-import type { Party } from './party';
+import type { NotaryPartyList } from './notary-party-list';
 
 export interface NotaryCasesPartiesListResponse {
   code: 0;
-  data: unknown & Record<string, unknown>;
+  data: unknown & NotaryPartyList;
   /** Server-owned request correlation id. */
   traceId: string;
 }

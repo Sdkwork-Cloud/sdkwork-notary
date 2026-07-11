@@ -11,6 +11,9 @@ export * from "../generated/server-openapi/src/api";
 export * from "../generated/server-openapi/src/http";
 export * from "../generated/server-openapi/src/auth";
 export * from "../composed/index";
+export type {
+  NotaryMattersManagementListParams,
+} from "../generated/server-openapi/src/api/notary";
 
 export type SdkworkNotaryBackendClient = SdkworkBackendClient;
 

@@ -1,0 +1,24 @@
+{
+  "workspace": {
+    "title": "Notary Workspace",
+    "searchPlaceholder": "Search case no. / institution / subject..."
+  },
+  "stats": {
+    "pendingQueue": "Pending Review",
+    "todayCompleted": "Completed Today",
+    "anomalyIntercepted": "Anomaly Intercepted",
+    "monthlyVolume": "Monthly Volume",
+    "dash": "—",
+    "loading": "Syncing...",
+    "estimatedProcessingTime": "Est. processing time {{hours}}h",
+    "comparedToYesterday": "+12 vs yesterday",
+    "comparedToYesterdayPositive": "+{{delta}} vs yesterday",
+    "comparedToYesterdayNegative": "-{{delta}} vs yesterday",
+    "riskControlAutoIntercept": "Risk control auto-intercept",
+    "blockchainSyncOk": "Blockchain sync OK",
+    "blockchainSyncing": "Blockchain syncing"
+  },
+  "common": {
+    "notAvailable": "—"
+  }
+}

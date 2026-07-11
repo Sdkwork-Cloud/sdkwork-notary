@@ -19,7 +19,7 @@ import {
 function parseArgs(argv) {
   const settings = {
     deploymentProfile: 'standalone',
-    serviceLayout: 'split-services',
+    environment: 'development',
     printEnv: false,
     dryRun: false,
     help: false,
@@ -36,8 +36,8 @@ function parseArgs(argv) {
       index += 1;
       continue;
     }
-    if (arg === '--service-layout') {
-      settings.serviceLayout = argv[index + 1] ?? settings.serviceLayout;
+    if (arg === '--environment') {
+      settings.environment = argv[index + 1] ?? settings.environment;
       index += 1;
       continue;
     }
@@ -63,7 +63,7 @@ sdkwork-routes-notary-* crates and consume the resolved profile env below.
 
 Options:
   --deployment-profile <standalone|cloud>           Default: standalone
-  --service-layout <split-services>                 Default: split-services
+  --environment <development|test|staging|production> Default: development
   --print-env                                       Print merged profile env keys
   --dry-run                                         Print resolved URLs only
   --help, -h
@@ -77,7 +77,7 @@ function main() {
     return;
   }
 
-  const profileId = resolveDevProfileId(settings.deploymentProfile, settings.serviceLayout);
+  const profileId = resolveDevProfileId(settings.deploymentProfile, settings.environment);
   const profileEnv = loadProfile(profileId);
   const mergedEnv = mergeRuntimeEnv(process.env, profileEnv, resolveIamDevEnv(process.env));
 
@@ -85,6 +85,9 @@ function main() {
     repoRoot: REPO_ROOT,
     profileId,
     deploymentProfile: settings.deploymentProfile,
+    environment: settings.environment,
+    runtimeTarget: 'server',
+    databaseProfile: 'postgres',
     defaultDevProfileId: DEFAULT_DEV_PROFILE_ID,
     applicationPublicHttpUrl: resolveSurfaceHttpUrl(profileId, 'application.public-ingress', mergedEnv),
     applicationBackendHttpUrl: resolveSurfaceHttpUrl(profileId, 'application.backend-http', mergedEnv),

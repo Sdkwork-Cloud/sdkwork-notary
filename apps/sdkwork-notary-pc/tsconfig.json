@@ -15,17 +15,26 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["vite/client"],
     "paths": {
+      "@sdkwork/utils/string": ["../../../sdkwork-utils/packages/sdkwork-utils-typescript/src/string.ts"],
       "@sdkwork/notary-pc-core": ["./packages/sdkwork-notary-pc-core/src/index.ts"],
       "@sdkwork/notary-pc-commons": ["./packages/sdkwork-notary-pc-commons/src/index.ts"],
+      "@sdkwork/notary-pc-admin-core": ["./packages/sdkwork-notary-pc-admin-core/src/index.ts"],
+      "@sdkwork/notary-pc-admin-shell": ["./packages/sdkwork-notary-pc-admin-shell/src/index.ts"],
+      "@sdkwork/notary-pc-admin-merchandise": ["./packages/sdkwork-notary-pc-admin-merchandise/src/index.ts"],
       "@sdkwork/notary-pc-shell": ["./packages/sdkwork-notary-pc-shell/src/index.ts"],
       "@sdkwork/notary-pc-notary": ["./packages/sdkwork-notary-pc-notary/src/index.ts"],
-      "@sdkwork/notary-app-sdk": ["./packages/sdkwork-notary-pc-core/src/notaryAppSdk.d.ts"],
-      "@sdkwork/drive-app-sdk": ["./packages/sdkwork-notary-pc-core/src/dependencyAppSdk.d.ts"],
-      "@sdkwork/iam-app-sdk": ["./packages/sdkwork-notary-pc-core/src/dependencyAppSdk.d.ts"],
+      "@sdkwork/notary-app-sdk": ["../../sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/src/index.ts"],
+      "@sdkwork/notary-backend-sdk": ["../../sdks/sdkwork-notary-backend-sdk/sdkwork-notary-backend-sdk-typescript/src/index.ts"],
+      "@sdkwork/drive-app-sdk": ["../../../sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript/src/index.ts"],
+      "@sdkwork/iam-app-sdk": ["../../../sdkwork-iam/sdks/sdkwork-iam-app-sdk/sdkwork-iam-app-sdk-typescript/src/index.ts"],
       "@sdkwork/auth-pc-react": ["./packages/sdkwork-notary-pc-core/src/iamAppbase.d.ts"],
       "@sdkwork/auth-runtime-pc-react": ["./packages/sdkwork-notary-pc-core/src/iamAppbase.d.ts"],
       "@sdkwork/iam-contracts": ["./packages/sdkwork-notary-pc-core/src/iamAppbase.d.ts"]
     }
   },
-  "include": ["src", "packages"]
+  "include": ["src", "packages"],
+  "exclude": [
+    "packages/sdkwork-notary-pc-core/src/dependencyAppSdk.d.ts",
+    "packages/sdkwork-notary-pc-core/src/notaryAppSdk.d.ts"
+  ]
 }

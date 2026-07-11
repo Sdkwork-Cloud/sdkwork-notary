@@ -3,7 +3,7 @@
   "info": {
     "title": "SDKWork Notary Backend API",
     "version": "0.1.0",
-    "description": "Operator-facing notary API. Backend operations compose Appbase, Commerce, and Drive through dependency SDKs."
+    "description": "Operator-facing notary API. Matter management delegates SPU/SKU ownership to Merchandise; Order owns checkout and order-item state; Payment remains behind Order; Drive owns storage; and IAM owns operator organization authority."
   },
   "servers": [
     {
@@ -367,6 +367,9 @@
           },
           {
             "$ref": "#/components/parameters/OrganizationId"
+          },
+          {
+            "$ref": "#/components/parameters/NotaryMatterStatus"
           }
         ],
         "responses": {
@@ -405,7 +408,7 @@
           "notary"
         ],
         "operationId": "notary.matters.create",
-        "summary": "Create a notary matter by creating one Commerce SPU with one SKU",
+        "summary": "Create a notary matter through the Merchandise one-SPU/one-SKU model",
         "security": [
           {
             "AuthToken": [],
@@ -1093,6 +1096,15 @@
           "type": "string"
         }
       },
+      "NotaryMatterStatus": {
+        "name": "status",
+        "in": "query",
+        "required": false,
+        "description": "Filter matters by merchandise lifecycle status.",
+        "schema": {
+          "$ref": "#/components/schemas/NotaryMatterStatus"
+        }
+      },
       "Query": {
         "name": "q",
         "in": "query",
@@ -1769,14 +1781,24 @@
             "type": "string"
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "priceAmount": {
             "type": "string",
+            "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,3})?$",
+            "description": "Major-unit decimal amount. The server converts it exactly to the Merchandise owner smallest-unit representation using currencyCode.",
             "x-sdkwork-decimal-string": true
           },
           "originalPriceAmount": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,3})?$",
+            "description": "Optional major-unit comparison amount. Null means no comparison price is configured.",
             "x-sdkwork-decimal-string": true
           },
           "currencyCode": {
@@ -1785,12 +1807,7 @@
             "maxLength": 3
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "draft",
-              "active",
-              "inactive"
-            ]
+            "$ref": "#/components/schemas/NotaryMatterStatus"
           },
           "spec": {
             "type": "object",
@@ -1840,10 +1857,14 @@
           },
           "priceAmount": {
             "type": "string",
+            "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,3})?$",
+            "description": "Major-unit decimal amount. The server converts it exactly to the Merchandise owner smallest-unit representation using currencyCode.",
             "x-sdkwork-decimal-string": true
           },
           "originalPriceAmount": {
             "type": "string",
+            "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,3})?$",
+            "description": "Optional major-unit comparison amount.",
             "x-sdkwork-decimal-string": true
           },
           "currencyCode": {
@@ -1852,11 +1873,10 @@
             "maxLength": 3
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "draft",
-              "active",
-              "inactive"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NotaryMatterStatus"
+              }
             ],
             "default": "active"
           },
@@ -1869,21 +1889,33 @@
       "UpdateNotaryMatterRequest": {
         "type": "object",
         "additionalProperties": false,
+        "minProperties": 1,
         "properties": {
           "title": {
             "type": "string",
+            "minLength": 1,
             "maxLength": 200
           },
           "description": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 4000
           },
           "priceAmount": {
             "type": "string",
+            "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,3})?$",
+            "description": "Major-unit decimal amount. currencyCode is required whenever this field is updated.",
             "x-sdkwork-decimal-string": true
           },
           "originalPriceAmount": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]{1,3})?$",
+            "description": "Major-unit comparison amount. Null clears the comparison price; currencyCode is required when setting a value.",
             "x-sdkwork-decimal-string": true
           },
           "currencyCode": {
@@ -1892,18 +1924,21 @@
             "maxLength": 3
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "draft",
-              "active",
-              "inactive"
-            ]
+            "$ref": "#/components/schemas/NotaryMatterStatus"
           },
           "spec": {
             "type": "object",
             "additionalProperties": true
           }
         }
+      },
+      "NotaryMatterStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "active",
+          "inactive"
+        ]
       },
       "NotaryCaseStatus": {
         "type": "string",

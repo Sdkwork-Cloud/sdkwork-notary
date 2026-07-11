@@ -34,23 +34,21 @@ export function getNotaryPcAppSdkClient(): SdkworkNotaryAppClient {
 }
 
 function resolveComposedDependencyClients(
-  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'>>,
-): Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'> {
+  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'appbase'>>,
+): Pick<CreateNotaryApiOptions, 'drive' | 'appbase'> {
   return {
     drive: (options.drive ?? getNotaryPcDriveAppSdkClient()) as DriveAppSdkPort,
-    commerce: options.commerce,
     appbase: (options.appbase ?? getNotaryPcAppbaseAppSdkClient()) as AppbaseAppSdkPort,
   };
 }
 
 export function createNotaryPcComposedApi(
-  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'commerce' | 'appbase'>> = {},
+  options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'appbase'>> = {},
 ) {
   const dependencies = resolveComposedDependencyClients(options);
   return createNotaryApi({
     notary: getNotaryPcAppSdkClient().notary,
     drive: dependencies.drive,
-    commerce: dependencies.commerce,
     appbase: dependencies.appbase,
   });
 }

@@ -1,103 +1,35 @@
-# Notary Contract Implementation Plan
+# Notary Contract Implementation Completion Record
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+Status: completed
+Owner: SDKWork maintainers
+Updated: 2026-07-11
 
-**Goal:** Build the initial `sdkwork-notary` contract layer with reusable database tables, app/backend OpenAPI, SDK family metadata, and composed SDK facades that integrate Appbase, Commerce, and Drive without duplicating their owned APIs.
+The active requirement, decision, and architecture authorities are:
 
-**Architecture:** Notary owns only its case dossier, party, assignment, event, and organization profile tables. Commerce remains the source of truth for SKU-backed notary matters and orders, Drive remains the source of truth for files/folders under `space_type='notary'`, and Appbase/IAM remains the source of truth for organization members, roles, positions, and departments.
+- [REQ-2026-0001](../../product/requirements/REQ-2026-0001-notary-pc-admin-matters.md)
+- [ADR-20260711](../../architecture/decisions/ADR-20260711-notary-admin-merchandise.md)
+- [TECH-2026-06-10](../../architecture/tech/TECH-2026-06-10-notary-contract-implementation.md)
 
-**Tech Stack:** SQLite-compatible SQL migrations, schema registry YAML, OpenAPI 3.1.2 JSON, SDKWork SDK family manifests, Node contract tests, TypeScript authored composed facades.
+## Implemented Scope
 
----
+- Notary owns only organization profiles, cases, parties, assignments, and case events.
+- IAM owns organization members and operator authority.
+- Merchandise owns one-SPU/one-SKU notary matter definitions.
+- Order owns checkout, order, order-item, amount snapshot, cancellation, and payment orchestration.
+- Payment owns payment intents, attempts, providers, callbacks, and refunds behind Order.
+- Drive owns notary spaces, folders, files, and download packages.
+- App and backend OpenAPI authorities use SDKWork v3 envelopes, numeric problem codes, typed inputs, and bounded pagination.
+- App and backend SDK families expose composed consumer package roots without raw HTTP or generated transport imports.
+- The embedded runtime consumes owner services and contains no Merchandise SPU/SKU SQL.
+- Runtime Merchandise ids use the injected SDKWork Snowflake provider; deterministic hashes are limited to idempotent business numbers.
+- Case acceptance queries the organization-scoped Order owner state, rejects unpaid or terminal orders, and permits zero-total orders without copying Order or Payment state into Notary.
+- The PC application contains separate app/user and backend-admin package families.
+- `/admin/notary/matters` supports server-paginated search, status filtering, create, edit, activation, and deactivation.
 
-### Task 1: Contract Tests
+## Persistence Result
 
-**Files:**
-- Create: `package.json`
-- Create: `sdks/test/notary-contracts.test.mjs`
+No `notary_matter`, `notary_product`, `notary_order`, `notary_payment`, or equivalent table was added. Notary does not copy dependency DDL. The reusable database framework owns Snowflake node leasing through `sdkwork_node_registry`.
 
-- [x] **Step 1: Write failing tests**
+## Verification Authority
 
-The contract tests assert the database, OpenAPI, SDK family, and composed facade boundaries.
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `pnpm test`
-Expected: FAIL because the SQL, OpenAPI, SDK manifests, and composed facade files are not implemented yet.
-
-### Task 2: Database Contract
-
-**Files:**
-- Create: `crates/sdkwork-notary-case-repository-sqlx/migrations/0001_notary_foundation.sql`
-- Create: `docs/schema-registry/tables/001-notary-core.yaml`
-
-- [ ] **Step 1: Implement minimal SQL**
-
-Create `notary_organization_profile`, `notary_case`, `notary_party`, `notary_case_assignment`, and `notary_case_event`.
-
-- [ ] **Step 2: Verify tests**
-
-Run: `pnpm test`
-Expected: database assertions pass, OpenAPI/SDK assertions still fail until later tasks are complete.
-
-### Task 3: OpenAPI Contracts
-
-**Files:**
-- Create: `generated/openapi/notary-app-api.openapi.json`
-- Create: `generated/openapi/notary-backend-api.openapi.json`
-
-- [ ] **Step 1: Implement app-api**
-
-Define Notary access, matters, cases, parties, files, download packages, and events under `/app/v3/api/notary`.
-
-- [ ] **Step 2: Implement backend-api**
-
-Define organization profiles, matter SKU management, case management, assignments, staff view, and reports under `/backend/v3/api/notary`.
-
-- [ ] **Step 3: Verify tests**
-
-Run: `pnpm test`
-Expected: OpenAPI assertions pass, SDK/facade assertions still fail until later tasks are complete.
-
-### Task 4: SDK Families And Facades
-
-**Files:**
-- Create: `sdks/sdkwork-notary-app-sdk/.sdkwork-assembly.json`
-- Create: `sdks/sdkwork-notary-app-sdk/sdk-manifest.json`
-- Create: `sdks/sdkwork-notary-app-sdk/specs/component.spec.json`
-- Create: `sdks/sdkwork-notary-app-sdk/specs/README.md`
-- Create: `sdks/sdkwork-notary-app-sdk/README.md`
-- Create: `sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/composed/index.ts`
-- Create: `sdks/sdkwork-notary-backend-sdk/.sdkwork-assembly.json`
-- Create: `sdks/sdkwork-notary-backend-sdk/sdk-manifest.json`
-- Create: `sdks/sdkwork-notary-backend-sdk/specs/component.spec.json`
-- Create: `sdks/sdkwork-notary-backend-sdk/specs/README.md`
-- Create: `sdks/sdkwork-notary-backend-sdk/README.md`
-- Create: `sdks/sdkwork-notary-backend-sdk/sdkwork-notary-backend-sdk-typescript/composed/index.ts`
-
-- [ ] **Step 1: Implement SDK metadata**
-
-Declare `sdkwork-appbase-*`, commerce T1 `sdkwork-catalog-*` / `sdkwork-order-*`, and `sdkwork-drive-*` as dependency SDKs.
-
-- [ ] **Step 2: Implement composed facades**
-
-Expose high-level Notary orchestration methods that call injected Notary, Drive, Commerce, and Appbase clients.
-
-- [ ] **Step 3: Verify tests**
-
-Run: `pnpm test`
-Expected: all tests pass.
-
-### Task 5: Documentation
-
-**Files:**
-- Create: `README.md`
-
-- [ ] **Step 1: Document architecture**
-
-Document table ownership, API ownership, SDK dependency boundaries, and Drive folder/file management.
-
-- [ ] **Step 2: Final verification**
-
-Run: `pnpm verify`
-Expected: PASS.
+Current verification commands are defined in the repository root `package.json`, `AGENTS.md`, and REQ-2026-0001. This completion record contains no executable backlog or unchecked historical steps.

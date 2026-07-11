@@ -6,4 +6,6 @@ export type {
   CreateNotaryTaskInput,
   NotaryService,
   NotaryStaffOption,
+  NotaryTaskPage,
+  NotaryTaskPageInfo,
 } from './services/NotaryService';

@@ -1,0 +1,55 @@
+{
+  "filter": {
+    "searchPlaceholder": "搜索流水卷宗号 / 机构名称 / 存证标的...",
+    "allBusinessTypes": "全部业务类型",
+    "allTypes": "全部业务类型",
+    "allNodeStatus": "全部节点状态",
+    "allStatuses": "全部节点状态",
+    "electronicContract": "电子合同存证",
+    "iprConfirmation": "知识产权确权公证",
+    "ipr": "知识产权确权",
+    "evidencePreservation": "电子证据固化",
+    "evidence": "电子证据固化",
+    "pendingReview": "待资审 / 风控",
+    "processing": "公证员办理中",
+    "completed": "区块链已出证"
+  },
+  "table": {
+    "notaryNo": "公证编号",
+    "title": "标题",
+    "business": "公证业务",
+    "party": "当事人",
+    "notary": "公证员",
+    "status": "状态",
+    "fee": "费用",
+    "createTime": "创建时间",
+    "actions": "操作",
+    "totalRecords": "共检索到 {{count}} 份电子卷宗",
+    "perPage": "每页显示",
+    "items": "条",
+    "remarks": "备注",
+    "viewDetails": "查看详情",
+    "delete": "删除",
+    "cancelConfirm": "确定要取消该公证流水吗？此操作不可撤销。",
+    "noTasks": "暂无匹配的公证卷宗"
+  },
+  "status": {
+    "pendingReview": "待审核",
+    "processing": "办理中",
+    "completed": "已出证",
+    "rejected": "已驳回",
+    "PENDING_REVIEW": "待审核",
+    "PROCESSING": "办理中",
+    "COMPLETED": "已出证",
+    "REJECTED": "已驳回",
+    "CANCELLED": "已取消",
+    "CREATE_FAILED": "创建失败"
+  },
+  "actions": {
+    "cancel": "取消",
+    "printPartyInfo": "打印当事人信息",
+    "monthlyReport": "业务月报",
+    "createTask": "新建公证",
+    "videoCall": "视频通话"
+  }
+}

@@ -33,7 +33,10 @@
       "iam.users.read",
       "iam.organizations.read",
       "iam.roles.read",
-      "iam.permissions.read"
+      "iam.permissions.read",
+      "notary.matters.management.read",
+      "notary.matters.create",
+      "notary.matters.update"
     ]
   },
   "runtime": {

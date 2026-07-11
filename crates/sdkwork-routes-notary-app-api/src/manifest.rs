@@ -43,7 +43,8 @@ const NOTARY_APP_API_ROUTES: &[HttpRoute] = &[
         "/app/v3/api/notary/cases",
         "notary",
         "notary.cases.create",
-    ),
+    )
+    .with_idempotent(true),
     HttpRoute::dual_token(
         HttpMethod::Get,
         "/app/v3/api/notary/cases/{caseId}",

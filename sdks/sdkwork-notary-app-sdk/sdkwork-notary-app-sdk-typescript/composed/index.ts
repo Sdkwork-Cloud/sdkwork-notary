@@ -1,3 +1,8 @@
+import type {
+  DriveUploaderClient,
+  DriveUploaderRequest,
+} from "@sdkwork/drive-app-sdk";
+
 export interface NotaryAppSdkPort {
   access: {
     retrieve(input?: unknown): Promise<unknown>;
@@ -9,7 +14,7 @@ export interface NotaryAppSdkPort {
     list(input?: unknown): Promise<unknown>;
   };
   cases: {
-    create(input: unknown, options?: unknown): Promise<unknown>;
+    create(input: unknown, options: { idempotencyKey: string }): Promise<unknown>;
     list(input?: unknown): Promise<unknown>;
     retrieve(caseId: string): Promise<unknown>;
     update(caseId: string, input: unknown): Promise<unknown>;
@@ -63,29 +68,27 @@ export interface NotaryAppSdkPort {
   };
 }
 
+export type NotaryDriveUploadInput = DriveUploaderRequest & {
+  uploadProfileCode: NonNullable<DriveUploaderRequest["uploadProfileCode"]>;
+  spaceId: string;
+  parentNodeId: string;
+};
+
 export interface DriveAppSdkPort {
-  spaces?: {
-    create(input: unknown): Promise<unknown>;
-  };
   nodes?: {
-    create?(input: unknown): Promise<unknown>;
     list?(input: unknown): Promise<unknown>;
-    delete?(nodeId: string, input?: unknown): Promise<unknown>;
+    delete?(nodeId: string): Promise<unknown>;
     downloadUrls?: {
-      create(nodeId: string, input?: unknown): Promise<unknown>;
-    };
-    files?: {
-      create(input: unknown): Promise<unknown>;
+      retrieve?(nodeId: string, input?: unknown): Promise<unknown>;
+      create?(nodeId: string, input?: unknown): Promise<unknown>;
     };
   };
   drive?: {
     nodes?: {
-      delete?(nodeId: string, input?: unknown): Promise<unknown>;
+      delete?(nodeId: string): Promise<unknown>;
       downloadUrls?: {
-        create(nodeId: string, input?: unknown): Promise<unknown>;
-      };
-      files?: {
-        create(input: unknown): Promise<unknown>;
+        retrieve?(nodeId: string, input?: unknown): Promise<unknown>;
+        create?(nodeId: string, input?: unknown): Promise<unknown>;
       };
       list?(spaceId: string, input?: unknown): Promise<unknown>;
     };
@@ -93,35 +96,16 @@ export interface DriveAppSdkPort {
       create(input: unknown): Promise<unknown>;
     };
     trash?: {
-      move?(nodeId: string, input?: unknown): Promise<unknown>;
+      create?(nodeId: string, input?: unknown): Promise<unknown>;
     };
   };
   downloadUrls?: {
     create(input: unknown): Promise<unknown>;
   };
   trash?: {
-    move?(nodeId: string, input?: unknown): Promise<unknown>;
+    create?(nodeId: string, input?: unknown): Promise<unknown>;
   };
-  uploader?: {
-    upload(input: unknown): Promise<unknown>;
-  };
-  nodeProperties?: {
-    set(nodeId: string, input: unknown): Promise<unknown>;
-  };
-}
-
-export interface CommerceT1AppSdkPort {
-  checkout?: {
-    create(input: unknown): Promise<unknown>;
-  };
-  orders?: {
-    retrieve(orderId: string): Promise<unknown>;
-  };
-  catalog?: {
-    skus?: {
-      retrieve(skuId: string): Promise<unknown>;
-    };
-  };
+  uploader?: Pick<DriveUploaderClient, "upload">;
 }
 
 export interface AppbaseAppSdkPort {
@@ -137,7 +121,6 @@ export interface AppbaseAppSdkPort {
 export interface CreateNotaryApiOptions {
   notary: NotaryAppSdkPort;
   drive: DriveAppSdkPort;
-  commerce?: CommerceT1AppSdkPort;
   appbase: AppbaseAppSdkPort;
 }
 
@@ -150,7 +133,7 @@ export interface CreateCaseInput {
   parties?: unknown[];
   driveFolderName?: string;
   primaryNotaryMembershipId?: string;
-  idempotencyKey?: string;
+  idempotencyKey: string;
 }
 
 export interface ListStaffInput {
@@ -180,12 +163,19 @@ export interface AssignCaseInput {
   assignmentRole: "primary_notary" | "assistant" | "reviewer" | "approver";
 }
 
-export interface UploadCaseFileInput {
+export interface CaseDriveTargetInput {
+  driveSpaceId?: string;
+  driveFolderNodeId?: string;
+}
+
+export interface UploadCaseFileInput extends CaseDriveTargetInput {
   caseId: string;
   file: unknown;
   category: "identity" | "evidence" | "notary";
   materialCode?: string;
   partyId?: string;
+  uploadIntentId?: string;
+  taskId?: string;
   source?: string;
 }
 
@@ -202,7 +192,7 @@ export interface CreateCaseFileDownloadUrlInput {
   disposition?: "inline" | "attachment";
 }
 
-export interface AttachPartySignatureInput {
+export interface AttachPartySignatureInput extends CaseDriveTargetInput {
   file?: unknown;
   signatureUrl?: string;
   signatureNodeId?: string;
@@ -225,6 +215,7 @@ export interface CaseCommandInput {
   remarks?: string;
   reason?: string;
   result?: string;
+  version?: string;
 }
 
 export interface ListCaseEventsInput {
@@ -243,7 +234,7 @@ export interface NotaryMatterOption {
   description?: string;
 }
 
-export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNotaryApiOptions) {
+export function createNotaryApi({ notary, drive, appbase }: CreateNotaryApiOptions) {
   async function getAccess() {
     return notary.access.retrieve();
   }
@@ -280,6 +271,10 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
   }
 
   async function createCase(input: CreateCaseInput) {
+    const idempotencyKey = input.idempotencyKey.trim();
+    if (!idempotencyKey) {
+      throw new Error("idempotencyKey is required to create a notary case");
+    }
     const result = await notary.cases.create(
       {
         skuId: input.skuId,
@@ -291,7 +286,7 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
         driveFolderName: input.driveFolderName,
         primaryNotaryMembershipId: input.primaryNotaryMembershipId
       },
-      input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}
+      { idempotencyKey }
     );
 
     return result;
@@ -351,29 +346,27 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
     partyId: string,
     input: AttachPartySignatureInput,
   ) {
+    const target = await resolveMutableCaseDriveTarget(notary, caseId, input);
     let signatureNodeId = stringField(input, ["signatureNodeId", "signature_node_id", "driveNodeId", "nodeId"]);
     if (!signatureNodeId) {
-      const uploaded = drive.uploader
-        ? await drive.uploader.upload({
-            file: resolveSignatureFile(input),
-            profile: "image",
-            scene: "notary.party_signature",
-            source: input.source ?? "sdkwork-notary",
-            target: {
-              driveSpaceType: "notary",
-              appResourceType: "notary_case_party_signature",
-              appResourceId: `${caseId}:${partyId}`
-            }
-          })
-        : await createDriveFileNode(drive, {
-            nodeType: "file",
-            driveSpaceType: "notary",
-            appResourceType: "notary_case_party_signature",
-            appResourceId: `${caseId}:${partyId}`,
-            profile: "image",
-            scene: "notary.party_signature",
-            file: resolveSignatureFile(input)
-          });
+      const signatureFile = resolveSignatureFile(input);
+      const uploaded = await uploadThroughDrive(drive, {
+        file: signatureFile,
+        taskId: buildNotaryUploadTaskId({
+          caseId,
+          partyId,
+          materialCode: "signature",
+          uploadIntentId: "signature",
+          file: signatureFile,
+        }),
+        appResourceType: "notary_case_party_signature",
+        appResourceId: `${caseId}:${partyId}`,
+        uploadProfileCode: "image",
+        scene: "notary.party_signature",
+        source: input.source ?? "sdkwork-notary",
+        spaceId: target.spaceId,
+        parentNodeId: target.parentNodeId,
+      });
       signatureNodeId = resolveDriveUploadNodeId(uploaded);
     }
 
@@ -417,30 +410,26 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
   async function uploadCaseFile(input: UploadCaseFileInput) {
     const target = input.partyId
       ? {
-          driveSpaceType: "notary",
           appResourceType: "notary_case_party_file",
           appResourceId: `${input.caseId}:${input.partyId}`
         }
       : {
-          driveSpaceType: "notary",
           appResourceType: "notary_case",
           appResourceId: input.caseId
         };
-    const uploaded = drive.uploader
-      ? await drive.uploader.upload({
-          file: resolveCaseFile(input.file),
-          profile: "document",
-          scene: "notary.case_file",
-          source: input.source ?? "sdkwork-notary",
-          target
-        })
-      : await createDriveFileNode(drive, {
-          nodeType: "file",
-          driveSpaceType: "notary",
-          appResourceType: target.appResourceType,
-          appResourceId: target.appResourceId,
-          file: resolveCaseFile(input.file)
-        });
+    const caseDriveTarget = await resolveMutableCaseDriveTarget(notary, input.caseId, input);
+    const file = resolveCaseFile(input.file);
+    const uploaded = await uploadThroughDrive(drive, {
+      file,
+      taskId: input.taskId ?? buildNotaryUploadTaskId({ ...input, file }),
+      appResourceType: target.appResourceType,
+      appResourceId: target.appResourceId,
+      uploadProfileCode: "document",
+      scene: "notary.case_file",
+      source: input.source ?? "sdkwork-notary",
+      spaceId: caseDriveTarget.spaceId,
+      parentNodeId: caseDriveTarget.parentNodeId,
+    });
 
     const driveNodeId = resolveDriveUploadNodeId(uploaded);
     return notary.cases.files.create(input.caseId, {
@@ -469,6 +458,8 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
       throw new Error("nodeId is required to create a notary case file download URL");
     }
 
+    await ensureNotaryCaseFileOwnership(notary, notaryCaseId, nodeId);
+
     const response = await createDriveNodeDownloadUrl(drive, nodeId, {
       ...(input.requestedTtlSeconds ?? input.expiresInSeconds
         ? { requestedTtlSeconds: input.requestedTtlSeconds ?? input.expiresInSeconds }
@@ -483,6 +474,9 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
       throw new Error("nodeId is required to delete a notary case file");
     }
 
+    await ensureMutableNotaryCase(notary, caseId);
+    await ensureNotaryCaseFileOwnership(notary, caseId, nodeId);
+
     await deleteDriveNode(drive, {
       nodeId,
       operatorId: input.operatorId,
@@ -494,7 +488,6 @@ export function createNotaryApi({ notary, drive, commerce, appbase }: CreateNota
   return {
     notary,
     drive,
-    commerce,
     appbase,
     getAccess,
     getDashboardStatistics,
@@ -530,17 +523,144 @@ function asObject(value: unknown): Record<string, unknown> {
     : {};
 }
 
-async function createDriveFileNode(drive: DriveAppSdkPort, input: unknown): Promise<unknown> {
-  if (drive.drive?.nodes?.files?.create) {
-    return drive.drive.nodes.files.create(input);
+function extractListItems(value: unknown): unknown[] {
+  if (Array.isArray(value)) {
+    return value;
   }
-  if (drive.nodes?.files?.create) {
-    return drive.nodes.files.create(input);
+  const record = asObject(value);
+  if (Array.isArray(record.items)) {
+    return record.items;
   }
-  if (drive.nodes?.create) {
-    return drive.nodes.create(input);
+  const data = asObject(record.data);
+  return Array.isArray(data.items) ? data.items : [];
+}
+
+function extractPageInfo(value: unknown): { hasMore: boolean; nextCursor?: string } {
+  const record = asObject(value);
+  const data = asObject(record.data);
+  const pageInfo = asObject(record.pageInfo ?? data.pageInfo);
+  const nextCursor = stringField(pageInfo, ["nextCursor", "next_cursor"]);
+  return {
+    hasMore: typeof pageInfo.hasMore === "boolean" ? pageInfo.hasMore : Boolean(nextCursor),
+    ...(nextCursor ? { nextCursor } : {}),
+  };
+}
+
+async function resolveMutableCaseDriveTarget(
+  notary: NotaryAppSdkPort,
+  caseId: string,
+  input: CaseDriveTargetInput,
+): Promise<{ spaceId: string; parentNodeId: string }> {
+  const notaryCaseId = caseId.trim();
+  if (!notaryCaseId) {
+    throw new Error("caseId is required to resolve a notary case Drive upload target");
   }
-  throw new Error("Drive file creation capability is required for notary case files");
+
+  const candidates = await retrieveNotaryCaseCandidates(notary, notaryCaseId);
+  ensureMutableNotaryCaseStatus(notaryCaseId, candidates);
+
+  const spaceId = firstStringField(candidates, ["driveSpaceId", "drive_space_id"]);
+  const parentNodeId = firstStringField(candidates, [
+    "driveFolderNodeId",
+    "drive_folder_node_id",
+  ]);
+  const requestedSpaceId = stringField(input, ["driveSpaceId", "drive_space_id"]);
+  const requestedParentNodeId = stringField(input, [
+    "driveFolderNodeId",
+    "drive_folder_node_id",
+  ]);
+  if (requestedSpaceId && requestedSpaceId !== spaceId) {
+    throw new Error(`Notary case ${notaryCaseId} Drive space does not match the case`);
+  }
+  if (requestedParentNodeId && requestedParentNodeId !== parentNodeId) {
+    throw new Error(`Notary case ${notaryCaseId} Drive folder does not match the case`);
+  }
+
+  if (!spaceId || !parentNodeId) {
+    throw new Error(
+      `Notary case ${notaryCaseId} is missing driveSpaceId or driveFolderNodeId for Drive upload`,
+    );
+  }
+  return { spaceId, parentNodeId };
+}
+
+async function ensureMutableNotaryCase(notary: NotaryAppSdkPort, caseId: string): Promise<void> {
+  const notaryCaseId = caseId.trim();
+  if (!notaryCaseId) {
+    throw new Error("caseId is required for notary case mutation");
+  }
+  const candidates = await retrieveNotaryCaseCandidates(notary, notaryCaseId);
+  ensureMutableNotaryCaseStatus(notaryCaseId, candidates);
+}
+
+async function retrieveNotaryCaseCandidates(
+  notary: NotaryAppSdkPort,
+  caseId: string,
+): Promise<Record<string, unknown>[]> {
+  const retrieved = asObject(await notary.cases.retrieve(caseId));
+  const data = asObject(retrieved.data);
+  return [
+    retrieved,
+    data,
+    asObject(retrieved.item),
+    asObject(data.item),
+    asObject(retrieved.case),
+    asObject(data.case),
+  ];
+}
+
+function ensureMutableNotaryCaseStatus(
+  caseId: string,
+  candidates: Record<string, unknown>[],
+): void {
+  const status = firstStringField(candidates, ["status"]);
+  if (!status) {
+    throw new Error(`Notary case ${caseId} is missing status for mutation safety`);
+  }
+  if (["COMPLETED", "REJECTED", "CANCELLED", "CREATE_FAILED"].includes(status.toUpperCase())) {
+    throw new Error(`Notary case ${caseId} is terminal and cannot be modified`);
+  }
+}
+
+async function ensureNotaryCaseFileOwnership(
+  notary: NotaryAppSdkPort,
+  caseId: string,
+  nodeId: string,
+): Promise<void> {
+  let cursor: string | undefined;
+  const visitedCursors = new Set<string>();
+  do {
+    const response = await notary.cases.files.list(caseId, {
+      driveSpaceType: "notary",
+      pageSize: 100,
+      ...(cursor ? { cursor } : {}),
+    });
+    if (extractListItems(response).some((item) => extractId(item) === nodeId)) {
+      return;
+    }
+    const pageInfo = extractPageInfo(response);
+    if (!pageInfo.hasMore) {
+      break;
+    }
+    const nextCursor = pageInfo.nextCursor;
+    if (!nextCursor || visitedCursors.has(nextCursor)) {
+      throw new Error(`Notary case ${caseId} file pagination did not advance`);
+    }
+    visitedCursors.add(nextCursor);
+    cursor = nextCursor;
+  } while (cursor);
+
+  throw new Error(`Drive node ${nodeId} is not registered to notary case ${caseId}`);
+}
+
+async function uploadThroughDrive(
+  drive: DriveAppSdkPort,
+  input: NotaryDriveUploadInput,
+): Promise<unknown> {
+  if (!drive.uploader?.upload) {
+    throw new Error("Drive uploader capability is required for notary case files");
+  }
+  return drive.uploader.upload(input);
 }
 
 async function deleteDriveNode(
@@ -553,24 +673,22 @@ async function deleteDriveNode(
     ...(input.operatorId ? { operatorId: input.operatorId } : {})
   };
   if (input.strategy === "trash") {
-    if (drive.drive?.trash?.move) {
-      return drive.drive.trash.move(input.nodeId, params);
+    if (drive.drive?.trash?.create) {
+      return drive.drive.trash.create(input.nodeId, params);
     }
-    if (drive.trash?.move) {
-      return drive.trash.move(input.nodeId, params);
+    if (drive.trash?.create) {
+      return drive.trash.create(input.nodeId, params);
     }
+    throw new Error("Drive trash capability is required for notary case files");
+  }
+  if (input.operatorId) {
+    throw new Error("Drive hard delete resolves operator identity from the authenticated context");
   }
   if (drive.drive?.nodes?.delete) {
-    return drive.drive.nodes.delete(input.nodeId, params);
+    return drive.drive.nodes.delete(input.nodeId);
   }
   if (drive.nodes?.delete) {
-    return drive.nodes.delete(input.nodeId, params);
-  }
-  if (drive.drive?.trash?.move) {
-    return drive.drive.trash.move(input.nodeId, params);
-  }
-  if (drive.trash?.move) {
-    return drive.trash.move(input.nodeId, params);
+    return drive.nodes.delete(input.nodeId);
   }
   throw new Error("Drive node deletion capability is required for notary case files");
 }
@@ -580,6 +698,12 @@ async function createDriveNodeDownloadUrl(
   nodeId: string,
   input: { requestedTtlSeconds?: number },
 ): Promise<unknown> {
+  if (drive.drive?.nodes?.downloadUrls?.retrieve) {
+    return drive.drive.nodes.downloadUrls.retrieve(nodeId, input);
+  }
+  if (drive.nodes?.downloadUrls?.retrieve) {
+    return drive.nodes.downloadUrls.retrieve(nodeId, input);
+  }
   if (drive.drive?.nodes?.downloadUrls?.create) {
     return drive.drive.nodes.downloadUrls.create(nodeId, input);
   }
@@ -629,21 +753,90 @@ function resolveDriveUploadNodeId(value: unknown): string {
   return driveNodeId;
 }
 
-function resolveSignatureFile(input: AttachPartySignatureInput): unknown {
+function resolveSignatureFile(input: AttachPartySignatureInput): DriveUploaderRequest["file"] {
   if (input.file) {
-    return input.file;
+    return requireDriveUploaderFile(input.file, "notary party signature");
   }
   if (input.signatureUrl) {
-    return dataUrlToFileLike(input.signatureUrl);
+    return requireDriveUploaderFile(
+      dataUrlToFileLike(input.signatureUrl),
+      "notary party signature",
+    );
   }
   throw new Error("signatureUrl or file is required to attach a notary party signature");
 }
 
-function resolveCaseFile(value: unknown): unknown {
+function resolveCaseFile(value: unknown): DriveUploaderRequest["file"] {
   if (typeof value === "string" && value.startsWith("data:")) {
-    return dataUrlToFileLike(value, "notary-case-file");
+    return requireDriveUploaderFile(
+      dataUrlToFileLike(value, "notary-case-file"),
+      "notary case file",
+    );
   }
-  return value;
+  return requireDriveUploaderFile(value, "notary case file");
+}
+
+function buildNotaryUploadTaskId(input: {
+  caseId: string;
+  partyId?: string;
+  materialCode?: string;
+  uploadIntentId?: string;
+  file: DriveUploaderRequest["file"];
+}): string {
+  const file = input.file as DriveUploaderRequest["file"] & {
+    lastModified?: number;
+  };
+  const fileName = file.name || "file";
+  const size = Number.isFinite(file.size) ? String(file.size) : "0";
+  const contentType = file.type || "application/octet-stream";
+  const lastModified = Number.isFinite(file.lastModified) ? String(file.lastModified) : "0";
+  const intent = input.uploadIntentId || input.materialCode || fileName;
+  return [
+    "notary",
+    "case-file",
+    input.caseId,
+    input.partyId || "case",
+    intent,
+    fileName,
+    size,
+    contentType,
+    lastModified,
+  ]
+    .map(sanitizeTaskIdPart)
+    .filter(Boolean)
+    .join("-")
+    .slice(0, 240);
+}
+
+function sanitizeTaskIdPart(value: string): string {
+  return value
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+}
+
+function requireDriveUploaderFile(
+  value: unknown,
+  resourceName: string,
+): DriveUploaderRequest["file"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`${resourceName} must be a Drive uploader compatible file`);
+  }
+  const candidate = value as {
+    size?: unknown;
+    slice?: unknown;
+  };
+  if (
+    typeof candidate.size !== "number"
+    || !Number.isFinite(candidate.size)
+    || candidate.size < 0
+    || typeof candidate.slice !== "function"
+  ) {
+    throw new Error(`${resourceName} must be a Drive uploader compatible file`);
+  }
+  return value as DriveUploaderRequest["file"];
 }
 
 function dataUrlToFileLike(value: string, fileName = "party-signature.png"): unknown {
@@ -708,6 +901,16 @@ function stringField(value: unknown, names: string[]): string {
     const candidate = record[name];
     if (typeof candidate === "string" && candidate.trim()) {
       return candidate.trim();
+    }
+  }
+  return "";
+}
+
+function firstStringField(values: unknown[], names: string[]): string {
+  for (const value of values) {
+    const result = stringField(value, names);
+    if (result) {
+      return result;
     }
   }
   return "";

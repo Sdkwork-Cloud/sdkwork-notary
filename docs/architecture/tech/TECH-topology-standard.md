@@ -1,13 +1,13 @@
 > Migrated from `docs/topology-standard.md` on 2026-06-24.
 > Owner: SDKWork maintainers
 
-Archetype: `application-http-gateway` (`specs/topology.spec.json`, `schemaVersion: 2`).
+Archetype: `application-http-gateway` (`specs/topology.spec.json`, `schemaVersion: 4`).
 
 Platform standard: `../sdkwork-specs/APP_RUNTIME_TOPOLOGY_ADOPTION.md`
 
 ## Default dev profile
 
-`standalone.split-services.development` — load the profile with:
+`standalone.development`: load the profile with:
 
 ```bash
 pnpm dev
@@ -25,13 +25,19 @@ H5 browser client:
 pnpm dev:browser
 ```
 
+PC browser client:
+
+```bash
+pnpm dev:desktop
+```
+
 ## Surfaces
 
 | Surface id | Plane | Consumer |
 | --- | --- | --- |
 | `application.public-ingress` | application | Notary App SDK (`/app/v3/api/notary`) |
 | `application.backend-http` | application | Notary Backend SDK (`/backend/v3/api/notary`) |
-| `platform.api-gateway` | platform | Appbase, Commerce, Drive SDKs via `sdkwork-api-cloud-gateway` |
+| `platform.api-gateway` | platform | IAM, Merchandise, Order, Payment, and Drive owner surfaces via `sdkwork-api-cloud-gateway` |
 
 `sdkwork-notary` is a domain library. It declares topology authority and profile env, but host applications wire `sdkwork-routes-notary-app-api` and `sdkwork-routes-notary-backend-api` into their own HTTP servers.
 
@@ -42,4 +48,3 @@ Validate:
 ```bash
 pnpm test:topology-validate
 ```
-

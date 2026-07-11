@@ -22,7 +22,19 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-commons",
     "publicExports": ["@sdkwork/notary-pc-commons"],
+    "providedPorts": [
+      {
+        "name": "notaryPcHostRuntime",
+        "export": "@sdkwork/notary-pc-commons"
+      },
+      {
+        "name": "notaryPcCommonsUi",
+        "export": "@sdkwork/notary-pc-commons"
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": ["configureNotaryPcHost", "createDefaultBrowserHostAdapter"],
     "sdkClients": [],
     "dependencyApiSurfaces": []

@@ -3,7 +3,12 @@
  * Re-exports from @sdkwork/notary-pc-commons and defines local types
  */
 export type { NotaryTask, Party, NotaryDocument, TimelineEvent } from '@sdkwork/notary-pc-commons';
-export type { NotaryStaffOption, CreateNotaryTaskInput } from '../services/NotaryService';
+export type {
+  NotaryStaffOption,
+  CreateNotaryTaskInput,
+  NotaryTaskPage,
+  NotaryTaskPageInfo,
+} from '../services/NotaryService';
 
 /**
  * Form state for party editing in PartyDrawer

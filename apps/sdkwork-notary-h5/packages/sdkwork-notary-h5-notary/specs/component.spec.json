@@ -27,7 +27,28 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-feature",
     "publicExports": ["@sdkwork/notary-h5-notary"],
+    "providedPorts": [
+      {
+        "name": "notaryH5NotaryFeature",
+        "export": "@sdkwork/notary-h5-notary"
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "notaryH5SdkRuntime",
+        "export": "@sdkwork/notary-h5-notary"
+      },
+      {
+        "name": "notaryH5CommonsUi",
+        "export": "@sdkwork/notary-h5-notary"
+      },
+      {
+        "name": "notaryH5AppShell",
+        "export": "@sdkwork/notary-h5-notary"
+      }
+    ],
     "runtimeEntrypoints": ["createNotaryH5Service"],
     "sdkClients": ["@sdkwork/notary-h5-core"],
     "dependencyApiSurfaces": []

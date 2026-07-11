@@ -1,0 +1,16 @@
+{
+  "signaturePad": {
+    "cancelSign": "Cancel",
+    "writeSmoothly": "Please sign your full name smoothly",
+    "clearRewrite": "Clear & Rewrite",
+    "confirmSubmit": "Confirm & Submit",
+    "signHereHint": "Please sign here",
+    "remoteSignature": "Remote Signature",
+    "scanQRHint": "Scan QR code with your phone to sign on mobile",
+    "copyLink": "Copy Link",
+    "black": "Black",
+    "blue": "Blue",
+    "red": "Red",
+    "signatureSaved": "Signature saved"
+  }
+}

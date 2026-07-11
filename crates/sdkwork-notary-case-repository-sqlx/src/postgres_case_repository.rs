@@ -1,13 +1,15 @@
-﻿use async_trait::async_trait;
+use async_trait::async_trait;
 use sdkwork_notary_case_contract::{
     now_iso8601, NotaryCaseRecord, NotaryCaseStatus, NotaryPartyCommand, NotaryServiceError,
 };
 use sdkwork_notary_case_service::{
+    decode_keyset_cursor, encode_keyset_cursor, validated_list_page_size,
     NotaryCaseAssignmentCommand, NotaryCaseAssignmentRecord, NotaryCaseEventListPage,
     NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
-    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryOrganizationProfileListPage,
-    NotaryOrganizationProfileUpdateCommand, NotaryPartyListPage, NotaryPartyListQuery,
-    NotaryPartyUpdateCommand, decode_keyset_cursor, encode_keyset_cursor, validated_list_page_size,
+    NotaryCaseUpdateCommand, NotaryDashboardStatisticsAggregate, NotaryDashboardStatisticsQuery,
+    NotaryMonthlyCaseCount, NotaryMonthlyCaseCountQuery, NotaryOrganizationProfile,
+    NotaryOrganizationProfileListPage, NotaryOrganizationProfileUpdateCommand, NotaryPartyListPage,
+    NotaryPartyListQuery, NotaryPartyUpdateCommand,
 };
 pub use sdkwork_notary_case_service::{NotaryCaseEventRecord, NotaryPartyRecord};
 use sqlx::{PgPool, Row};
@@ -118,7 +120,7 @@ impl PostgresNotaryCaseRepository {
         page_size: i64,
         cursor: Option<&str>,
     ) -> Result<NotaryOrganizationProfileListPage, NotaryServiceError> {
-        let page_size = validated_list_page_size(page_size);
+        let page_size = validated_list_page_size(page_size)?;
         let fetch_limit = page_size + 1;
         let keyset = decode_keyset_cursor(cursor)?;
         let (cursor_updated_at, cursor_id) = match keyset {
@@ -308,11 +310,9 @@ impl PostgresNotaryCaseRepository {
     }
 
     pub async fn delete_case(&self, case_id: &str) -> Result<(), NotaryServiceError> {
-        let mut tx = self
-            .pool
-            .begin()
-            .await
-            .map_err(store_error("failed to begin notary case delete transaction"))?;
+        let mut tx = self.pool.begin().await.map_err(store_error(
+            "failed to begin notary case delete transaction",
+        ))?;
         sqlx::query("DELETE FROM notary_case_event WHERE tenant_id = $1 AND case_id = $2")
             .bind(&self.tenant_id)
             .bind(case_id)
@@ -337,9 +337,9 @@ impl PostgresNotaryCaseRepository {
             .execute(&mut *tx)
             .await
             .map_err(store_error("failed to delete notary case"))?;
-        tx.commit()
-            .await
-            .map_err(store_error("failed to commit notary case delete transaction"))?;
+        tx.commit().await.map_err(store_error(
+            "failed to commit notary case delete transaction",
+        ))?;
         Ok(())
     }
 
@@ -486,6 +486,7 @@ impl PostgresNotaryCaseRepository {
                 chain_hash,
                 request_no,
                 idempotency_key,
+                version,
                 created_at,
                 updated_at
             FROM notary_case
@@ -532,6 +533,7 @@ impl PostgresNotaryCaseRepository {
                 chain_hash,
                 request_no,
                 idempotency_key,
+                version,
                 created_at,
                 updated_at
             FROM notary_case
@@ -553,53 +555,134 @@ impl PostgresNotaryCaseRepository {
         &self,
         command: NotaryCaseUpdateCommand,
     ) -> Result<NotaryCaseRecord, NotaryServiceError> {
-        let mut record = self
-            .get_case(&command.case_id)
-            .await?
-            .ok_or_else(|| NotaryServiceError::not_found("notary case not found"))?;
+        let NotaryCaseUpdateCommand {
+            case_id,
+            expected_version,
+            title,
+            remarks,
+            status,
+            chain_hash,
+            reject_reason,
+            event_type,
+        } = command;
+        let status = status.as_ref().map(NotaryCaseStatus::as_storage_value);
+        let updated_at = now_iso8601();
+        let mut tx = self.pool.begin().await.map_err(store_error(
+            "failed to begin notary case update transaction",
+        ))?;
 
-        if let Some(title) = command.title {
-            record.title = title;
-        }
-        if let Some(remarks) = command.remarks {
-            record.remarks = Some(remarks);
-        }
-        if let Some(status) = command.status {
-            record.status = status;
-        }
-        if let Some(chain_hash) = command.chain_hash {
-            record.chain_hash = Some(chain_hash);
-        }
-        record.updated_at = now_iso8601();
-
-        sqlx::query(
+        let row = sqlx::query(
             r#"
             UPDATE notary_case
             SET
-                title = $3,
-                remarks = $4,
-                status = $5,
-                chain_hash = $6,
-                accepted_at = CASE WHEN $5 = 'processing' THEN $7 ELSE accepted_at END,
-                completed_at = CASE WHEN $5 = 'completed' THEN $7 ELSE completed_at END,
-                rejected_at = CASE WHEN $5 = 'rejected' THEN $7 ELSE rejected_at END,
-                updated_at = $7,
+                title = COALESCE($3, title),
+                remarks = COALESCE($4, remarks),
+                status = COALESCE($5, status),
+                chain_hash = COALESCE($6, chain_hash),
+                reject_reason = COALESCE($7, reject_reason),
+                accepted_at = CASE WHEN $5 = 'processing' THEN $8 ELSE accepted_at END,
+                completed_at = CASE WHEN $5 = 'completed' THEN $8 ELSE completed_at END,
+                rejected_at = CASE WHEN $5 = 'rejected' THEN $8 ELSE rejected_at END,
+                updated_at = $8,
                 version = version + 1
             WHERE tenant_id = $1
               AND id = $2
+              AND version = $9
+            RETURNING
+                id,
+                case_no,
+                organization_id,
+                title,
+                remarks,
+                status,
+                applicant_name_snapshot,
+                primary_notary_membership_id,
+                primary_notary_user_id,
+                primary_notary_name_snapshot,
+                order_id,
+                order_item_id,
+                sku_id,
+                matter_title_snapshot,
+                fee_amount_snapshot,
+                currency_code,
+                drive_space_id,
+                drive_space_type,
+                drive_folder_node_id,
+                chain_hash,
+                request_no,
+                idempotency_key,
+                version,
+                created_at,
+                updated_at
             "#,
         )
         .bind(&self.tenant_id)
-        .bind(&record.case_id)
-        .bind(&record.title)
-        .bind(record.remarks.as_deref())
-        .bind(record.status.as_storage_value())
-        .bind(record.chain_hash.as_deref())
-        .bind(&record.updated_at)
-        .execute(&self.pool)
+        .bind(&case_id)
+        .bind(title.as_deref())
+        .bind(remarks.as_deref())
+        .bind(status)
+        .bind(chain_hash.as_deref())
+        .bind(reject_reason.as_deref())
+        .bind(&updated_at)
+        .bind(expected_version)
+        .fetch_optional(&mut *tx)
         .await
         .map_err(store_error("failed to update notary case"))?;
-
+        let Some(row) = row else {
+            let exists: Option<i32> = sqlx::query_scalar(
+                "SELECT version FROM notary_case WHERE tenant_id = $1 AND id = $2 LIMIT 1",
+            )
+            .bind(&self.tenant_id)
+            .bind(&case_id)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(store_error(
+                "failed to inspect notary case version conflict",
+            ))?;
+            return match exists {
+                Some(_) => Err(NotaryServiceError::conflict("notary case version conflict")),
+                None => Err(NotaryServiceError::not_found("notary case not found")),
+            };
+        };
+        let record = case_from_row(&row)?;
+        let next_order: i64 = sqlx::query_scalar(
+            "SELECT COUNT(1) + 1 FROM notary_case_event WHERE tenant_id = $1 AND case_id = $2",
+        )
+        .bind(&self.tenant_id)
+        .bind(&case_id)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(store_error("failed to count notary case events"))?;
+        sqlx::query(
+            r#"
+            INSERT INTO notary_case_event (
+                id,
+                tenant_id,
+                organization_id,
+                case_id,
+                event_type,
+                event_title,
+                actor_user_id,
+                occurred_at,
+                created_at
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8)
+            "#,
+        )
+        .bind(format!("event-{case_id}-{next_order}"))
+        .bind(&self.tenant_id)
+        .bind(&record.organization_id)
+        .bind(&case_id)
+        .bind(&event_type)
+        .bind(event_title(&event_type))
+        .bind(&self.actor_user_id)
+        .bind(&updated_at)
+        .execute(&mut *tx)
+        .await
+        .map_err(store_error("failed to append notary case event"))?;
+        tx.commit().await.map_err(store_error(
+            "failed to commit notary case update transaction",
+        ))?;
         Ok(record)
     }
 
@@ -838,7 +921,7 @@ impl PostgresNotaryCaseRepository {
         &self,
         query: NotaryCaseListQuery,
     ) -> Result<NotaryCaseListPage, NotaryServiceError> {
-        let page_size = validated_list_page_size(query.page_size);
+        let page_size = validated_list_page_size(query.page_size)?;
         let fetch_limit = page_size + 1;
         let keyset = decode_keyset_cursor(query.cursor.as_deref())?;
         let (cursor_updated_at, cursor_id) = match keyset {
@@ -849,6 +932,31 @@ impl PostgresNotaryCaseRepository {
             .search_term
             .as_ref()
             .map(|value| format!("%{}%", value.trim()));
+        let total_items: i64 = sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM notary_case
+            WHERE tenant_id = $1
+              AND organization_id = $2
+              AND ($3 IS NULL OR status = $3)
+              AND (
+                $4 IS NULL
+                OR title LIKE $4
+                OR applicant_name_snapshot LIKE $4
+                OR matter_title_snapshot LIKE $4
+                OR case_no LIKE $4
+              )
+              AND ($5 IS NULL OR sku_id = $5)
+            "#,
+        )
+        .bind(&self.tenant_id)
+        .bind(&query.organization_id)
+        .bind(query.status.as_deref())
+        .bind(search_pattern.as_deref())
+        .bind(query.sku_id.as_deref())
+        .fetch_one(&self.pool)
+        .await
+        .map_err(store_error("failed to count notary cases"))?;
         let rows = sqlx::query(
             r#"
             SELECT
@@ -874,6 +982,7 @@ impl PostgresNotaryCaseRepository {
                 chain_hash,
                 request_no,
                 idempotency_key,
+                version,
                 created_at,
                 updated_at
             FROM notary_case
@@ -927,14 +1036,108 @@ impl PostgresNotaryCaseRepository {
             items,
             has_more,
             next_cursor,
+            total_items,
         })
+    }
+
+    pub async fn get_dashboard_statistics(
+        &self,
+        query: NotaryDashboardStatisticsQuery,
+    ) -> Result<NotaryDashboardStatisticsAggregate, NotaryServiceError> {
+        let row = sqlx::query(
+            r#"
+            WITH utc_clock AS (
+                SELECT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date AS today
+            )
+            SELECT
+                COUNT(*) FILTER (
+                    WHERE status = 'pending_review'
+                ) AS pending_review_count,
+                COUNT(*) FILTER (
+                    WHERE status = 'completed'
+                      AND completed_at IS NOT NULL
+                      AND (completed_at::timestamptz AT TIME ZONE 'UTC')::date = utc_clock.today
+                ) AS today_completed_count,
+                COUNT(*) FILTER (
+                    WHERE status = 'completed'
+                      AND completed_at IS NOT NULL
+                      AND (completed_at::timestamptz AT TIME ZONE 'UTC')::date = utc_clock.today - 1
+                ) AS yesterday_completed_count,
+                COUNT(*) FILTER (
+                    WHERE date_trunc('month', created_at::timestamptz AT TIME ZONE 'UTC')
+                        = date_trunc('month', CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
+                ) AS monthly_case_count,
+                COUNT(*) FILTER (
+                    WHERE status IN ('rejected', 'cancelled', 'create_failed')
+                ) AS anomaly_intercepted_count,
+                COUNT(*) FILTER (
+                    WHERE status = 'completed'
+                      AND (chain_hash IS NULL OR btrim(chain_hash) = '')
+                ) AS unsynced_completed_count
+            FROM notary_case
+            CROSS JOIN utc_clock
+            WHERE tenant_id = $1
+              AND organization_id = $2
+            GROUP BY utc_clock.today
+            "#,
+        )
+        .bind(&self.tenant_id)
+        .bind(&query.organization_id)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(store_error(
+            "failed to aggregate notary dashboard statistics",
+        ))?;
+
+        let Some(row) = row else {
+            return Ok(NotaryDashboardStatisticsAggregate::default());
+        };
+        Ok(NotaryDashboardStatisticsAggregate {
+            pending_review_count: dashboard_count(&row, "pending_review_count")?,
+            today_completed_count: dashboard_count(&row, "today_completed_count")?,
+            yesterday_completed_count: dashboard_count(&row, "yesterday_completed_count")?,
+            monthly_case_count: dashboard_count(&row, "monthly_case_count")?,
+            anomaly_intercepted_count: dashboard_count(&row, "anomaly_intercepted_count")?,
+            unsynced_completed_count: dashboard_count(&row, "unsynced_completed_count")?,
+        })
+    }
+
+    pub async fn count_cases_for_month(
+        &self,
+        query: NotaryMonthlyCaseCountQuery,
+    ) -> Result<NotaryMonthlyCaseCount, NotaryServiceError> {
+        let count = sqlx::query_scalar(
+            r#"
+            WITH month_bounds AS (
+                SELECT
+                    ($3 || '-01T00:00:00Z')::timestamptz AS month_start,
+                    ($3 || '-01T00:00:00Z')::timestamptz + INTERVAL '1 month'
+                        AS next_month_start
+            )
+            SELECT COUNT(*)
+            FROM notary_case
+            CROSS JOIN month_bounds
+            WHERE tenant_id = $1
+              AND organization_id = $2
+              AND created_at::timestamptz >= month_bounds.month_start
+              AND created_at::timestamptz < month_bounds.next_month_start
+            "#,
+        )
+        .bind(&self.tenant_id)
+        .bind(query.organization_id())
+        .bind(query.month())
+        .fetch_one(&self.pool)
+        .await
+        .map_err(store_error("failed to count monthly notary cases"))?;
+
+        Ok(NotaryMonthlyCaseCount { count })
     }
 
     pub async fn list_parties(
         &self,
         query: NotaryPartyListQuery,
     ) -> Result<NotaryPartyListPage, NotaryServiceError> {
-        let page_size = validated_list_page_size(query.page_size);
+        let page_size = validated_list_page_size(query.page_size)?;
         let fetch_limit = page_size + 1;
         let keyset = decode_keyset_cursor(query.cursor.as_deref())?;
         let (cursor_sort_order, cursor_id) = match keyset {
@@ -1012,7 +1215,7 @@ impl PostgresNotaryCaseRepository {
         &self,
         query: NotaryCaseEventListQuery,
     ) -> Result<NotaryCaseEventListPage, NotaryServiceError> {
-        let page_size = validated_list_page_size(query.page_size);
+        let page_size = validated_list_page_size(query.page_size)?;
         let fetch_limit = page_size + 1;
         let keyset = decode_keyset_cursor(query.cursor.as_deref())?;
         let (cursor_occurred_at, cursor_id) = match keyset {
@@ -1138,6 +1341,7 @@ fn case_from_row(row: &sqlx::postgres::PgRow) -> Result<NotaryCaseRecord, Notary
         remarks: optional_string_cell(row, "remarks"),
         request_no: string_cell(row, "request_no"),
         idempotency_key: string_cell(row, "idempotency_key"),
+        version: row.try_get::<i32, _>("version").map(i64::from).unwrap_or(1),
         created_at: string_cell(row, "created_at"),
         updated_at: string_cell(row, "updated_at"),
     })
@@ -1316,6 +1520,20 @@ impl NotaryCaseRepositoryPort for PostgresNotaryCaseRepository {
         PostgresNotaryCaseRepository::list_cases(self, query).await
     }
 
+    async fn get_dashboard_statistics(
+        &self,
+        query: NotaryDashboardStatisticsQuery,
+    ) -> Result<NotaryDashboardStatisticsAggregate, NotaryServiceError> {
+        PostgresNotaryCaseRepository::get_dashboard_statistics(self, query).await
+    }
+
+    async fn count_cases_for_month(
+        &self,
+        query: NotaryMonthlyCaseCountQuery,
+    ) -> Result<NotaryMonthlyCaseCount, NotaryServiceError> {
+        PostgresNotaryCaseRepository::count_cases_for_month(self, query).await
+    }
+
     async fn list_parties(
         &self,
         query: NotaryPartyListQuery,
@@ -1329,4 +1547,9 @@ impl NotaryCaseRepositoryPort for PostgresNotaryCaseRepository {
     ) -> Result<NotaryCaseEventListPage, NotaryServiceError> {
         PostgresNotaryCaseRepository::list_events(self, query).await
     }
+}
+
+fn dashboard_count(row: &sqlx::postgres::PgRow, column: &str) -> Result<i64, NotaryServiceError> {
+    row.try_get(column)
+        .map_err(store_error("failed to decode notary dashboard statistics"))
 }

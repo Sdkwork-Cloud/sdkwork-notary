@@ -10,4 +10,4 @@ Operator SDK family for Notary management workflows.
 - Package entry: `sdkwork-notary-backend-sdk-typescript/src/index.ts`
 - Composed facade: `sdkwork-notary-backend-sdk-typescript/composed/index.ts`
 
-Backend SDK consumers manage notary enablement and case workflow. IAM member, role, position, department, Commerce SKU, Commerce order, and Drive space/node capabilities are dependency-owned. The package root exports the generated backend client, generated types, and the composed `createNotaryBackendApi` management facade.
+Backend SDK consumers manage notary enablement, Merchandise-backed matter definitions, and case workflow. IAM member, role, position, department, Merchandise SPU/SKU, Order checkout/order items, Payment execution, and Drive space/node capabilities remain owner-domain concerns; this SDK exposes only Notary orchestration. The package root exports the generated backend client, generated types, and the composed `createNotaryBackendApi` management facade.

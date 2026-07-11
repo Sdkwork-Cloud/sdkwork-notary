@@ -46,7 +46,15 @@
     }
   ],
   "contracts": {
+    "layerRole": "backend-repository",
     "publicExports": ["sdkwork_notary_case_repository_sqlx::*"],
+    "providedPorts": [
+      {
+        "name": "notary.case.repository",
+        "export": "sdkwork_notary_case_repository_sqlx::*"
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": ["SqliteNotaryCaseRepository", "PostgresNotaryCaseRepository"],
     "routeManifest": null,
     "sdkClients": [],

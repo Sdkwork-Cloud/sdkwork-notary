@@ -34,7 +34,6 @@ declare module '@sdkwork/notary-app-sdk' {
   export interface CreateNotaryApiOptions {
     notary: unknown;
     drive: DriveAppSdkPort;
-    commerce?: unknown;
     appbase: AppbaseAppSdkPort;
   }
 

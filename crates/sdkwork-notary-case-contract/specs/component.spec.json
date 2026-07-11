@@ -41,7 +41,10 @@
     }
   ],
   "contracts": {
+    "layerRole": "contract",
     "publicExports": ["sdkwork_notary_case_contract::*"],
+    "providedPorts": [],
+    "requiredPorts": [],
     "runtimeEntrypoints": [],
     "routeManifest": null,
     "sdkClients": [],

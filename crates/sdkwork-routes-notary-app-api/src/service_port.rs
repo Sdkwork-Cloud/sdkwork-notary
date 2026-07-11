@@ -3,6 +3,7 @@ use std::{collections::BTreeMap, sync::Arc};
 use async_trait::async_trait;
 use serde_json::Value;
 
+pub use sdkwork_notary_case_service::NotaryOperationMetadata;
 pub use sdkwork_routes_notary_http_auth::{
     NotaryAuthError, NotaryRequestContext, NotaryRouteError,
 };
@@ -15,6 +16,7 @@ pub trait NotaryAppApiServicePort: Send + Sync {
         operation_id: &'static str,
         path_params: BTreeMap<String, String>,
         body: Value,
+        metadata: NotaryOperationMetadata,
     ) -> Result<Value, NotaryRouteError>;
 }
 

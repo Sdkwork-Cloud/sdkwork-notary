@@ -23,6 +23,7 @@ import { PartyDrawer } from './PartyDrawer';
 import { SignaturePad } from './SignaturePad';
 import { notaryService, type NotaryStaffOption } from './services/NotaryService';
 import type { LocalAttachment, MediaPreviewState, NotaryMatterOption } from './types';
+import { createNotaryCaseIntentIdempotencyKey } from './utils/createCaseIdempotencyKey';
 
 const WIZARD_STEPS = 4;
 
@@ -33,6 +34,7 @@ export const CreateNotaryTaskView: React.FC<{ onBack: () => void; onSuccess?: ()
   const { t } = useTranslation('notary');
   const { MediaViewer } = useNotaryPcHost();
 
+  const [idempotencyKey] = useState(createNotaryCaseIntentIdempotencyKey);
   const [step, setStep] = useState(1);
   const [businessType, setBusinessType] = useState('');
   const [selectedSkuId, setSelectedSkuId] = useState<string | undefined>(undefined);
@@ -190,6 +192,7 @@ export const CreateNotaryTaskView: React.FC<{ onBack: () => void; onSuccess?: ()
     setIsSubmitting(true);
     try {
       await notaryService.createTask({
+        idempotencyKey,
         type: businessType,
         skuId: selectedSkuId,
         notary,
@@ -204,6 +207,7 @@ export const CreateNotaryTaskView: React.FC<{ onBack: () => void; onSuccess?: ()
           category: 'evidence' as const,
           materialCode: attachment.file.name,
           partyId: attachment.partyId,
+          uploadIntentId: attachment.id,
           file: attachment.file,
         })),
       });

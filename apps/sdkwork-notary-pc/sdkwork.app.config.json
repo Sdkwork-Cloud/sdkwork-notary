@@ -31,6 +31,24 @@
       "browser"
     ]
   },
+  "backend": {
+    "profileKey": "backend-root-admin",
+    "ownerMode": "tenant",
+    "grantMode": "current",
+    "platform": "WEB",
+    "appId": null,
+    "tenantId": "100001",
+    "organizationId": "0",
+    "accessTokenPermissionScope": [
+      "iam.users.read",
+      "iam.organizations.read",
+      "iam.roles.read",
+      "iam.permissions.read",
+      "notary.matters.management.read",
+      "notary.matters.create",
+      "notary.matters.update"
+    ]
+  },
   "devApp": {
     "build": {
       "targets": [

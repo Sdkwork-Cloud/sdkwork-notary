@@ -22,7 +22,15 @@
     }
   ],
   "contracts": {
+    "layerRole": "frontend-commons",
     "publicExports": ["@sdkwork/notary-h5-commons"],
+    "providedPorts": [
+      {
+        "name": "notaryH5CommonsUi",
+        "export": "@sdkwork/notary-h5-commons"
+      }
+    ],
+    "requiredPorts": [],
     "runtimeEntrypoints": [],
     "sdkClients": [],
     "dependencyApiSurfaces": []

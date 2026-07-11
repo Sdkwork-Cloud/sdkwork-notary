@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "kind": "sdkwork.component.spec",
+  "component": {
+    "name": "@sdkwork/notary-pc-admin-shell",
+    "displayName": "SDKWork Notary PC Admin Shell",
+    "version": "0.1.0",
+    "type": "react-package",
+    "root": "sdkwork-notary/apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-admin-shell",
+    "domain": "notary",
+    "declaredDomain": "notary",
+    "capability": "admin-shell",
+    "surface": "backend-admin",
+    "status": "ready",
+    "languages": ["typescript"],
+    "generated": false,
+    "private": true,
+    "manifests": ["package.json"]
+  },
+  "canonicalSpecs": [
+    {
+      "file": "APP_PC_ARCHITECTURE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/APP_PC_ARCHITECTURE_SPEC.md",
+      "purpose": "PC backend-admin shell, route ownership, and dependency direction."
+    },
+    {
+      "file": "BACKEND_UI_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/BACKEND_UI_SPEC.md",
+      "purpose": "Backend-admin navigation and permission boundary."
+    },
+    {
+      "file": "COMPONENT_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/COMPONENT_SPEC.md",
+      "purpose": "Component manifest and public port contract."
+    },
+    {
+      "file": "TYPESCRIPT_CODE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md",
+      "purpose": "Strict TypeScript package exports."
+    },
+    {
+      "file": "FRONTEND_CODE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/FRONTEND_CODE_SPEC.md",
+      "purpose": "React layout, navigation, accessibility, and responsive UI rules."
+    },
+    {
+      "file": "CODE_STYLE_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/CODE_STYLE_SPEC.md",
+      "purpose": "Authored shell structure and public export boundaries."
+    },
+    {
+      "file": "NAMING_SPEC.md",
+      "path": "../../../../../../sdkwork-specs/NAMING_SPEC.md",
+      "purpose": "Canonical admin shell and route naming."
+    }
+  ],
+  "contracts": {
+    "layerRole": "frontend-shell",
+    "publicExports": ["."],
+    "providedPorts": [
+      {
+        "name": "notaryPcAdminRoutes",
+        "export": "."
+      }
+    ],
+    "requiredPorts": [
+      {
+        "name": "notaryPcAdminRuntime",
+        "export": "."
+      },
+      {
+        "name": "notaryPcAdminMerchandise",
+        "export": "."
+      }
+    ],
+    "runtimeEntrypoints": [
+      "NotaryPcAdminRoutes",
+      "NotaryPcAdminLayout",
+      "NOTARY_PC_ADMIN_ROOT_PATH",
+      "NOTARY_PC_ADMIN_MATTERS_PATH"
+    ],
+    "sdkClients": [],
+    "sdkDependencies": [],
+    "dependencyApiExports": [],
+    "dependencyApiSurfaces": [],
+    "events": [],
+    "configKeys": [],
+    "routeManifest": null,
+    "uiRoutes": {
+      "rootPath": "/admin",
+      "routes": [
+        {
+          "path": "/admin/notary/matters",
+          "permission": "notary.matters.management.read"
+        }
+      ]
+    }
+  },
+  "integration": {
+    "authority": "Notary PC admin shell owns backend-admin layout, menu, route guards, and route composition.",
+    "dependencyPolicy": "The shell consumes admin-core and capability package public exports only; it does not own SDK construction or business orchestration.",
+    "sdkPolicy": "No SDK client construction, raw HTTP, or app-api resource usage is allowed in the shell.",
+    "languagePolicy": "TypeScript source uses strict package exports and lazy capability loading."
+  },
+  "verification": {
+    "commands": [
+      "pnpm --dir apps/sdkwork-notary-pc/packages/sdkwork-notary-pc-admin-shell typecheck",
+      "node ../sdkwork-specs/tools/check-component-port-bindings.mjs --root . --strict"
+    ]
+  },
+  "metadata": {
+    "managedBy": "codex",
+    "standardVersion": "2026-07-11"
+  }
+}

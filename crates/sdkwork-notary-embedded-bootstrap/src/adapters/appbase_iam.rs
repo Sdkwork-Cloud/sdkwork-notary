@@ -2,8 +2,8 @@ use async_trait::async_trait;
 use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_notary_case_contract::NotaryServiceError;
 use sdkwork_notary_case_service::{
-    AppbaseOrganizationMember, AppbasePort, NotaryStaffListPage, NotaryStaffListQuery,
-    validated_list_page_size,
+    validated_list_page_size, AppbaseOrganizationMember, AppbasePort, NotaryStaffListPage,
+    NotaryStaffListQuery,
 };
 use sqlx::Row;
 
@@ -108,14 +108,16 @@ async fn load_member_sqlite(
     let positions = load_positions_sqlite(pool, &tenant_id, &membership_id).await?;
     let departments = load_departments_sqlite(pool, &tenant_id, &membership_id).await?;
     Ok(Some(build_member(
-        membership_id,
-        user_id,
-        organization_id,
-        display_name,
-        verification_status,
-        roles,
-        positions,
-        departments,
+        MemberProfile {
+            membership_id,
+            user_id,
+            organization_id,
+            display_name,
+            verification_status,
+            roles,
+            positions,
+            departments,
+        },
         development_mode,
     )))
 }
@@ -157,14 +159,16 @@ async fn list_members_sqlite(
         let positions = load_positions_sqlite(pool, &tenant_id, &membership_id).await?;
         let departments = load_departments_sqlite(pool, &tenant_id, &membership_id).await?;
         members.push(build_member(
-            membership_id,
-            user_id,
-            organization_id,
-            display_name,
-            verification_status,
-            roles,
-            positions,
-            departments,
+            MemberProfile {
+                membership_id,
+                user_id,
+                organization_id,
+                display_name,
+                verification_status,
+                roles,
+                positions,
+                departments,
+            },
             development_mode,
         ));
     }
@@ -210,14 +214,16 @@ async fn load_member_postgres(
     let positions = load_positions_postgres(pool, &tenant_id, &membership_id).await?;
     let departments = load_departments_postgres(pool, &tenant_id, &membership_id).await?;
     Ok(Some(build_member(
-        membership_id,
-        user_id,
-        organization_id,
-        display_name,
-        verification_status,
-        roles,
-        positions,
-        departments,
+        MemberProfile {
+            membership_id,
+            user_id,
+            organization_id,
+            display_name,
+            verification_status,
+            roles,
+            positions,
+            departments,
+        },
         development_mode,
     )))
 }
@@ -259,21 +265,23 @@ async fn list_members_postgres(
         let positions = load_positions_postgres(pool, &tenant_id, &membership_id).await?;
         let departments = load_departments_postgres(pool, &tenant_id, &membership_id).await?;
         members.push(build_member(
-            membership_id,
-            user_id,
-            organization_id,
-            display_name,
-            verification_status,
-            roles,
-            positions,
-            departments,
+            MemberProfile {
+                membership_id,
+                user_id,
+                organization_id,
+                display_name,
+                verification_status,
+                roles,
+                positions,
+                departments,
+            },
             development_mode,
         ));
     }
     Ok(members)
 }
 
-fn build_member(
+struct MemberProfile {
     membership_id: String,
     user_id: String,
     organization_id: String,
@@ -282,8 +290,19 @@ fn build_member(
     roles: Vec<String>,
     positions: Vec<String>,
     departments: Vec<String>,
-    development_mode: bool,
-) -> AppbaseOrganizationMember {
+}
+
+fn build_member(profile: MemberProfile, development_mode: bool) -> AppbaseOrganizationMember {
+    let MemberProfile {
+        membership_id,
+        user_id,
+        organization_id,
+        display_name,
+        verification_status,
+        roles,
+        positions,
+        departments,
+    } = profile;
     let enterprise_verified =
         development_mode || verification_status.eq_ignore_ascii_case("verified");
     let notary_enabled = development_mode
@@ -440,7 +459,7 @@ async fn list_notary_staff_page_sqlite(
     query: &NotaryStaffListQuery,
     development_mode: bool,
 ) -> Result<NotaryStaffListPage, NotaryServiceError> {
-    let page_size = validated_list_page_size(query.page_size);
+    let page_size = validated_list_page_size(query.page_size)?;
     let fetch_limit = page_size + 1;
     let dev_flag = i64::from(development_mode);
     let rows = sqlx::query(
@@ -506,14 +525,16 @@ async fn list_notary_staff_page_sqlite(
         let positions = load_positions_sqlite(pool, &tenant_id, &membership_id).await?;
         let departments = load_departments_sqlite(pool, &tenant_id, &membership_id).await?;
         items.push(build_member(
-            membership_id,
-            user_id,
-            organization_id,
-            display_name,
-            verification_status,
-            roles,
-            positions,
-            departments,
+            MemberProfile {
+                membership_id,
+                user_id,
+                organization_id,
+                display_name,
+                verification_status,
+                roles,
+                positions,
+                departments,
+            },
             development_mode,
         ));
     }
@@ -533,7 +554,7 @@ async fn list_notary_staff_page_postgres(
     query: &NotaryStaffListQuery,
     development_mode: bool,
 ) -> Result<NotaryStaffListPage, NotaryServiceError> {
-    let page_size = validated_list_page_size(query.page_size);
+    let page_size = validated_list_page_size(query.page_size)?;
     let fetch_limit = page_size + 1;
     let dev_flag = development_mode;
     let rows = sqlx::query(
@@ -599,14 +620,16 @@ async fn list_notary_staff_page_postgres(
         let positions = load_positions_postgres(pool, &tenant_id, &membership_id).await?;
         let departments = load_departments_postgres(pool, &tenant_id, &membership_id).await?;
         items.push(build_member(
-            membership_id,
-            user_id,
-            organization_id,
-            display_name,
-            verification_status,
-            roles,
-            positions,
-            departments,
+            MemberProfile {
+                membership_id,
+                user_id,
+                organization_id,
+                display_name,
+                verification_status,
+                roles,
+                positions,
+                departments,
+            },
             development_mode,
         ));
     }

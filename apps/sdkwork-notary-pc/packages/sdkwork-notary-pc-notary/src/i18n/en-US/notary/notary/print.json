@@ -1,0 +1,25 @@
+{
+  "print": {
+    "notaryCertificate": "Electronic Notary Certificate",
+    "birthDate": "Date of Birth",
+    "ethnicity": "Ethnicity",
+    "address": "Address",
+    "idNumber": "ID Number",
+    "issuingAuthority": "Issuing Authority",
+    "validPeriod": "Valid Period",
+    "livePhoto": "Live Photo",
+    "comparisonScore": "Comparison Score",
+    "comparisonResult": "Result",
+    "comparisonMethod": "Method",
+    "referenceThreshold": "Threshold",
+    "partySignature": "Party Signature:",
+    "success": "Success",
+    "faceComparison": "Face Comparison",
+    "idPhoto": "ID Photo",
+    "faceComparisonVerification": "Face Comparison Verification Table",
+    "totalPages": "{{count}} pages",
+    "photo": "Photo",
+    "referenceThresholdValue": "68",
+    "loadingMedia": "Loading identity media..."
+  }
+}

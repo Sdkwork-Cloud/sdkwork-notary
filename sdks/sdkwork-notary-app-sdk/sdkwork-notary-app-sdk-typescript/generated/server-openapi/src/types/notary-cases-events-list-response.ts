@@ -1,9 +1,8 @@
-import type { PageInfo } from './page-info';
-import type { TimelineEvent } from './timeline-event';
+import type { TimelineEventList } from './timeline-event-list';
 
 export interface NotaryCasesEventsListResponse {
   code: 0;
-  data: unknown & Record<string, unknown>;
+  data: unknown & TimelineEventList;
   /** Server-owned request correlation id. */
   traceId: string;
 }

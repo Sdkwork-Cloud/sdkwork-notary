@@ -8,10 +8,12 @@ use sdkwork_notary_case_service::{
     CommercePort, DriveCreateFolderCommand, DriveCreateSpaceCommand, DriveFolderReference,
     DriveListNodesPage, DriveListNodesQuery, DrivePort, NotaryCaseEventListPage,
     NotaryCaseEventListQuery, NotaryCaseListPage, NotaryCaseListQuery, NotaryCaseRepositoryPort,
-    NotaryCaseUpdateCommand, NotaryOrganizationProfile, NotaryPartyRecord,
+    NotaryCaseUpdateCommand, NotaryDashboardStatisticsAggregate, NotaryDashboardStatisticsQuery,
+    NotaryMonthlyCaseCount, NotaryMonthlyCaseCountQuery, NotaryOrganizationProfile,
+    NotaryPartyListPage, NotaryPartyListQuery,
 };
 use sdkwork_routes_notary_app_api::{
-    NotaryAppApiServicePort, NotaryAppRuntimeService, NotaryRequestContext,
+    NotaryAppApiServicePort, NotaryAppRuntimeService, NotaryOperationMetadata, NotaryRequestContext,
 };
 use serde_json::json;
 
@@ -19,8 +21,8 @@ use serde_json::json;
 async fn app_runtime_service_dispatches_route_operations_to_notary_runtime() {
     let service = NotaryAppRuntimeService::new(
         RecordingAppbase::with_notary_member(),
-        RecordingCommerce::default(),
-        RecordingDrive::default(),
+        RecordingCommerce,
+        RecordingDrive,
         RecordingNotaryRepository::with_profile(),
     );
 
@@ -34,9 +36,11 @@ async fn app_runtime_service_dispatches_route_operations_to_notary_runtime() {
                 "skuId": "sku-electronic-contract",
                 "title": "Electronic contract preservation",
                 "applicantName": "Zhang San Network",
-                "primaryNotaryMembershipId": "member-notary-1",
-                "idempotencyKey": "idem-route-service-1"
+                "primaryNotaryMembershipId": "member-notary-1"
             }),
+            NotaryOperationMetadata {
+                idempotency_key: Some("idem-route-service-1".to_string()),
+            },
         )
         .await
         .unwrap();
@@ -314,17 +318,39 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
         &self,
         _query: NotaryCaseListQuery,
     ) -> Result<NotaryCaseListPage, NotaryServiceError> {
+        let cases = self.inner.lock().unwrap().cases.clone();
+        let total_items = cases.len() as i64;
         Ok(NotaryCaseListPage {
-            items: self.inner.lock().unwrap().cases.clone(),
+            items: cases,
             has_more: false,
+            next_cursor: None,
+            total_items,
         })
+    }
+
+    async fn get_dashboard_statistics(
+        &self,
+        _query: NotaryDashboardStatisticsQuery,
+    ) -> Result<NotaryDashboardStatisticsAggregate, NotaryServiceError> {
+        Ok(NotaryDashboardStatisticsAggregate::default())
+    }
+
+    async fn count_cases_for_month(
+        &self,
+        _query: NotaryMonthlyCaseCountQuery,
+    ) -> Result<NotaryMonthlyCaseCount, NotaryServiceError> {
+        Ok(NotaryMonthlyCaseCount::default())
     }
 
     async fn list_parties(
         &self,
-        _case_id: &str,
-    ) -> Result<Vec<NotaryPartyRecord>, NotaryServiceError> {
-        Ok(Vec::new())
+        _query: NotaryPartyListQuery,
+    ) -> Result<NotaryPartyListPage, NotaryServiceError> {
+        Ok(NotaryPartyListPage {
+            items: Vec::new(),
+            has_more: false,
+            next_cursor: None,
+        })
     }
 
     async fn list_events(
@@ -334,6 +360,7 @@ impl NotaryCaseRepositoryPort for RecordingNotaryRepository {
         Ok(NotaryCaseEventListPage {
             items: Vec::new(),
             has_more: false,
+            next_cursor: None,
         })
     }
 }
