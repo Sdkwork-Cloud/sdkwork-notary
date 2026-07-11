@@ -658,13 +658,23 @@ function dataUrlToFileLike(value: string, fileName = "party-signature.png"): unk
   const payload = match[2] || "";
   const bytes = decodeBase64(payload);
   if (typeof Blob !== "undefined") {
-    const blob = new Blob([bytes], { type: mimeType });
+    const blob = new Blob([toArrayBuffer(bytes)], { type: mimeType });
     if (typeof File !== "undefined") {
       return new File([blob], fileName, { type: mimeType });
     }
     return blob;
   }
   return value;
+}
+
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const buffer = bytes.buffer;
+  if (buffer instanceof ArrayBuffer) {
+    return buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  }
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer;
 }
 
 function decodeBase64(value: string): Uint8Array {

@@ -66,7 +66,12 @@ test("notary TypeScript SDK package roots expose generated clients and composed 
     assert.equal(packageJson.module, "./src/index.ts");
     assert.equal(packageJson.types, "./src/index.ts");
     assert.equal(packageJson.exports["."].import, "./src/index.ts");
-    assert.equal(packageJson.exports["./generated"].import, "./generated/server-openapi/src/index.ts");
+    assert.equal(
+      packageJson.exports["./generated"],
+      undefined,
+      `${sdkPackage.packageName} must not expose generated transport as a consumer subpath`,
+    );
+    assert.equal(packageJson.exports["./composed"].import, "./composed/index.ts");
     assert.equal(packageJson.dependencies["@sdkwork/sdk-common"], "^1.0.3");
     for (const dependencyName of sdkPackage.dependencies) {
       assert.equal(

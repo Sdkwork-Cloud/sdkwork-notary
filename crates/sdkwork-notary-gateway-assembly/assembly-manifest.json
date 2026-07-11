@@ -4,7 +4,7 @@
   "applicationCode": "notary",
   "packageName": "sdkwork-notary-gateway-assembly",
   "crateDir": "crates/sdkwork-notary-gateway-assembly",
-  "generatedAt": "2026-06-25T13:08:05.582Z",
+  "generatedAt": "2026-07-08T01:34:16.415Z",
   "routeCrates": [
     {
       "packageName": "sdkwork-routes-notary-app-api",

@@ -15,7 +15,7 @@ export {
   createNotaryApi,
   type AppbaseAppSdkPort,
   type CaseCommandInput,
-  type CommerceAppSdkPort,
+  type CommerceT1AppSdkPort,
   type CreateCaseInput,
   type CreateNotaryApiOptions,
   type DriveAppSdkPort,

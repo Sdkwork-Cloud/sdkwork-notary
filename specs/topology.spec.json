@@ -1,20 +1,15 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "kind": "sdkwork.app.topology",
   "appId": "sdkwork-notary",
   "archetype": "application-http-gateway",
   "profileRoot": "configs/topology",
-  "profilePattern": "{deploymentProfile}.{serviceLayout}.{environment}.env",
+  "profilePattern": "{deploymentProfile}.{environment}.env",
   "vocabulary": {
     "deploymentProfile": {
       "allowed": [
         "standalone",
         "cloud"
-      ]
-    },
-    "serviceLayout": {
-      "allowed": [
-        "split-services"
       ]
     },
     "environment": {
@@ -31,19 +26,19 @@
     }
   },
   "defaults": {
-    "developmentProfileId": "standalone.split-services.development",
-    "productionProfileId": "cloud.split-services.production",
-    "gatewayBind": "127.0.0.1:3900"
+    "developmentProfileId": "standalone.development",
+    "productionProfileId": "cloud.production",
+    "gatewayBind": "127.0.0.1:3900",
+    "desktopBuildProfileId": "standalone.production"
   },
   "profileFiles": {
-    "standalone.split-services.development": "configs/topology/standalone.split-services.development.env",
-    "cloud.split-services.development": "configs/topology/cloud.split-services.development.env",
-    "standalone.split-services.production": "configs/topology/standalone.split-services.production.env",
-    "cloud.split-services.production": "configs/topology/cloud.split-services.production.env"
+    "standalone.development": "configs/topology/standalone.development.env",
+    "cloud.development": "configs/topology/cloud.development.env",
+    "standalone.production": "configs/topology/standalone.production.env",
+    "cloud.production": "configs/topology/cloud.production.env"
   },
   "envKeys": {
     "deploymentProfile": "SDKWORK_NOTARY_DEPLOYMENT_PROFILE",
-    "serviceLayout": "SDKWORK_NOTARY_SERVICE_LAYOUT",
     "environment": "SDKWORK_NOTARY_ENVIRONMENT",
     "profileId": "SDKWORK_NOTARY_PROFILE_ID",
     "clientDeploymentProfile": "VITE_SDKWORK_NOTARY_DEPLOYMENT_PROFILE",
@@ -114,7 +109,7 @@
   },
   "orchestration": {
     "profiles": {
-      "standalone.split-services.development": {
+      "standalone.development": {
         "processes": [],
         "healthSurfaces": [
           "application.public-ingress",
@@ -122,7 +117,7 @@
           "platform.api-gateway"
         ]
       },
-      "cloud.split-services.development": {
+      "cloud.development": {
         "processes": [
           {
             "id": "platform.api-gateway",
@@ -136,7 +131,7 @@
           "platform.api-gateway"
         ]
       },
-      "cloud.split-services.production": {
+      "cloud.production": {
         "processes": [
           {
             "id": "platform.api-gateway",
@@ -146,6 +141,14 @@
             "required": false
           }
         ],
+        "healthSurfaces": [
+          "application.public-ingress",
+          "application.backend-http",
+          "platform.api-gateway"
+        ]
+      },
+      "standalone.production": {
+        "processes": [],
         "healthSurfaces": [
           "application.public-ingress",
           "application.backend-http",
