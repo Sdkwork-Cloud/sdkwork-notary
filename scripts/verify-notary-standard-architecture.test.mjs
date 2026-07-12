@@ -381,6 +381,19 @@ test('route and service component specs reference security and observability sta
   }
 });
 
+test('notary case service declares owner ports instead of direct dependency SDK clients', () => {
+  const spec = readJson('crates/sdkwork-notary-case-service/specs/component.spec.json');
+  const requiredPorts = new Set(spec.contracts.requiredPorts.map((port) => port.name));
+
+  assert.deepEqual(spec.contracts.sdkClients, []);
+  assert.equal(requiredPorts.has('commerce.merchandise'), true);
+  assert.equal(requiredPorts.has('commerce.order'), true);
+  assert.equal(requiredPorts.has('commerce.payment'), false);
+
+  const serviceCargo = read('crates/sdkwork-notary-case-service/Cargo.toml');
+  assert.doesNotMatch(serviceCargo, /sdkwork-(?:catalog|merchandise|order|payment).*sdk/u);
+});
+
 test('H5 AuthGate redirects unauthenticated production sessions to platform IAM login', () => {
   const authGate = read('apps/sdkwork-notary-h5/src/AuthGate.tsx');
   assert.match(authGate, /import\.meta\.env\.PROD/);

@@ -69,6 +69,10 @@
         "export": "sdkwork_notary_case_service::*"
       },
       {
+        "name": "commerce.merchandise",
+        "export": "sdkwork_notary_case_service::*"
+      },
+      {
         "name": "drive.notary_space",
         "export": "sdkwork_notary_case_service::*"
       },
@@ -84,12 +88,7 @@
       "list_case_files"
     ],
     "routeManifest": null,
-    "sdkClients": [
-      "sdkwork-iam-app-sdk",
-      "sdkwork-catalog-app-sdk",
-      "sdkwork-order-app-sdk",
-      "sdkwork-drive-app-sdk"
-    ],
+    "sdkClients": [],
     "events": ["notary.case.submitted"],
     "configKeys": []
   },
