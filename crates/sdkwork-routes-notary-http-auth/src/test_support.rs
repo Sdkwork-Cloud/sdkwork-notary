@@ -36,6 +36,7 @@ pub fn test_web_request_context() -> WebRequestContext {
         client_kind: None,
         operation: None,
         trace_id: None,
+        idempotency_key: None,
     }
 }
 
