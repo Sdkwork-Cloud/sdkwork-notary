@@ -48,7 +48,7 @@ pub async fn assemble_embedded_notary_application_router(
     runtime: EmbeddedNotaryRuntimeConfig,
 ) -> Result<EmbeddedNotaryAssembly, String> {
     let (merchandise_id_generator, merchandise_id_node_lease) =
-        SnowflakeNodeAllocator::allocate_generator(
+        SnowflakeNodeAllocator::allocate_process_generator(
             &commerce_pool,
             &NodeAllocatorConfig::from_service_name("sdkwork-notary-merchandise"),
         )

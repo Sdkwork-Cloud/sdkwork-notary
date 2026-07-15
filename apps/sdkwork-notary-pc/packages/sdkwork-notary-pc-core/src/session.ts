@@ -56,7 +56,13 @@ function readPersistedSessionRawValue(): string | null {
     return null;
   }
 
-  return window.sessionStorage.getItem(NOTARY_PC_SESSION_KEY);
+  const legacyRaw = window.sessionStorage.getItem(NOTARY_PC_SESSION_KEY);
+  const raw = window.localStorage.getItem(NOTARY_PC_SESSION_KEY) ?? legacyRaw;
+  if (legacyRaw && !window.localStorage.getItem(NOTARY_PC_SESSION_KEY)) {
+    window.localStorage.setItem(NOTARY_PC_SESSION_KEY, legacyRaw);
+    window.sessionStorage.removeItem(NOTARY_PC_SESSION_KEY);
+  }
+  return raw;
 }
 
 function writePersistedSessionRawValue(value: string | null): void {
@@ -65,8 +71,10 @@ function writePersistedSessionRawValue(value: string | null): void {
   }
 
   if (value) {
-    window.sessionStorage.setItem(NOTARY_PC_SESSION_KEY, value);
+    window.localStorage.setItem(NOTARY_PC_SESSION_KEY, value);
+    window.sessionStorage.removeItem(NOTARY_PC_SESSION_KEY);
   } else {
+    window.localStorage.removeItem(NOTARY_PC_SESSION_KEY);
     window.sessionStorage.removeItem(NOTARY_PC_SESSION_KEY);
   }
 }
@@ -85,6 +93,7 @@ function readPersistedTokens(): AuthTokens | undefined {
     return {
       accessToken: parsed.accessToken,
       authToken: parsed.authToken,
+      refreshToken: parsed.refreshToken,
     };
   } catch {
     return undefined;
@@ -106,16 +115,18 @@ function persistTokens(tokens: AuthTokens): void {
   }
 
   if (tokens.accessToken) {
-    window.sessionStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
   } else {
-    window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   }
 
   if (tokens.authToken) {
-    window.sessionStorage.setItem(AUTH_TOKEN_KEY, tokens.authToken);
+    window.localStorage.setItem(AUTH_TOKEN_KEY, tokens.authToken);
   } else {
-    window.sessionStorage.removeItem(AUTH_TOKEN_KEY);
+    window.localStorage.removeItem(AUTH_TOKEN_KEY);
   }
+  window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  window.sessionStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
 function clearPersistedTokens(): void {
@@ -123,6 +134,9 @@ function clearPersistedTokens(): void {
     return;
   }
 
+  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  window.localStorage.removeItem(AUTH_TOKEN_KEY);
+  window.localStorage.removeItem(NOTARY_PC_SESSION_KEY);
   window.sessionStorage.removeItem(ACCESS_TOKEN_KEY);
   window.sessionStorage.removeItem(AUTH_TOKEN_KEY);
   window.sessionStorage.removeItem(NOTARY_PC_SESSION_KEY);
@@ -165,6 +179,7 @@ export function applyNotaryPcSessionTokens(session: NotaryPcSession | null): Not
     getNotaryPcGlobalTokenManager().setTokens({
       accessToken: normalized.accessToken,
       authToken: normalized.authToken,
+      refreshToken: normalized.refreshToken,
     });
   } else {
     writePersistedSessionRawValue(null);
