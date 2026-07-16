@@ -603,7 +603,7 @@ test("notary SDK family manifests declare dependency SDKs without copying depend
     const openapi = readJson(family.input);
 
     assert.equal(
-      existsSync(path.join(workspaceRoot, familyRoot, ".sdkwork-assembly.json")),
+      existsSync(path.join(workspaceRoot, familyRoot, "sdk-manifest.json")),
       false,
       `${family.root} must use sdk-manifest.json as its per-family metadata SSOT`,
     );
