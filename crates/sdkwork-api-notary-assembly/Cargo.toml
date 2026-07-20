@@ -1,0 +1,16 @@
+[package]
+name = "sdkwork-api-notary-assembly"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+description = "Generated API assembly for sdkwork-notary application HTTP plane."
+
+[lib]
+name = "sdkwork_api_notary_assembly"
+path = "src/lib.rs"
+
+[dependencies]
+axum.workspace = true
+tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
+sdkwork-routes-notary-app-api.workspace = true
+sdkwork-routes-notary-backend-api.workspace = true

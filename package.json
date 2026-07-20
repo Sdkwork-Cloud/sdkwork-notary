@@ -52,8 +52,8 @@
     "db:bootstrap": "cargo run --manifest-path ../sdkwork-database/Cargo.toml -p sdkwork-database-cli -- --app-root . bootstrap",
     "format:check": "cargo fmt -p sdkwork-notary-case-contract -p sdkwork-notary-case-service -p sdkwork-notary-case-repository-sqlx -p sdkwork-notary-database-host -p sdkwork-notary-embedded-bootstrap -p sdkwork-notary-gateway-assembly -p sdkwork-routes-notary-http-auth -p sdkwork-routes-notary-app-api -p sdkwork-routes-notary-backend-api -- --check",
     "test:contract:database": "node ../sdkwork-specs/tools/check-database-framework-standard.mjs --root .",
-    "api:assembly:materialize": "node scripts/gateway/assembly-materialize.mjs",
-    "api:assembly:validate": "node scripts/gateway/assembly-validate.mjs",
+    "api:assembly:materialize": "node ../sdkwork-specs/tools/materialize-api-assembly.mjs --root .",
+    "api:assembly:validate": "node ../sdkwork-specs/tools/validate-api-assembly.mjs --root .",
     "check:app-composition": "node ../sdkwork-specs/tools/verify-repo.mjs --root ."
   },
   "exports": {

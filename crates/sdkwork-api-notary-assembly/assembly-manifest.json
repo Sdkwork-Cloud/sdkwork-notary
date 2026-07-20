@@ -1,0 +1,32 @@
+{
+  "kind": "sdkwork.api.assembly",
+  "schemaVersion": 1,
+  "applicationCode": "notary",
+  "apiMode": "served",
+  "packageName": "sdkwork-api-notary-assembly",
+  "crateDir": "crates/sdkwork-api-notary-assembly",
+  "routeCrates": [
+    {
+      "packageName": "sdkwork-routes-notary-app-api",
+      "memberDir": "crates/sdkwork-routes-notary-app-api",
+      "libName": "sdkwork_routes_notary_app_api",
+      "surface": "app-api",
+      "pathPrefix": null,
+      "mountOrder": 0,
+      "componentRef": "crates/sdkwork-routes-notary-app-api/specs/component.spec.json",
+      "routeManifestRef": "crates/sdkwork-routes-notary-app-api/../../../sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json",
+      "sourceRef": "crates/sdkwork-routes-notary-app-api/Cargo.toml"
+    },
+    {
+      "packageName": "sdkwork-routes-notary-backend-api",
+      "memberDir": "crates/sdkwork-routes-notary-backend-api",
+      "libName": "sdkwork_routes_notary_backend_api",
+      "surface": "backend-api",
+      "pathPrefix": null,
+      "mountOrder": 1,
+      "componentRef": "crates/sdkwork-routes-notary-backend-api/specs/component.spec.json",
+      "routeManifestRef": "crates/sdkwork-routes-notary-backend-api/../../../sdks/_route-manifests/backend-api/sdkwork-routes-notary-backend-api.route-manifest.json",
+      "sourceRef": "crates/sdkwork-routes-notary-backend-api/Cargo.toml"
+    }
+  ]
+}
