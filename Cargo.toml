@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/sdkwork-api-notary-standalone-gateway",
     "crates/sdkwork-api-notary-assembly",
     "crates/sdkwork-api-notary-assembly",
     "crates/sdkwork-notary-embedded-bootstrap",
