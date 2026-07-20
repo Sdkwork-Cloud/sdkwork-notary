@@ -42,8 +42,6 @@
     "environment": "SDKWORK_NOTARY_ENVIRONMENT",
     "profileId": "SDKWORK_NOTARY_PROFILE_ID",
     "clientDeploymentProfile": "VITE_SDKWORK_NOTARY_DEPLOYMENT_PROFILE",
-    "gatewayAutostart": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_AUTOSTART",
-    "cloudGatewayBind": "SDKWORK_API_CLOUD_GATEWAY_BIND",
     "apiGatewayBaseUrl": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
     "clientApiGatewayBaseUrl": "VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL"
   },
@@ -71,11 +69,8 @@
       "protocols": [
         "http"
       ],
-      "owner": "sdkwork-api-cloud-gateway",
-      "bindEnv": "SDKWORK_API_CLOUD_GATEWAY_BIND",
       "httpUrlEnv": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
-      "clientHttpEnv": "VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL",
-      "autostartEnv": "SDKWORK_NOTARY_PLATFORM_API_GATEWAY_AUTOSTART"
+      "clientHttpEnv": "VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL"
     }
   },
   "cloudPublicHosts": {
@@ -100,11 +95,6 @@
     "backendApiRouter": {
       "crate": "sdkwork-routes-notary-backend-api",
       "library": "sdkwork_routes_notary_backend_api"
-    },
-    "cloudGateway": {
-      "crate": "sdkwork-api-cloud-gateway",
-      "binary": "sdkwork-api-cloud-gateway",
-      "repository": "sdkwork-api-cloud-gateway"
     }
   },
   "orchestration": {
@@ -118,29 +108,13 @@
         ]
       },
       "cloud.development": {
-        "processes": [
-          {
-            "id": "platform.api-gateway",
-            "crate": "sdkwork-api-cloud-gateway",
-            "binary": "sdkwork-api-cloud-gateway",
-            "repository": "sdkwork-api-cloud-gateway",
-            "required": false
-          }
-        ],
+        "processes": [],
         "healthSurfaces": [
           "platform.api-gateway"
         ]
       },
       "cloud.production": {
-        "processes": [
-          {
-            "id": "platform.api-gateway",
-            "crate": "sdkwork-api-cloud-gateway",
-            "binary": "sdkwork-api-cloud-gateway",
-            "repository": "sdkwork-api-cloud-gateway",
-            "required": false
-          }
-        ],
+        "processes": [],
         "healthSurfaces": [
           "application.public-ingress",
           "application.backend-http",
@@ -176,10 +150,7 @@
     "notes": "sdkwork-notary is a domain library. Host applications wire sdkwork-routes-notary-* route crates and load profile env from this repository."
   },
   "packaging": {
-    "cloudConfigFiles": [
-      "sdkwork-api-cloud-gateway.notary.development.toml",
-      "sdkwork-api-cloud-gateway.notary.production.toml"
-    ],
+    "cloudConfigFiles": [],
     "targets": [
       {
         "id": "container-noarch-cloud-container-config-bundle-tar-gz",
