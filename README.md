@@ -63,7 +63,7 @@ These package roots export generated clients, generated types, and approved comp
 - `crates/sdkwork-notary-case-repository-sqlx`: SQLx-backed Notary repository implementations (`SqliteNotaryCaseRepository`, `PostgresNotaryCaseRepository`) with schema sourced from `database/migrations/`.
 - `crates/sdkwork-notary-database-host`: database lifecycle bootstrap via `sdkwork-database-lifecycle` SPI.
 - `crates/sdkwork-notary-embedded-bootstrap`: same-process IAM, Merchandise/Order, and Drive adapters with an assembly-owned Snowflake node lease.
-- `crates/sdkwork-notary-gateway-assembly`: app/backend route composition that retains embedded runtime lifecycles.
+- `crates/sdkwork-api-notary-assembly`: app/backend route composition that retains embedded runtime lifecycles.
 
 The runtime layer implements the main notary workflow without owning dependency facts:
 
