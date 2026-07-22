@@ -6,13 +6,17 @@
     "displayName": "SDKWork Router Notary App API",
     "version": "0.1.0",
     "type": "rust-route-crate",
-    "root": "sdkwork-notary/crates/sdkwork-routes-notary-app-api",
+    "root": "crates/sdkwork-routes-notary-app-api",
     "domain": "notary",
     "capability": "notary",
     "surface": "app-api",
-    "languages": ["rust"],
+    "languages": [
+      "rust"
+    ],
     "generated": false,
-    "manifests": ["Cargo.toml"]
+    "manifests": [
+      "Cargo.toml"
+    ]
   },
   "canonicalSpecs": [
     {
@@ -48,7 +52,9 @@
   ],
   "contracts": {
     "layerRole": "backend-route",
-    "publicExports": ["sdkwork_routes_notary_app_api::*"],
+    "publicExports": [
+      "sdkwork_routes_notary_app_api::*"
+    ],
     "providedPorts": [
       {
         "name": "build_sdkwork_notary_app_api_router",
@@ -61,12 +67,16 @@
         "export": "sdkwork_routes_notary_app_api::*"
       }
     ],
-    "runtimeEntrypoints": ["build_sdkwork_notary_app_api_router"],
-    "routeManifest": "../../../sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json",
+    "runtimeEntrypoints": [
+      "build_sdkwork_notary_app_api_router"
+    ],
+    "routeManifest": "sdks/_route-manifests/app-api/sdkwork-routes-notary-app-api.route-manifest.json",
     "sdkClients": [],
     "dependencyApiSurfaces": []
   },
   "verification": {
-    "commands": ["cargo test --workspace --target-dir target-codex-test"]
+    "commands": [
+      "cargo test --workspace --target-dir target-codex-test"
+    ]
   }
 }
