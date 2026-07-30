@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use async_trait::async_trait;
-use sdkwork_database_sqlx::{create_any_pool_from_config, DatabasePool};
+use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_drive_workspace_service::application::node_service::{
     CreateNodeCommand, DriveNodeService,
 };
@@ -14,6 +14,7 @@ use sdkwork_drive_workspace_service::application::workspace_service::{
 use sdkwork_drive_workspace_service::domain::node::DriveNodeType;
 use sdkwork_drive_workspace_service::domain::space::DriveSpaceType;
 use sdkwork_drive_workspace_service::infrastructure::sql::node_store::SqlNodeStore;
+use sdkwork_drive_workspace_service::infrastructure::sql::postgres_pool_from_database_pool;
 use sdkwork_drive_workspace_service::DriveServiceError;
 use sdkwork_notary_case_contract::NotaryServiceError;
 use sdkwork_notary_case_service::{
@@ -24,7 +25,7 @@ use sdkwork_notary_case_service::{
     NOTARY_FILE_REVIEW_STATUS_PROPERTY,
 };
 use sdkwork_utils_rust::{base64_decode, base64_encode, format_bytes, sha256_hash};
-use sqlx::AnyPool;
+use sqlx::PgPool;
 
 const NOTARY_FILE_PROPERTY_VISIBILITY: &str = "app_public";
 const NOTARY_DRIVE_CURSOR_PREFIX: &str = "ndf1:";
@@ -35,7 +36,7 @@ pub struct DriveWorkspacePort {
     space_service: SqlDriveSpaceService,
     node_service: DriveNodeService<SqlNodeStore>,
     workspace_service: SqlDriveWorkspaceService,
-    pool: AnyPool,
+    pool: PgPool,
 }
 
 impl DriveWorkspacePort {
@@ -44,24 +45,23 @@ impl DriveWorkspacePort {
         tenant_id: impl Into<String>,
         operator_id: impl Into<String>,
     ) -> Result<Self, NotaryServiceError> {
-        let any_pool = create_any_pool_from_config(pool.config().clone())
-            .await
-            .map_err(|error| NotaryServiceError::storage(error.to_string()))?;
-        Ok(Self::from_any_pool(
-            any_pool,
+        let postgres_pool =
+            postgres_pool_from_database_pool(&pool).map_err(NotaryServiceError::storage)?;
+        Ok(Self::from_postgres_pool(
+            postgres_pool,
             tenant_id.into(),
             operator_id.into(),
         ))
     }
 
-    fn from_any_pool(any_pool: AnyPool, tenant_id: String, operator_id: String) -> Self {
+    fn from_postgres_pool(pool: PgPool, tenant_id: String, operator_id: String) -> Self {
         Self {
             tenant_id,
             operator_id,
-            space_service: SqlDriveSpaceService::new(any_pool.clone()),
-            node_service: DriveNodeService::new(SqlNodeStore::new(any_pool.clone())),
-            workspace_service: SqlDriveWorkspaceService::new(any_pool.clone()),
-            pool: any_pool,
+            space_service: SqlDriveSpaceService::new(pool.clone()),
+            node_service: DriveNodeService::new(SqlNodeStore::new(pool.clone())),
+            workspace_service: SqlDriveWorkspaceService::new(pool.clone()),
+            pool,
         }
     }
 }
@@ -289,7 +289,7 @@ struct FileNodeMetadata {
 }
 
 async fn load_file_metadata(
-    pool: &AnyPool,
+    pool: &PgPool,
     tenant_id: &str,
     node_ids: &[String],
 ) -> Result<HashMap<String, FileNodeMetadata>, NotaryServiceError> {
@@ -352,7 +352,7 @@ async fn load_file_metadata(
 }
 
 async fn upsert_node_property(
-    pool: &AnyPool,
+    pool: &PgPool,
     tenant_id: &str,
     node_id: &str,
     property_key: &str,

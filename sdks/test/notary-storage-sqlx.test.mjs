@@ -44,7 +44,7 @@ test("notary SQLx storage keeps ownership local and does not join dependency tab
   );
 
   assert(schemaSource.includes("notary_foundation_migration_sql"));
-  assert(schemaSource.includes("database/ddl/baseline/sqlite/0001_notary_baseline.sql"));
+  assert(schemaSource.includes("tests/fixtures/database/sqlite/ddl/baseline/0001_notary_baseline.sql"));
 
   for (const api of [
     "SqliteNotaryCaseRepository",

@@ -1,13 +1,12 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "sdkwork.database.module",
   "moduleId": "notary",
   "serviceCode": "NOTARY",
   "displayName": "NOTARY Database",
   "owner": "notary-platform",
   "engines": [
-    "postgres",
-    "sqlite"
+    "postgres"
   ],
   "defaultEngine": "postgres",
   "tablePrefix": "notary_",
@@ -15,7 +14,7 @@
   "baselineStrategy": "baseline-plus-migrations",
   "modules": [],
   "lifecycle": {
-    "autoMigrate": true,
+    "autoMigrate": false,
     "seedOnBoot": false,
     "defaultSeedLocale": "zh-CN",
     "defaultSeedProfile": "standard",
@@ -42,5 +41,6 @@
   "spi": {
     "provider": "default",
     "hooks": []
-  }
+  },
+  "databaseRole": "authoritative-server"
 }

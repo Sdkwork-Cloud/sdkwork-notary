@@ -59,7 +59,7 @@
     "sdkClients": [],
     "sdkDependencies": [{ "workspace": "sdkwork-database" }],
     "events": [],
-    "configKeys": ["SDKWORK_NOTARY_DATABASE_URL", "SDKWORK_NOTARY_APP_ROOT"]
+    "configKeys": ["SDKWORK_DATABASE_URL", "SDKWORK_NOTARY_APP_ROOT"]
   },
   "verification": {
     "commands": [

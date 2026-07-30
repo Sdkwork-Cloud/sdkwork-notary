@@ -15,4 +15,4 @@ pnpm db:validate
 cargo test -p sdkwork-notary-case-repository-sqlx --target-dir target-codex-test
 ```
 
-Set `SDKWORK_NOTARY_DATABASE_URL` to a PostgreSQL connection string when running live PostgreSQL verification in host applications.
+Set `SDKWORK_DATABASE_URL` to a PostgreSQL connection string when running live PostgreSQL verification in host applications.

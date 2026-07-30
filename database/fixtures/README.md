@@ -46,7 +46,7 @@ both a development/test environment and the explicit `--confirm-dev-test` flag.
 SQLite example:
 
 ```powershell
-sqlite3 .runtime/notary-fixture.sqlite ".read database/ddl/baseline/sqlite/0001_notary_baseline.sql"
+sqlite3 .runtime/notary-fixture.sqlite ".read tests/fixtures/database/sqlite/ddl/baseline/0001_notary_baseline.sql"
 $env:SDKWORK_NOTARY_ENVIRONMENT = "development"
 node database/fixtures/load-notary-fixtures.mjs `
   --engine sqlite `
@@ -59,7 +59,7 @@ PostgreSQL example:
 
 ```powershell
 $env:SDKWORK_NOTARY_ENVIRONMENT = "test"
-$env:SDKWORK_NOTARY_DATABASE_URL = "postgres://..."
+$env:SDKWORK_DATABASE_URL = "postgres://..."
 node database/fixtures/load-notary-fixtures.mjs `
   --engine postgres `
   --confirm-dev-test

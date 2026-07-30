@@ -136,7 +136,7 @@ test("both integration fixtures can be loaded repeatedly with complete workflow 
   for (const engine of ["postgres", "sqlite"]) {
     const database = new DatabaseSync(":memory:");
     try {
-      database.exec(readText("database/ddl/baseline/sqlite/0001_notary_baseline.sql"));
+      database.exec(readText("tests/fixtures/database/sqlite/ddl/baseline/0001_notary_baseline.sql"));
       const fixture = readText(`database/fixtures/${engine}/001_notary_integration_fixture.sql`);
       database.exec(fixture);
       database.exec(fixture);
@@ -188,7 +188,7 @@ test("relative fixture dates produce controlled today and yesterday completed wo
   for (const engine of ["postgres", "sqlite"]) {
     const database = new DatabaseSync(":memory:");
     try {
-      database.exec(readText("database/ddl/baseline/sqlite/0001_notary_baseline.sql"));
+      database.exec(readText("tests/fixtures/database/sqlite/ddl/baseline/0001_notary_baseline.sql"));
       database.exec(readText(`database/fixtures/${engine}/001_notary_integration_fixture.sql`));
       const refreshSql = buildRelativeCaseDateRefreshSql(engine, referenceTime);
       assert.match(refreshSql, /tenant_id = '100001'/u);

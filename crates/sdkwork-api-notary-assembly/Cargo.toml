@@ -12,7 +12,8 @@ path = "src/lib.rs"
 [dependencies]
 axum.workspace = true
 tokio.workspace = true
+sdkwork-web-bootstrap.workspace = true
+sdkwork-web-core.workspace = true
 sdkwork-notary-embedded-bootstrap.workspace = true
-sdkwork-routes-notary-http-auth.workspace = true
 sdkwork-routes-notary-app-api.workspace = true
 sdkwork-routes-notary-backend-api.workspace = true

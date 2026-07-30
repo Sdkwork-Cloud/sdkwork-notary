@@ -27,7 +27,7 @@ Optional deterministic clock:
 
 Required environment:
   SDKWORK_NOTARY_ENVIRONMENT=dev|development|local|test
-  SDKWORK_NOTARY_DATABASE_URL=<postgres URL>  # postgres only
+  SDKWORK_DATABASE_URL=<postgres URL>  # postgres only
   SDKWORK_NOTARY_FIXTURE_REFERENCE_TIME=<canonical UTC ISO timestamp>  # optional
 `);
 }
@@ -134,9 +134,9 @@ if (options.engine === 'sqlite') {
     : path.resolve(options.databasePath);
   run('sqlite3', [databasePath], { input: loadSql });
 } else {
-  const databaseUrl = process.env.SDKWORK_NOTARY_DATABASE_URL?.trim();
+  const databaseUrl = process.env.SDKWORK_DATABASE_URL?.trim();
   if (!databaseUrl) {
-    fail('SDKWORK_NOTARY_DATABASE_URL is required for PostgreSQL fixtures.');
+    fail('SDKWORK_DATABASE_URL is required for PostgreSQL fixtures.');
   }
   run('psql', ['--set', 'ON_ERROR_STOP=on'], {
     env: {

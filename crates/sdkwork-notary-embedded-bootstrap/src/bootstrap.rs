@@ -15,7 +15,16 @@ use crate::adapters::{CommerceOrderPort, DriveWorkspacePort, IamSqlxAppbasePort}
 
 pub struct EmbeddedNotaryAssembly {
     pub router: Router,
+    pub app_router: Router,
+    pub backend_router: Router,
+    database_pools: Vec<DatabasePool>,
     _merchandise_id_node_lease: NodeLease,
+}
+
+impl EmbeddedNotaryAssembly {
+    pub fn database_pools(&self) -> &[DatabasePool] {
+        &self.database_pools
+    }
 }
 
 pub async fn assemble_embedded_notary_application_router_from_env(
@@ -55,7 +64,7 @@ pub async fn assemble_embedded_notary_application_router(
         .await
         .map_err(|error| format!("allocate Merchandise Snowflake node failed: {error}"))?;
     let merchandise_id_generator: Arc<dyn IdGenerator> = Arc::new(merchandise_id_generator);
-    let app_router = match notary_pool {
+    let (app_router, backend_router) = match notary_pool.clone() {
         DatabasePool::Sqlite(pool, _) => {
             let repository = SqliteNotaryCaseRepository::new(
                 pool,
@@ -63,9 +72,9 @@ pub async fn assemble_embedded_notary_application_router(
                 runtime.operator_user_id.clone(),
             );
             build_notary_router(
-                iam_pool,
-                commerce_pool,
-                drive_pool,
+                iam_pool.clone(),
+                commerce_pool.clone(),
+                drive_pool.clone(),
                 runtime,
                 merchandise_id_generator.clone(),
                 repository.clone(),
@@ -80,9 +89,9 @@ pub async fn assemble_embedded_notary_application_router(
                 runtime.operator_user_id.clone(),
             );
             build_notary_router(
-                iam_pool,
-                commerce_pool,
-                drive_pool,
+                iam_pool.clone(),
+                commerce_pool.clone(),
+                drive_pool.clone(),
                 runtime,
                 merchandise_id_generator,
                 repository.clone(),
@@ -92,8 +101,12 @@ pub async fn assemble_embedded_notary_application_router(
         }
     };
 
+    let router = app_router.clone().merge(backend_router.clone());
     Ok(EmbeddedNotaryAssembly {
-        router: app_router,
+        router,
+        app_router,
+        backend_router,
+        database_pools: vec![notary_pool, iam_pool, commerce_pool, drive_pool],
         _merchandise_id_node_lease: merchandise_id_node_lease,
     })
 }
@@ -106,7 +119,7 @@ async fn build_notary_router<Repository>(
     merchandise_id_generator: Arc<dyn IdGenerator>,
     app_repository: Repository,
     backend_repository: Repository,
-) -> Result<Router, String>
+) -> Result<(Router, Router), String>
 where
     Repository:
         sdkwork_notary_case_service::NotaryCaseRepositoryPort + Clone + Send + Sync + 'static,
@@ -150,11 +163,10 @@ where
             backend_repository,
         ));
 
-    Ok(
-        sdkwork_routes_notary_app_api::gateway_mount(app_service).merge(
-            sdkwork_routes_notary_backend_api::gateway_mount(backend_service),
-        ),
-    )
+    Ok((
+        sdkwork_routes_notary_app_api::gateway_mount(app_service),
+        sdkwork_routes_notary_backend_api::gateway_mount(backend_service),
+    ))
 }
 
 #[derive(Clone, Debug)]
