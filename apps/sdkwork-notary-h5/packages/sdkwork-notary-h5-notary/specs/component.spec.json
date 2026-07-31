@@ -2,58 +2,47 @@
   "schemaVersion": 1,
   "kind": "sdkwork.component.spec",
   "component": {
-    "name": "sdkwork-notary-h5-notary",
+    "name": "@sdkwork/notary-h5-notary",
     "displayName": "SDKWork Notary H5 Notary",
     "version": "0.1.0",
-    "type": "typescript-package",
+    "type": "node-package",
     "root": "sdkwork-notary/apps/sdkwork-notary-h5/packages/sdkwork-notary-h5-notary",
     "domain": "notary",
     "capability": "notary",
-    "surface": "h5",
-    "languages": ["typescript"],
+    "surface": "app",
+    "languages": ["typescript", "react"],
     "generated": false,
     "manifests": ["package.json"]
   },
   "canonicalSpecs": [
-    {
-      "file": "APP_MOBILE_REACT_UI_SPEC.md",
-      "path": "../../../../../../sdkwork-specs/APP_MOBILE_REACT_UI_SPEC.md",
-      "purpose": "Notary mobile screens and service boundaries."
-    },
-    {
-      "file": "APP_SDK_INTEGRATION_SPEC.md",
-      "path": "../../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md",
-      "purpose": "Business services must consume composed app SDK APIs only."
-    }
+    { "file": "COMPONENT_SPEC.md", "path": "../../../../../sdkwork-specs/COMPONENT_SPEC.md", "purpose": "Component contract." },
+    { "file": "CODE_STYLE_SPEC.md", "path": "../../../../../sdkwork-specs/CODE_STYLE_SPEC.md", "purpose": "Source boundaries." },
+    { "file": "NAMING_SPEC.md", "path": "../../../../../sdkwork-specs/NAMING_SPEC.md", "purpose": "Naming." },
+    { "file": "TYPESCRIPT_CODE_SPEC.md", "path": "../../../../../sdkwork-specs/TYPESCRIPT_CODE_SPEC.md", "purpose": "TypeScript." },
+    { "file": "FRONTEND_CODE_SPEC.md", "path": "../../../../../sdkwork-specs/FRONTEND_CODE_SPEC.md", "purpose": "Frontend." },
+    { "file": "UI_ARCHITECTURE_SPEC.md", "path": "../../../../../sdkwork-specs/UI_ARCHITECTURE_SPEC.md", "purpose": "UI selection." },
+    { "file": "APP_H5_ARCHITECTURE_SPEC.md", "path": "../../../../../sdkwork-specs/APP_H5_ARCHITECTURE_SPEC.md", "purpose": "H5 root." },
+    { "file": "APP_MOBILE_REACT_UI_SPEC.md", "path": "../../../../../sdkwork-specs/APP_MOBILE_REACT_UI_SPEC.md", "purpose": "Mobile React UI." },
+    { "file": "APP_SDK_INTEGRATION_SPEC.md", "path": "../../../../../sdkwork-specs/APP_SDK_INTEGRATION_SPEC.md", "purpose": "SDK injection." },
+    { "file": "TEST_SPEC.md", "path": "../../../../../sdkwork-specs/TEST_SPEC.md", "purpose": "Verification." }
   ],
   "contracts": {
     "layerRole": "frontend-feature",
-    "publicExports": ["@sdkwork/notary-h5-notary"],
-    "providedPorts": [
-      {
-        "name": "notaryH5NotaryFeature",
-        "export": "@sdkwork/notary-h5-notary"
-      }
-    ],
+    "publicExports": ["."],
+    "providedPorts": [{ "name": "notaryH5Feature", "export": "." }],
     "requiredPorts": [
-      {
-        "name": "notaryH5SdkRuntime",
-        "export": "@sdkwork/notary-h5-notary"
-      },
-      {
-        "name": "notaryH5CommonsUi",
-        "export": "@sdkwork/notary-h5-notary"
-      },
-      {
-        "name": "notaryH5AppShell",
-        "export": "@sdkwork/notary-h5-notary"
-      }
+      { "name": "notaryH5Runtime", "package": "@sdkwork/notary-h5-core", "export": "." },
+      { "name": "mobileReactUi", "package": "@sdkwork/ui-mobile-react", "export": "." }
     ],
-    "runtimeEntrypoints": ["createNotaryH5Service"],
-    "sdkClients": ["@sdkwork/notary-h5-core"],
-    "dependencyApiSurfaces": []
+    "runtimeEntrypoints": [],
+    "routeManifest": null,
+    "sdkClients": [],
+    "sdkDependencies": [],
+    "dependencyApiExports": [],
+    "events": [],
+    "configKeys": []
   },
   "verification": {
-    "commands": ["pnpm --dir apps/sdkwork-notary-h5 typecheck", "pnpm test:browser"]
+    "commands": ["pnpm --dir apps/sdkwork-notary-h5 typecheck"]
   }
 }

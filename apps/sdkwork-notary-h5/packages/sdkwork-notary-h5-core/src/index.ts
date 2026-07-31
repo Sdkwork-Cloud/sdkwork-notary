@@ -7,6 +7,8 @@ export {
   resetNotaryH5SdkClients,
 } from './notaryAppSdk';
 
+export type { NotaryH5ComposedApi } from './notaryAppSdk';
+
 export {
   getNotaryH5AppbaseAppSdkClient,
   initNotaryH5AppbaseAppSdkClient,

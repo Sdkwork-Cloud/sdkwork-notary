@@ -17,10 +17,17 @@
     "@sdkwork/notary-h5-commons": "workspace:*",
     "@sdkwork/notary-h5-core": "workspace:*",
     "@sdkwork/notary-h5-shell": "workspace:*",
+    "@sdkwork/ui-mobile-react": "workspace:*",
     "@sdkwork/utils": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^19.0.0"
+    "lucide-react": ">=1.0.0",
+    "motion": ">=12.0.0",
+    "react": "^19.0.0",
+    "react-i18next": ">=17.0.0",
+    "react-qr-code": ">=2.0.0",
+    "react-router": ">=7.0.0",
+    "react-signature-canvas": ">=1.0.0"
   },
   "sdkwork": {
     "workspace": "sdkwork-notary",

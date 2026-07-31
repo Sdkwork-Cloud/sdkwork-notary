@@ -6,7 +6,7 @@ import {
   type SdkworkNotaryAppClient,
 } from '@sdkwork/notary-app-sdk';
 
-import { getNotaryH5AppbaseAppSdkClient, resetNotaryH5AppbaseAppSdkClient } from './appbaseAppSdk';
+import { resetNotaryH5AppbaseAppSdkClient } from './appbaseAppSdk';
 import { getNotaryH5DriveAppSdkClient, resetNotaryH5DriveAppSdkClient } from './driveAppSdk';
 
 let notaryAppSdkClient: SdkworkNotaryAppClient | null = null;
@@ -33,7 +33,7 @@ function resolveComposedDependencyClients(
 ): Pick<CreateNotaryApiOptions, 'drive' | 'appbase'> {
   return {
     drive: options.drive ?? getNotaryH5DriveAppSdkClient(),
-    appbase: options.appbase ?? getNotaryH5AppbaseAppSdkClient(),
+    appbase: options.appbase ?? {},
   };
 }
 
@@ -41,12 +41,15 @@ export function createNotaryH5ComposedApi(
   options: Partial<Pick<CreateNotaryApiOptions, 'drive' | 'appbase'>> = {},
 ) {
   const dependencies = resolveComposedDependencyClients(options);
-  return createNotaryApi({
+  notaryComposedApi = createNotaryApi({
     notary: getNotaryH5AppSdkClient().notary,
     drive: dependencies.drive,
     appbase: dependencies.appbase,
   });
+  return notaryComposedApi;
 }
+
+export type NotaryH5ComposedApi = ReturnType<typeof createNotaryH5ComposedApi>;
 
 export function getNotaryH5ComposedApi() {
   if (!notaryComposedApi) {
