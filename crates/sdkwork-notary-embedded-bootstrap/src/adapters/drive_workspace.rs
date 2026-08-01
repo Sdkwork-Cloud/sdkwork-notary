@@ -319,7 +319,7 @@ async fn load_file_metadata(
            AND node_id IN ({placeholders})"
     );
 
-    let mut sql_query = sqlx::query(&query)
+    let mut sql_query = sqlx::query(sqlx::AssertSqlSafe(query.as_str()))
         .bind(tenant_id)
         .bind(NOTARY_FILE_PROPERTY_VISIBILITY);
     for node_id in node_ids {

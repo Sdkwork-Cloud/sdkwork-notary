@@ -30,5 +30,5 @@ sdkwork-routes-notary-app-api.workspace = true
 sdkwork-routes-notary-backend-api.workspace = true
 sdkwork-utils-rust.workspace = true
 serde_json = "1"
-sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio", "sqlite", "postgres", "any"] }
+sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "sqlite", "postgres", "any"] }
 tokio = { version = "1.48", features = ["macros", "rt-multi-thread"] }
