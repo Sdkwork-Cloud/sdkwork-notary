@@ -1,6 +1,6 @@
 import { LoaderCircle, Pencil, Power } from 'lucide-react';
 import type { NotaryMatter } from '@sdkwork/notary-pc-admin-core';
-import { formatCurrency } from '@sdkwork/utils';
+import { formatMoney } from '@sdkwork/utils/money';
 
 import type { NotaryMatterMessages } from '../i18n';
 import { MatterStatusBadge } from './MatterStatusBadge';
@@ -16,11 +16,13 @@ export interface MatterTableProps {
 }
 
 function formatMatterPrice(item: NotaryMatter, language: string): string {
-  const amount = Number(item.priceAmount);
-  if (!Number.isFinite(amount) || Math.abs(amount) > Number.MAX_SAFE_INTEGER) {
-    return `${item.currencyCode} ${item.priceAmount}`;
-  }
-  return formatCurrency(amount, item.currencyCode, language) ?? `${item.currencyCode} ${item.priceAmount}`;
+  return (
+    formatMoney(item.priceAmount, {
+      currency: item.currencyCode,
+      locale: language,
+      mode: 'symbol',
+    }) ?? `${item.currencyCode} ${item.priceAmount}`
+  );
 }
 
 export function MatterTable({
