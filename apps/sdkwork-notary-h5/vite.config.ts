@@ -30,19 +30,6 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@sdkwork/utils/string': path.resolve(utilsRoot, 'string.ts'),
-        '@sdkwork/utils': path.resolve(utilsRoot, 'index.ts'),
-        '@sdkwork/sdk-common': path.resolve(sdkCommonRoot, 'index.ts'),
-        '@sdkwork/notary-h5-core': path.resolve(h5Root, 'packages/sdkwork-notary-h5-core/src/index.ts'),
-        '@sdkwork/notary-h5-commons': path.resolve(h5Root, 'packages/sdkwork-notary-h5-commons/src/index.ts'),
-        '@sdkwork/notary-h5-shell': path.resolve(h5Root, 'packages/sdkwork-notary-h5-shell/src/index.ts'),
-        '@sdkwork/notary-h5-notary': path.resolve(h5Root, 'packages/sdkwork-notary-h5-notary/src/index.ts'),
-        '@sdkwork/notary-app-sdk': path.resolve(
-          repoRoot,
-          'sdks/sdkwork-notary-app-sdk/sdkwork-notary-app-sdk-typescript/src/index.ts',
-        ),
-        '@sdkwork/drive-app-sdk': generatedDriveAppSdkEntry,
-        '@sdkwork/iam-app-sdk': generatedAppbaseAppSdkEntry,
       },
     },
     optimizeDeps: {

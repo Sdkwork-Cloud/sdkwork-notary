@@ -39,6 +39,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@sdkwork/drive-app-sdk": "workspace:*",
+    "@sdkwork/iam-app-sdk": "workspace:*",
+    "@sdkwork/notary-app-sdk": "workspace:*",
     "@sdkwork/sdk-common": "^1.0.3"
   },
   "sdkwork": {

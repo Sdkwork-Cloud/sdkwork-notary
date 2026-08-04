@@ -39,6 +39,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@sdkwork/auth-pc-react": "workspace:*",
+    "@sdkwork/auth-runtime-pc-react": "workspace:*",
+    "@sdkwork/drive-app-sdk": "workspace:*",
+    "@sdkwork/iam-app-sdk": "workspace:*",
+    "@sdkwork/iam-contracts": "workspace:*",
+    "@sdkwork/notary-app-sdk": "workspace:*",
     "@sdkwork/sdk-common": "^1.0.3"
   },
   "sdkwork": {
