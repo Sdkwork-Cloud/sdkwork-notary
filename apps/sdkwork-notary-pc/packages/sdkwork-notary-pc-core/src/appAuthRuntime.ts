@@ -98,7 +98,9 @@ function createNotaryPcIamRuntime(): SdkworkAppbasePcAuthRuntimeComposition {
     ],
     sessionBridge: {
       clearSession: clearNotaryPcSessionTokens,
-      commitSession: (session) => applyNotaryPcSessionTokens(session as NotaryPcSession),
+      commitSession: (session) => {
+        applyNotaryPcSessionTokens(session as NotaryPcSession);
+      },
       readSession: readNotaryPcSessionTokens,
     },
     tokenManager: getNotaryPcGlobalTokenManager(),
@@ -110,7 +112,7 @@ export function getNotaryPcIamRuntime(): SdkworkIamRuntimeAuthRuntimeLike {
     notaryPcIamRuntimeComposition = createNotaryPcIamRuntime();
   }
 
-  return notaryPcIamRuntimeComposition.runtime as SdkworkIamRuntimeAuthRuntimeLike;
+  return notaryPcIamRuntimeComposition.runtime as unknown as SdkworkIamRuntimeAuthRuntimeLike;
 }
 
 export function resetNotaryPcIamRuntime(): void {

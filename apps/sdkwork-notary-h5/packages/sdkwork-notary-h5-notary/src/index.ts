@@ -1,3 +1,4 @@
+export * from "./pages/NotaryHomePage";
 export * from "./pages/NotaryRecords";
 export * from "./pages/NotaryFiles";
 export * from "./pages/NotaryMessages";

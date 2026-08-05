@@ -1,7 +1,7 @@
 import type {
   DriveUploaderClient,
   DriveUploaderRequest,
-} from "@sdkwork/drive-app-sdk";
+} from "@sdkwork/drive-app-sdk/uploader";
 
 export interface NotaryAppSdkPort {
   access: {
