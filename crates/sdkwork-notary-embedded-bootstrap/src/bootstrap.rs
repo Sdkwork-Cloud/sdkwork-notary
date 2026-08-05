@@ -49,6 +49,22 @@ pub async fn assemble_embedded_notary_application_router_from_env(
     .await
 }
 
+/// Assemble the embedded Notary router against a caller-provided process-wide
+/// database pool so the platform cloud gateway can share its PostgreSQL pool
+/// across all embedded dependency workspaces.
+pub async fn assemble_embedded_notary_application_router_with_pool(
+    pool: DatabasePool,
+) -> Result<EmbeddedNotaryAssembly, String> {
+    assemble_embedded_notary_application_router(
+        pool.clone(),
+        pool.clone(),
+        pool.clone(),
+        pool,
+        resolve_embedded_notary_runtime_config(),
+    )
+    .await
+}
+
 pub async fn assemble_embedded_notary_application_router(
     notary_pool: DatabasePool,
     iam_pool: DatabasePool,

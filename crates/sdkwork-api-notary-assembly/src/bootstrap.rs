@@ -1,6 +1,7 @@
 //! Host-neutral API assembly bootstrap for SDKWork Notary.
 
 use axum::Router;
+use sdkwork_database_sqlx::DatabasePool;
 use sdkwork_notary_embedded_bootstrap::EmbeddedNotaryAssembly;
 use sdkwork_web_bootstrap::{ApiAssemblyContribution, ReadinessCheck, ReadinessFuture};
 use sdkwork_web_core::HttpRouteManifest;
@@ -37,6 +38,26 @@ pub async fn assemble_api_router() -> Result<ApiAssembly, String> {
     let embedded = Arc::new(
         sdkwork_notary_embedded_bootstrap::assemble_embedded_notary_application_router_from_env()
             .await?,
+    );
+    let mut routes = Vec::new();
+    routes.extend_from_slice(sdkwork_routes_notary_app_api::gateway_route_manifest().routes());
+    routes.extend_from_slice(sdkwork_routes_notary_backend_api::gateway_route_manifest().routes());
+    build_contribution(
+        "SDKWork Notary API",
+        embedded.router.clone(),
+        HttpRouteManifest::from_owned_routes(routes),
+        embedded,
+    )
+}
+
+/// Assemble the Notary router against a caller-provided database pool so the
+/// platform cloud gateway can share its process-wide PostgreSQL pool.
+pub async fn assemble_api_router_with_pool(pool: DatabasePool) -> Result<ApiAssembly, String> {
+    let embedded = Arc::new(
+        sdkwork_notary_embedded_bootstrap::assemble_embedded_notary_application_router_with_pool(
+            pool,
+        )
+        .await?,
     );
     let mut routes = Vec::new();
     routes.extend_from_slice(sdkwork_routes_notary_app_api::gateway_route_manifest().routes());
