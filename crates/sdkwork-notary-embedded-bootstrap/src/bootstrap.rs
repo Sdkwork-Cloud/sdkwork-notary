@@ -162,7 +162,8 @@ where
             merchandise_id_generator.clone(),
             runtime.tenant_id.as_str(),
             runtime.operator_user_id.as_str(),
-        ),
+        )
+        .map_err(|error| error.message().to_string())?,
         app_drive,
         app_repository,
     ));
@@ -174,7 +175,8 @@ where
                 merchandise_id_generator,
                 runtime.tenant_id.as_str(),
                 runtime.operator_user_id.as_str(),
-            ),
+            )
+            .map_err(|error| error.message().to_string())?,
             backend_drive,
             backend_repository,
         ));

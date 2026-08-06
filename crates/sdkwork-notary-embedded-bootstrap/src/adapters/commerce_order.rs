@@ -15,7 +15,7 @@ use sdkwork_notary_case_service::{
     CommerceMatterListQuery, CommerceMatterRecord, CommerceMatterUpdateCommand,
     CommerceOrderFulfillmentState, CommerceOrderReference, CommercePort,
 };
-use sdkwork_order_repository_sqlx::{PostgresCommerceOrderStore, SqliteCommerceOrderStore};
+use sdkwork_order_repository_sqlx::PostgresCommerceOrderStore;
 use sdkwork_order_service::{
     CancelOwnerOrderCommand, CheckoutLineInput, CreateCheckoutQuoteCommand,
     CreateCheckoutSessionCommand, CreateOwnerOrderCommand, OrderOwnerDetailQuery,
@@ -26,13 +26,8 @@ const NOTARY_FULFILLMENT_TYPE: &str = "notary";
 const NOTARY_PRODUCT_TYPE: &str = "notary";
 const NOTARY_ORDER_CANCEL_REASON: &str = "notary case creation compensation";
 
-enum OrderStore {
-    Sqlite(SqliteCommerceOrderStore),
-    Postgres(PostgresCommerceOrderStore),
-}
-
 pub struct CommerceOrderPort {
-    store: OrderStore,
+    store: PostgresCommerceOrderStore,
     merchandise: SingleSkuMerchandiseService<SqlxSingleSkuMerchandiseRepository>,
     tenant_id: String,
     owner_user_id: String,
@@ -44,24 +39,28 @@ impl CommerceOrderPort {
         merchandise_id_generator: Arc<dyn IdGenerator>,
         tenant_id: impl Into<String>,
         owner_user_id: impl Into<String>,
-    ) -> Self {
+    ) -> Result<Self, NotaryServiceError> {
+        // Initialization state: sdkwork-order is an authoritative-server PostgreSQL module
+        // (no sqlite store); the notary embedded runtime must be handed a PostgreSQL pool.
         let store = match &pool {
-            DatabasePool::Sqlite(sqlite_pool, _) => {
-                OrderStore::Sqlite(SqliteCommerceOrderStore::new(sqlite_pool.clone()))
+            DatabasePool::Sqlite(_, _) => {
+                return Err(NotaryServiceError::provider_unavailable(
+                    "sdkwork-order is an authoritative-server PostgreSQL module; the notary embedded runtime requires a PostgreSQL commerce pool",
+                ));
             }
             DatabasePool::Postgres(postgres_pool, _) => {
-                OrderStore::Postgres(PostgresCommerceOrderStore::new(postgres_pool.clone()))
+                PostgresCommerceOrderStore::new(postgres_pool.clone())
             }
         };
         let merchandise = SingleSkuMerchandiseService::new(
             SqlxSingleSkuMerchandiseRepository::new(pool, merchandise_id_generator),
         );
-        Self {
+        Ok(Self {
             store,
             merchandise,
             tenant_id: tenant_id.into(),
             owner_user_id: owner_user_id.into(),
-        }
+        })
     }
 }
 
@@ -87,16 +86,11 @@ impl CommercePort for CommerceOrderPort {
         )
         .map_err(map_commerce_error)?;
 
-        let session = match &self.store {
-            OrderStore::Sqlite(store) => store
-                .create_checkout_session(session_command)
-                .await
-                .map_err(map_commerce_error)?,
-            OrderStore::Postgres(store) => store
-                .create_checkout_session(session_command)
-                .await
-                .map_err(map_commerce_error)?,
-        };
+        let session = self
+            .store
+            .create_checkout_session(session_command)
+            .await
+            .map_err(map_commerce_error)?;
 
         let quote_command = CreateCheckoutQuoteCommand::new(
             self.tenant_id.as_str(),
@@ -108,20 +102,10 @@ impl CommercePort for CommerceOrderPort {
         )
         .map_err(map_commerce_error)?;
 
-        match &self.store {
-            OrderStore::Sqlite(store) => {
-                store
-                    .create_checkout_quote(quote_command)
-                    .await
-                    .map_err(map_commerce_error)?;
-            }
-            OrderStore::Postgres(store) => {
-                store
-                    .create_checkout_quote(quote_command)
-                    .await
-                    .map_err(map_commerce_error)?;
-            }
-        }
+        self.store
+            .create_checkout_quote(quote_command)
+            .await
+            .map_err(map_commerce_error)?;
 
         let order_command = CreateOwnerOrderCommand::new(
             self.tenant_id.as_str(),
@@ -133,16 +117,11 @@ impl CommercePort for CommerceOrderPort {
         )
         .map_err(map_commerce_error)?;
 
-        let outcome = match &self.store {
-            OrderStore::Sqlite(store) => store
-                .create_owner_order(order_command)
-                .await
-                .map_err(map_commerce_error)?,
-            OrderStore::Postgres(store) => store
-                .create_owner_order(order_command)
-                .await
-                .map_err(map_commerce_error)?,
-        };
+        let outcome = self
+            .store
+            .create_owner_order(order_command)
+            .await
+            .map_err(map_commerce_error)?;
 
         let detail_query = OrderOwnerDetailQuery::new(
             self.tenant_id.as_str(),
@@ -151,19 +130,14 @@ impl CommercePort for CommerceOrderPort {
             outcome.order_id.as_str(),
         )
         .map_err(map_commerce_error)?;
-        let detail = match &self.store {
-            OrderStore::Sqlite(store) => store
-                .retrieve_owner_order(detail_query)
-                .await
-                .map_err(map_commerce_error)?,
-            OrderStore::Postgres(store) => store
-                .retrieve_owner_order(detail_query)
-                .await
-                .map_err(map_commerce_error)?,
-        }
-        .ok_or_else(|| {
-            NotaryServiceError::not_found("order detail was not created for notary case")
-        })?;
+        let detail = self
+            .store
+            .retrieve_owner_order(detail_query)
+            .await
+            .map_err(map_commerce_error)?
+            .ok_or_else(|| {
+                NotaryServiceError::not_found("order detail was not created for notary case")
+            })?;
         let order_item = match detail.items.as_slice() {
             [item] => item,
             [] => {
@@ -205,16 +179,10 @@ impl CommercePort for CommerceOrderPort {
             Some(NOTARY_ORDER_CANCEL_REASON),
         )
         .map_err(map_commerce_error)?;
-        match &self.store {
-            OrderStore::Sqlite(store) => store
-                .cancel_owner_order(command)
-                .await
-                .map_err(map_commerce_error),
-            OrderStore::Postgres(store) => store
-                .cancel_owner_order(command)
-                .await
-                .map_err(map_commerce_error),
-        }
+        self.store
+            .cancel_owner_order(command)
+            .await
+            .map_err(map_commerce_error)
     }
 
     async fn get_notary_order_fulfillment_state(
@@ -229,21 +197,16 @@ impl CommercePort for CommerceOrderPort {
             order_id,
         )
         .map_err(map_commerce_error)?;
-        let detail = match &self.store {
-            OrderStore::Sqlite(store) => store
-                .retrieve_owner_order(query)
-                .await
-                .map_err(map_commerce_error)?,
-            OrderStore::Postgres(store) => store
-                .retrieve_owner_order(query)
-                .await
-                .map_err(map_commerce_error)?,
-        }
-        .ok_or_else(|| {
-            NotaryServiceError::not_found(
-                "commerce order was not found for the notary organization",
-            )
-        })?;
+        let detail = self
+            .store
+            .retrieve_owner_order(query)
+            .await
+            .map_err(map_commerce_error)?
+            .ok_or_else(|| {
+                NotaryServiceError::not_found(
+                    "commerce order was not found for the notary organization",
+                )
+            })?;
         let payable_amount = detail.summary.total_amount.as_str().to_owned();
         Ok(CommerceOrderFulfillmentState {
             order_id: detail.summary.order_id,
