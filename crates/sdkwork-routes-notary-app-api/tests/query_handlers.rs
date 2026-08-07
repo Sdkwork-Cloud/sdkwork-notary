@@ -140,7 +140,8 @@ async fn create_case_handler_forwards_standard_idempotency_header_as_metadata() 
 
 #[test]
 fn create_case_route_policy_is_idempotent() {
-    let route = notary_app_api_http_route_manifest()
+    let manifest = notary_app_api_http_route_manifest();
+    let route = manifest
         .routes()
         .iter()
         .find(|route| route.operation_id == "notary.cases.create")

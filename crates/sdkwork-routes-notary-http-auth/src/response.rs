@@ -181,6 +181,7 @@ mod tests {
             client_kind: None,
             operation: None,
             trace_id: Some("trace-notary-test".to_owned()),
+            idempotency_key: None,
         }
     }
 

@@ -6,7 +6,6 @@ use sdkwork_database_id::{IdGenerator, NodeAllocatorConfig, NodeLease, Snowflake
 use sdkwork_database_sqlx::{create_pool_from_config, DatabasePool};
 use sdkwork_notary_case_repository_sqlx::{
     bootstrap_notary_database, connect_notary_database_pool_from_env, PostgresNotaryCaseRepository,
-    SqliteNotaryCaseRepository,
 };
 use sdkwork_routes_notary_app_api::{NotaryAppApiServicePort, NotaryAppRuntimeService};
 use sdkwork_routes_notary_backend_api::{NotaryBackendApiServicePort, NotaryBackendRuntimeService};
@@ -81,22 +80,11 @@ pub async fn assemble_embedded_notary_application_router(
         .map_err(|error| format!("allocate Merchandise Snowflake node failed: {error}"))?;
     let merchandise_id_generator: Arc<dyn IdGenerator> = Arc::new(merchandise_id_generator);
     let (app_router, backend_router) = match notary_pool.clone() {
-        DatabasePool::Sqlite(pool, _) => {
-            let repository = SqliteNotaryCaseRepository::new(
-                pool,
-                runtime.tenant_id.clone(),
-                runtime.operator_user_id.clone(),
+        DatabasePool::Sqlite(_, _) => {
+            return Err(
+                "notary embedded runtime requires a PostgreSQL pool (DATABASE_SPEC: authoritative-server persistence is PostgreSQL only)"
+                    .to_string(),
             );
-            build_notary_router(
-                iam_pool.clone(),
-                commerce_pool.clone(),
-                drive_pool.clone(),
-                runtime,
-                merchandise_id_generator.clone(),
-                repository.clone(),
-                repository,
-            )
-            .await?
         }
         DatabasePool::Postgres(pool, _) => {
             let repository = PostgresNotaryCaseRepository::new(

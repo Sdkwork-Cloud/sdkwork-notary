@@ -474,16 +474,24 @@ fn map_drive_error(error: DriveServiceError) -> NotaryServiceError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sqlx::any::AnyPoolOptions;
+    use sdkwork_database_config::DatabaseEngine;
+
+    fn optional_postgres_database_url() -> Option<String> {
+        std::env::var("SDKWORK_DATABASE_URL")
+            .or_else(|_| std::env::var("DATABASE_URL"))
+            .ok()
+            .filter(|url| DatabaseEngine::from_url(url) == Some(DatabaseEngine::Postgres))
+    }
 
     #[tokio::test]
     async fn notary_file_business_metadata_round_trips_through_drive_properties() {
-        sqlx::any::install_default_drivers();
-        let pool = AnyPoolOptions::new()
-            .max_connections(1)
-            .connect("sqlite::memory:")
+        let Some(database_url) = optional_postgres_database_url() else {
+            eprintln!("skipping drive workspace test: set SDKWORK_DATABASE_URL or DATABASE_URL to a postgres URL");
+            return;
+        };
+        let pool = sqlx::PgPool::connect(&database_url)
             .await
-            .expect("connect sqlite");
+            .expect("connect postgres");
         sqlx::query(
             "CREATE TABLE dr_drive_node_property (
                 id TEXT PRIMARY KEY,

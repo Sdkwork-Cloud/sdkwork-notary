@@ -1,9 +1,5 @@
 //! Canonical notary schema SQL sourced from `database/ddl/baseline/`.
 
-/// Returns the sqlite foundation baseline used by integration tests and local repositories.
-pub fn notary_foundation_migration_sql() -> &'static str {
-    include_str!("../../../tests/fixtures/database/sqlite/ddl/baseline/0001_notary_baseline.sql")
-}
 
 /// Returns the postgres foundation baseline for host bootstrap helpers.
 pub fn notary_foundation_postgres_migration_sql() -> &'static str {
