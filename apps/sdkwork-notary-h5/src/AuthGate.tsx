@@ -10,12 +10,24 @@ export interface AuthGateProps {
   children: ReactNode;
 }
 
+function isAuthRoutePath(pathname: string): boolean {
+  return pathname === '/auth' || pathname.startsWith('/auth/');
+}
+
 function resolveLoginRedirectUrl(): string {
   const gateway = import.meta.env.VITE_SDKWORK_NOTARY_PLATFORM_API_GATEWAY_HTTP_URL;
   const baseUrl = typeof gateway === 'string' && gateway.trim()
     ? gateway.trim()
     : resolveEnvironment().apiBaseUrl;
-  const returnUrl = encodeURIComponent(window.location.href);
+  const { pathname, search } = window.location;
+  // Never re-wrap an auth-route URL: encoding the whole current URL again
+  // nests the `redirect` param one level deeper on every bounce. Reuse the
+  // existing return target when already on the auth surface.
+  if (isAuthRoutePath(pathname)) {
+    const existing = /[?&]redirect=([^&]*)/u.exec(search)?.[1];
+    return `${baseUrl.replace(/\/$/, '')}/auth/login${existing ? `?redirect=${existing}` : ''}`;
+  }
+  const returnUrl = encodeURIComponent(pathname + search);
   return `${baseUrl.replace(/\/$/, '')}/auth/login?redirect=${returnUrl}`;
 }
 
