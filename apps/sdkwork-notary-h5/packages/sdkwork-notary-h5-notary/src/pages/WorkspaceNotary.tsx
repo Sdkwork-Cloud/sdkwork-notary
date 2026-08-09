@@ -21,7 +21,7 @@ export const WorkspaceNotary: React.FC = () => {
           {t("notary.title", "Notary")}
         </h1>
       </header>
-      <main className="flex flex-1 flex-col gap-3 p-4">
+      <main className="flex flex-1 flex-col gap-3 px-4 pt-4 pb-[84px]">
         <button
           type="button"
           className="flex items-center gap-4 border-b border-border-color px-2 py-4 text-left"
