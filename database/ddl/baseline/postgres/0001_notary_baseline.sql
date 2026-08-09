@@ -28,7 +28,7 @@
 CREATE TABLE IF NOT EXISTS notary_organization_profile (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  organization_id TEXT NOT NULL,
+  organization_id TEXT NOT NULL DEFAULT '0',
   status TEXT NOT NULL CHECK (status IN ('active', 'suspended', 'closed')),
   drive_space_id TEXT NOT NULL,
   drive_space_type TEXT NOT NULL DEFAULT 'notary' CHECK (drive_space_type = 'notary'),
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS notary_organization_profile (
 CREATE TABLE IF NOT EXISTS notary_case (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  organization_id TEXT NOT NULL,
+  organization_id TEXT NOT NULL DEFAULT '0',
   case_no TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS notary_case (
 CREATE TABLE IF NOT EXISTS notary_party (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  organization_id TEXT NOT NULL,
+  organization_id TEXT NOT NULL DEFAULT '0',
   case_id TEXT NOT NULL,
   order_id TEXT NOT NULL,
   order_item_id TEXT NOT NULL,
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS notary_party (
 CREATE TABLE IF NOT EXISTS notary_case_assignment (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  organization_id TEXT NOT NULL,
+  organization_id TEXT NOT NULL DEFAULT '0',
   case_id TEXT NOT NULL,
   organization_membership_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS notary_case_assignment (
 CREATE TABLE IF NOT EXISTS notary_case_event (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
-  organization_id TEXT NOT NULL,
+  organization_id TEXT NOT NULL DEFAULT '0',
   case_id TEXT NOT NULL,
   event_type TEXT NOT NULL,
   event_title TEXT NOT NULL,
