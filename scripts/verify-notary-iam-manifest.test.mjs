@@ -35,6 +35,15 @@ function collectOpenApiPermissions(openApiRelativePath) {
         continue;
       }
       const permission = operation?.['x-sdkwork-permission'];
+      if (method === 'get') {
+        // App read operations are authenticated tenant-scoped reads without an
+        // RBAC permission requirement (same contract as other IM embedded
+        // dependency surfaces); backend read operations still declare theirs.
+        if (permission) {
+          permissions.add(permission);
+        }
+        continue;
+      }
       assert.ok(permission, `${openApiRelativePath} ${method.toUpperCase()} ${pathKey} must declare x-sdkwork-permission`);
       permissions.add(permission);
     }

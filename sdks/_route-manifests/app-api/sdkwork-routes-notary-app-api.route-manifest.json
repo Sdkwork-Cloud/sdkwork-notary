@@ -24,7 +24,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.access.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -222,7 +222,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.events.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -288,7 +288,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.files.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -321,7 +321,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.cases.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -420,7 +420,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.parties.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -618,7 +618,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.cases.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -684,7 +684,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.dashboard.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -717,7 +717,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.matters.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -750,7 +750,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.reports.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },
@@ -783,7 +783,7 @@
       "auth": {
         "mode": "dual-token",
         "required": true,
-        "permission": "notary.staff.read",
+        "permission": null,
         "tenantScope": "tenant",
         "dataScope": "organization"
       },

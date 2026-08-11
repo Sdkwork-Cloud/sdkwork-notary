@@ -1,22 +1,11 @@
 use sdkwork_notary_case_contract::{NotaryRuntimeContext, NotaryServiceError};
 
 static OPERATION_PERMISSIONS: &[(&str, &str)] = &[
-    ("notary.access.retrieve", "notary.access.read"),
-    ("notary.matters.list", "notary.matters.read"),
-    (
-        "notary.dashboard.statistics.retrieve",
-        "notary.dashboard.read",
-    ),
-    ("notary.reports.monthly.retrieve", "notary.reports.read"),
     ("notary.cases.create", "notary.cases.create"),
-    ("notary.staff.list", "notary.staff.read"),
-    ("notary.cases.list", "notary.cases.read"),
-    ("notary.cases.retrieve", "notary.cases.read"),
     ("notary.cases.update", "notary.cases.update"),
     ("notary.cases.acceptances.create", "notary.cases.accept"),
     ("notary.cases.rejections.create", "notary.cases.reject"),
     ("notary.cases.completions.create", "notary.cases.complete"),
-    ("notary.cases.parties.list", "notary.parties.read"),
     ("notary.cases.parties.create", "notary.parties.create"),
     ("notary.cases.parties.update", "notary.parties.update"),
     ("notary.cases.parties.delete", "notary.parties.delete"),
@@ -32,13 +21,11 @@ static OPERATION_PERMISSIONS: &[(&str, &str)] = &[
         "notary.cases.parties.signatureInvites.create",
         "notary.parties.signature_invites.create",
     ),
-    ("notary.cases.files.list", "notary.files.read"),
     ("notary.cases.files.create", "notary.files.create"),
     (
         "notary.cases.downloadPackages.create",
         "notary.files.download",
     ),
-    ("notary.cases.events.list", "notary.events.read"),
     (
         "notary.cases.assignments.create",
         "notary.cases.assignments.create",
