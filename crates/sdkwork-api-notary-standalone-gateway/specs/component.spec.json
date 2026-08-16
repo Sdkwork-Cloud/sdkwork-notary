@@ -62,7 +62,8 @@
     "requiredPorts": [
       {
         "name": "applicationApiAssembly",
-        "export": "sdkwork-api-assembly"
+        "export": "sdkwork_api_notary_assembly::assemble_api_router",
+        "provider": "sdkwork-api-notary-assembly"
       }
     ],
     "runtimeEntrypoints": [

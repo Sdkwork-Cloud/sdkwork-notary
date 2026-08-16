@@ -6,5 +6,6 @@ license.workspace = true
 
 [dependencies]
 sdkwork-api-notary-assembly.workspace = true
+sdkwork-iam-web-adapter.workspace = true
 sdkwork-web-bootstrap.workspace = true
 tokio.workspace = true

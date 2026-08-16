@@ -1767,6 +1767,7 @@ name = "sdkwork-api-notary-standalone-gateway"
 version = "0.1.0"
 dependencies = [
  "sdkwork-api-notary-assembly",
+ "sdkwork-iam-web-adapter",
  "sdkwork-web-bootstrap",
  "tokio",
 ]
