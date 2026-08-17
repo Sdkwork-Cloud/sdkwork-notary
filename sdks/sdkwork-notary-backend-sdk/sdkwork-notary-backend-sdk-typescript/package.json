@@ -1,6 +1,6 @@
 {
   "name": "@sdkwork/notary-backend-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SDKWork Notary Backend SDK with composed management facade.",
   "type": "module",
   "private": false,
@@ -26,11 +26,11 @@
     }
   },
   "dependencies": {
-    "@sdkwork/sdk-common": "^1.0.3"
+    "@sdkwork/sdk-common": "^1.0.5"
   },
   "peerDependencies": {
-    "@sdkwork/iam-backend-sdk": "workspace:*",
-    "@sdkwork/drive-backend-sdk": "workspace:*"
+    "@sdkwork/iam-backend-sdk": "^0.1.1",
+    "@sdkwork/drive-backend-sdk": "^0.1.1"
   },
   "peerDependenciesMeta": {
     "@sdkwork/iam-backend-sdk": {

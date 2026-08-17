@@ -1,6 +1,6 @@
 {
   "name": "@sdkwork/notary-app-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SDKWork Notary App SDK with composed workflow facade.",
   "type": "module",
   "private": false,
@@ -26,11 +26,11 @@
     }
   },
   "dependencies": {
-    "@sdkwork/sdk-common": "^1.0.3"
+    "@sdkwork/sdk-common": "^1.0.5"
   },
   "peerDependencies": {
-    "@sdkwork/iam-app-sdk": "workspace:*",
-    "@sdkwork/drive-app-sdk": "workspace:*"
+    "@sdkwork/iam-app-sdk": "^0.1.1",
+    "@sdkwork/drive-app-sdk": "^0.1.1"
   },
   "peerDependenciesMeta": {
     "@sdkwork/iam-app-sdk": {
