@@ -10,6 +10,7 @@
   "scripts": {
     "stop": "node ../sdkwork-specs/tools/stop-sdkwork-workspace-processes.mjs --workspace .",
     "dev": "node scripts/notary-dev.mjs --deployment-profile standalone",
+    "env:token:ensure": "node ../sdkwork-iam/scripts/dev/ensure-repo-bootstrap-access-token.mjs --repo-root .",
     "dev:cloud": "node scripts/notary-dev.mjs --deployment-profile cloud",
     "dev:browser:postgres:standalone": "pnpm --dir apps/sdkwork-notary-h5 dev",
     "dev:browser": "pnpm dev:browser:postgres:standalone",
