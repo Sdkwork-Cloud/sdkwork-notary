@@ -1,8 +1,8 @@
 export interface NotaryStatistics {
-  pendingReviewQueue: Record<string, unknown>;
-  todayCompleted: Record<string, unknown>;
-  anomalyIntercepted: Record<string, unknown>;
-  monthlyPreservationTotal: Record<string, unknown>;
+  pendingReviewQueue: { count: number; estimatedProcessHours?: number; };
+  todayCompleted: { count: number; comparedToYesterday?: number; };
+  anomalyIntercepted: { count: number; interceptorType?: string; };
+  monthlyPreservationTotal: { count: number; blockchainSyncStatus?: 'OK' | 'PENDING' | 'ERROR'; };
   /** When the statistics were computed */
   timestamp?: string;
 }
