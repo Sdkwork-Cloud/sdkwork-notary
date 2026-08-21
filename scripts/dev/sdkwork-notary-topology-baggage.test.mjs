@@ -119,7 +119,7 @@ assert.equal(resolveDevProfileId('standalone'), 'standalone.development');
 assert.equal(resolveDevProfileId('cloud', 'production'), 'cloud.production');
 assert.throws(() => resolveDevProfileId('standalone', 'invalid'));
 
-const profileDir = path.join(repoRoot, 'configs/topology');
+const profileDir = path.join(repoRoot, 'etc/topology');
 const profileFiles = fs.readdirSync(profileDir).filter((name) => name.endsWith('.env'));
 assert.ok(profileFiles.length >= 2, 'topology profile env files required');
 
@@ -143,7 +143,7 @@ assert.ok(
 assert.ok(fs.existsSync(path.join(repoRoot, 'docs/topology-standard.md')), 'topology-standard doc required');
 
 for (const profileFile of profileFiles) {
-  const profileText = readText(path.join('configs/topology', profileFile));
+  const profileText = readText(path.join('etc/topology', profileFile));
   for (const key of surfaceUrlKeys) {
     const match = profileText.match(new RegExp(`^${key}=(.+)$`, 'mu'));
     if (!match) {

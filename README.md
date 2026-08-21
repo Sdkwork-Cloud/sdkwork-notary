@@ -111,7 +111,7 @@ pnpm build:desktop
 Runtime topology follows SDKWork v2 (`application-http-gateway`):
 
 - Spec: `specs/topology.spec.json`
-- Profiles: `configs/topology/*.env`
+- Profiles: `etc/topology/*.env`
 - Adapter: `scripts/lib/notary-topology.mjs`
 - Dev entry: `pnpm dev`
 

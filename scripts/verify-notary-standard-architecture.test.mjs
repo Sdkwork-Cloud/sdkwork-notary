@@ -328,8 +328,8 @@ test('declares IMF registry config with notary module enabled', () => {
 
 test('production topology profiles document PII vault secret injection', () => {
   for (const profile of [
-    'configs/topology/standalone.production.env',
-    'configs/topology/cloud.production.env',
+    'etc/topology/standalone.production.env',
+    'etc/topology/cloud.production.env',
   ]) {
     const env = read(profile);
     assert.match(env, /NOTARY_PII_VAULT_KEY/);

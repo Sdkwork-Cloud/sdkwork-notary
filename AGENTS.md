@@ -34,7 +34,7 @@ Read `sdkwork.app.config.json` when changing application identity, release metad
 - `.sdkwork/`: local skills, plugins, manifests, and workspace metadata (see `.sdkwork/README.md` and `.sdkwork/.gitignore`).
 - `apis/`: API authority index and authored OpenAPI contracts for notary app/backend surfaces.
 - `apps/`: H5 mobile client at `apps/sdkwork-notary-h5/` plus host integration pointers
-- `configs/topology/`: v2 runtime topology profile env files.
+- `etc/topology/`: v2 runtime topology profile env files.
 - `deployments/`, `jobs/`, `tools/`, `plugins/`, `examples/`, `tests/`: standard workspace directories (see `docs/root-layout.md`).
 - `docs/topology-standard.md`: human topology summary and dev commands.
 - `docs/root-layout.md`: workspace directory dictionary and framework integration summary.

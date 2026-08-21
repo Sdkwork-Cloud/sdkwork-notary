@@ -56,7 +56,7 @@ function parseArgs(argv) {
 function printHelp() {
   console.log(`Usage: node scripts/notary-dev.mjs [options]
 
-Topology-aware Notary dev entry. Loads configs/topology profile env via @sdkwork/app-topology.
+Topology-aware Notary dev entry. Loads etc/topology profile env via @sdkwork/app-topology.
 
 This repository ships route/runtime libraries only. Host applications wire
 sdkwork-routes-notary-* crates and consume the resolved profile env below.
