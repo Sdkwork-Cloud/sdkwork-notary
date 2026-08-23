@@ -1,6 +1,5 @@
 version: 2
 defaultProfile: cloud.production
-
 profiles:
   cloud.development:
     deployment:
@@ -17,17 +16,48 @@ profiles:
     install:
       layout: binary-package
     expose:
-      - domain: notary-dev.sdkwork.com
+      - domain: notary-admin-dev.sdkwork.com
         tls: sdkwork.com
         mode: web+api
         web: adaptive
+        aliases:
+          - notary-dev.sdkwork.com
+      - domain: notary-admin-dev.birdcoder.com
+        tls: birdcoder.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.birdcoder.com
+      - domain: notary-admin-dev.dtupay.com
+        tls: dtupay.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.dtupay.com
+      - domain: notary-admin-dev.sdkwork.cn
+        tls: sdkwork.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.sdkwork.cn
+      - domain: notary-admin-dev.birdcoder.cn
+        tls: birdcoder.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.birdcoder.cn
+      - domain: notary-admin-dev.dtupay.cn
+        tls: dtupay.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.dtupay.cn
     packages: []
     overrides:
       topology:
         spec: specs/topology.spec.json
         profile: cloud.development
         env: etc/topology/cloud.development.env
-
   cloud.production:
     deployment:
       deploymentProfile: cloud
@@ -43,17 +73,48 @@ profiles:
     install:
       layout: binary-package
     expose:
-      - domain: notary.sdkwork.com
+      - domain: notary-admin.sdkwork.com
         tls: sdkwork.com
         mode: web+api
         web: adaptive
+        aliases:
+          - notary.sdkwork.com
+      - domain: notary-admin.birdcoder.com
+        tls: birdcoder.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.birdcoder.com
+      - domain: notary-admin.dtupay.com
+        tls: dtupay.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.dtupay.com
+      - domain: notary-admin.sdkwork.cn
+        tls: sdkwork.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.sdkwork.cn
+      - domain: notary-admin.birdcoder.cn
+        tls: birdcoder.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.birdcoder.cn
+      - domain: notary-admin.dtupay.cn
+        tls: dtupay.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.dtupay.cn
     packages: []
     overrides:
       topology:
         spec: specs/topology.spec.json
         profile: cloud.production
         env: etc/topology/cloud.production.env
-
   standalone.development:
     deployment:
       deploymentProfile: standalone
@@ -69,17 +130,48 @@ profiles:
     install:
       layout: binary-package
     expose:
-      - domain: notary-dev.sdkwork.com
+      - domain: notary-admin-dev.sdkwork.com
         tls: sdkwork.com
         mode: web+api
         web: adaptive
+        aliases:
+          - notary-dev.sdkwork.com
+      - domain: notary-admin-dev.birdcoder.com
+        tls: birdcoder.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.birdcoder.com
+      - domain: notary-admin-dev.dtupay.com
+        tls: dtupay.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.dtupay.com
+      - domain: notary-admin-dev.sdkwork.cn
+        tls: sdkwork.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.sdkwork.cn
+      - domain: notary-admin-dev.birdcoder.cn
+        tls: birdcoder.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.birdcoder.cn
+      - domain: notary-admin-dev.dtupay.cn
+        tls: dtupay.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.dtupay.cn
     packages: []
     overrides:
       topology:
         spec: specs/topology.spec.json
         profile: standalone.development
         env: etc/topology/standalone.development.env
-
   standalone.production:
     deployment:
       deploymentProfile: standalone
@@ -95,10 +187,42 @@ profiles:
     install:
       layout: binary-package
     expose:
-      - domain: notary.sdkwork.com
+      - domain: notary-admin.sdkwork.com
         tls: sdkwork.com
         mode: web+api
         web: adaptive
+        aliases:
+          - notary.sdkwork.com
+      - domain: notary-admin.birdcoder.com
+        tls: birdcoder.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.birdcoder.com
+      - domain: notary-admin.dtupay.com
+        tls: dtupay.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.dtupay.com
+      - domain: notary-admin.sdkwork.cn
+        tls: sdkwork.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.sdkwork.cn
+      - domain: notary-admin.birdcoder.cn
+        tls: birdcoder.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.birdcoder.cn
+      - domain: notary-admin.dtupay.cn
+        tls: dtupay.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.dtupay.cn
     packages: []
     overrides:
       topology:

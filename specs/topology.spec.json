@@ -85,43 +85,130 @@
       "httpHost": "notary.sdkwork.com",
       "environments": {
         "development": {
-          "httpHost": "notary-dev.sdkwork.com"
+          "httpHosts": [
+            "notary-dev.sdkwork.com",
+            "notary-dev.birdcoder.com",
+            "notary-dev.dtupay.com",
+            "notary-dev.sdkwork.cn",
+            "notary-dev.birdcoder.cn",
+            "notary-dev.dtupay.cn"
+          ]
         },
         "test": {
-          "httpHost": "notary-test.sdkwork.com"
+          "httpHosts": [
+            "notary-test.sdkwork.com",
+            "notary-test.birdcoder.com",
+            "notary-test.dtupay.com",
+            "notary-test.sdkwork.cn",
+            "notary-test.birdcoder.cn",
+            "notary-test.dtupay.cn"
+          ]
         },
         "staging": {
-          "httpHost": "notary-staging.sdkwork.com"
+          "httpHosts": [
+            "notary-staging.sdkwork.com",
+            "notary-staging.birdcoder.com",
+            "notary-staging.dtupay.com",
+            "notary-staging.sdkwork.cn",
+            "notary-staging.birdcoder.cn",
+            "notary-staging.dtupay.cn"
+          ]
         }
-      }
+      },
+      "httpHosts": [
+        "notary.sdkwork.com",
+        "notary.birdcoder.com",
+        "notary.dtupay.com",
+        "notary.sdkwork.cn",
+        "notary.birdcoder.cn",
+        "notary.dtupay.cn"
+      ]
     },
     "application.backend-http": {
       "httpHost": "notary-admin.sdkwork.com",
       "environments": {
         "development": {
-          "httpHost": "notary-admin-dev.sdkwork.com"
+          "httpHosts": [
+            "notary-admin-dev.sdkwork.com",
+            "notary-admin-dev.birdcoder.com",
+            "notary-admin-dev.dtupay.com",
+            "notary-admin-dev.sdkwork.cn",
+            "notary-admin-dev.birdcoder.cn",
+            "notary-admin-dev.dtupay.cn"
+          ]
         },
         "test": {
-          "httpHost": "notary-admin-test.sdkwork.com"
+          "httpHosts": [
+            "notary-admin-test.sdkwork.com",
+            "notary-admin-test.birdcoder.com",
+            "notary-admin-test.dtupay.com",
+            "notary-admin-test.sdkwork.cn",
+            "notary-admin-test.birdcoder.cn",
+            "notary-admin-test.dtupay.cn"
+          ]
         },
         "staging": {
-          "httpHost": "notary-admin-staging.sdkwork.com"
+          "httpHosts": [
+            "notary-admin-staging.sdkwork.com",
+            "notary-admin-staging.birdcoder.com",
+            "notary-admin-staging.dtupay.com",
+            "notary-admin-staging.sdkwork.cn",
+            "notary-admin-staging.birdcoder.cn",
+            "notary-admin-staging.dtupay.cn"
+          ]
         }
-      }
+      },
+      "httpHosts": [
+        "notary-admin.sdkwork.com",
+        "notary-admin.birdcoder.com",
+        "notary-admin.dtupay.com",
+        "notary-admin.sdkwork.cn",
+        "notary-admin.birdcoder.cn",
+        "notary-admin.dtupay.cn"
+      ]
     },
     "platform.api-gateway": {
       "httpHost": "api.sdkwork.com",
       "environments": {
         "development": {
-          "httpHost": "api-dev.sdkwork.com"
+          "httpHosts": [
+            "api-dev.sdkwork.com",
+            "api-dev.birdcoder.com",
+            "api-dev.dtupay.com",
+            "api-dev.sdkwork.cn",
+            "api-dev.birdcoder.cn",
+            "api-dev.dtupay.cn"
+          ]
         },
         "test": {
-          "httpHost": "api-test.sdkwork.com"
+          "httpHosts": [
+            "api-test.sdkwork.com",
+            "api-test.birdcoder.com",
+            "api-test.dtupay.com",
+            "api-test.sdkwork.cn",
+            "api-test.birdcoder.cn",
+            "api-test.dtupay.cn"
+          ]
         },
         "staging": {
-          "httpHost": "api-staging.sdkwork.com"
+          "httpHosts": [
+            "api-staging.sdkwork.com",
+            "api-staging.birdcoder.com",
+            "api-staging.dtupay.com",
+            "api-staging.sdkwork.cn",
+            "api-staging.birdcoder.cn",
+            "api-staging.dtupay.cn"
+          ]
         }
-      }
+      },
+      "httpHosts": [
+        "api.sdkwork.com",
+        "api.birdcoder.com",
+        "api.dtupay.com",
+        "api.sdkwork.cn",
+        "api.birdcoder.cn",
+        "api.dtupay.cn"
+      ]
     }
   },
   "components": {
