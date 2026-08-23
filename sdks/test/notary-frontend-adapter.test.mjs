@@ -219,8 +219,8 @@ imPcTest("real IM PC notary create retries reuse a per-intent random idempotency
     /primaryNotaryMembershipId:\s*resolvePrimaryNotaryMembershipId\(data\),[\s\S]*?idempotencyKey,\s*\n\s*\}\)/,
     "createCase must receive the resolved intent key",
   );
-  assert.match(idempotencyKeys, /cryptoApi\.randomUUID\(\)/);
-  assert.match(idempotencyKeys, /cryptoApi\.getRandomValues/);
+  assert.match(idempotencyKeys, /from ['"]@sdkwork\/utils\/id['"]/);
+  assert.match(idempotencyKeys, /uuid\(\)/);
   assert.match(idempotencyKeys, /callerKey \|\| createNotaryCaseIntentIdempotencyKey\(\)/);
   assert.doesNotMatch(source, /buildIdempotencyKey/);
   assert.doesNotMatch(idempotencyKeys, /Date\.now|Math\.random|traceId|requestId/);

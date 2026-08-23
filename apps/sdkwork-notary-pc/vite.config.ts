@@ -11,7 +11,6 @@ const iamRoot = path.resolve(workspaceRoot, 'sdkwork-iam');
 const uiRoot = path.resolve(workspaceRoot, 'sdkwork-ui');
 const coreRoot = path.resolve(workspaceRoot, 'sdkwork-core');
 const sdkCommonRoot = path.resolve(workspaceRoot, 'sdkwork-sdk-commons/sdkwork-sdk-common-typescript/src');
-const utilsRoot = path.resolve(workspaceRoot, 'sdkwork-utils/packages/sdkwork-utils-typescript/src');
 
 const generatedDriveAppSdkEntry = path.resolve(
   workspaceRoot,
@@ -32,8 +31,6 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: [
-        { find: '@sdkwork/utils/string', replacement: path.resolve(utilsRoot, 'string.ts') },
-        { find: '@sdkwork/utils', replacement: path.resolve(utilsRoot, 'index.ts') },
         { find: '@sdkwork/notary-pc-core', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-core/src/index.ts') },
         { find: '@sdkwork/notary-pc-commons', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-commons/src/index.ts') },
         { find: '@sdkwork/notary-pc-admin-core', replacement: path.resolve(pcRoot, 'packages/sdkwork-notary-pc-admin-core/src/index.ts') },

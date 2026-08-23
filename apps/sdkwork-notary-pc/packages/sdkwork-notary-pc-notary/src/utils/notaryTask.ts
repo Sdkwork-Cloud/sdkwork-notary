@@ -1,3 +1,4 @@
+import { uuid } from '@sdkwork/utils/id';
 import type { NotaryTask } from '@sdkwork/notary-pc-commons';
 
 export function getNotaryTaskDisplayNo(task: NotaryTask): string {
@@ -12,8 +13,5 @@ export function isNotaryTaskTerminalStatus(status: NotaryTask['status']): boolea
 }
 
 export function generateClientId(prefix = 'notary'): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `${prefix}-${crypto.randomUUID()}`;
-  }
-  return `${prefix}-${Date.now().toString(36)}`;
+  return `${prefix}-${uuid()}`;
 }

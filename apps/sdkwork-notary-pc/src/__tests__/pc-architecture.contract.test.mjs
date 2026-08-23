@@ -272,8 +272,8 @@ test('notary pc create intent owns one stable secure idempotency key', () => {
   assert(notaryService.includes('idempotencyKey?: string;'));
   assert(notaryService.includes('resolveNotaryCaseIdempotencyKey(data.idempotencyKey)'));
   assert(!notaryService.includes('buildIdempotencyKey'));
-  assert(idempotencyKeys.includes('cryptoApi.randomUUID()'));
-  assert(idempotencyKeys.includes('cryptoApi.getRandomValues'));
+  assert(idempotencyKeys.includes("from '@sdkwork/utils/id'"));
+  assert(idempotencyKeys.includes('uuid()'));
   assert(idempotencyKeys.includes('callerKey || createNotaryCaseIntentIdempotencyKey()'));
   assert(!idempotencyKeys.includes('Date.now'));
   assert(!idempotencyKeys.includes('Math.random'));

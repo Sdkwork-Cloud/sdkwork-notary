@@ -10,7 +10,6 @@ const sdkCommonRoot = path.resolve(
   workspaceRoot,
   'sdkwork-sdk-commons/sdkwork-sdk-common-typescript/src',
 );
-const utilsRoot = path.resolve(workspaceRoot, 'sdkwork-utils/packages/sdkwork-utils-typescript/src');
 const generatedDriveAppSdkEntry = path.resolve(
   workspaceRoot,
   'sdkwork-drive/sdks/sdkwork-drive-app-sdk/sdkwork-drive-app-sdk-typescript/src/index.ts',
