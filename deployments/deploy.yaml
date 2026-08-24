@@ -52,6 +52,54 @@ profiles:
         web: adaptive
         aliases:
           - notary-dev.dtupay.cn
+      - domain: notary-admin-dev.skubc.com
+        tls: skubc.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.skubc.com
+      - domain: notary-admin-dev.skubc.cn
+        tls: skubc.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.skubc.cn
+      - domain: notary-admin-dev.zowalk.com
+        tls: zowalk.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.zowalk.com
+      - domain: notary-admin-dev.zowalk.cn
+        tls: zowalk.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.zowalk.cn
+      - domain: notary-admin-dev.offer86.com
+        tls: offer86.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.offer86.com
+      - domain: notary-admin-dev.offer86.cn
+        tls: offer86.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.offer86.cn
+      - domain: notary-admin-dev.86offer.com
+        tls: 86offer.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.86offer.com
+      - domain: notary-admin-dev.86offer.cn
+        tls: 86offer.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.86offer.cn
     packages: []
     overrides:
       topology:
@@ -109,6 +157,54 @@ profiles:
         web: adaptive
         aliases:
           - notary.dtupay.cn
+      - domain: notary-admin.skubc.com
+        tls: skubc.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.skubc.com
+      - domain: notary-admin.skubc.cn
+        tls: skubc.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.skubc.cn
+      - domain: notary-admin.zowalk.com
+        tls: zowalk.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.zowalk.com
+      - domain: notary-admin.zowalk.cn
+        tls: zowalk.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.zowalk.cn
+      - domain: notary-admin.offer86.com
+        tls: offer86.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.offer86.com
+      - domain: notary-admin.offer86.cn
+        tls: offer86.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.offer86.cn
+      - domain: notary-admin.86offer.com
+        tls: 86offer.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.86offer.com
+      - domain: notary-admin.86offer.cn
+        tls: 86offer.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.86offer.cn
     packages: []
     overrides:
       topology:
@@ -166,6 +262,54 @@ profiles:
         web: adaptive
         aliases:
           - notary-dev.dtupay.cn
+      - domain: notary-admin-dev.skubc.com
+        tls: skubc.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.skubc.com
+      - domain: notary-admin-dev.skubc.cn
+        tls: skubc.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.skubc.cn
+      - domain: notary-admin-dev.zowalk.com
+        tls: zowalk.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.zowalk.com
+      - domain: notary-admin-dev.zowalk.cn
+        tls: zowalk.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.zowalk.cn
+      - domain: notary-admin-dev.offer86.com
+        tls: offer86.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.offer86.com
+      - domain: notary-admin-dev.offer86.cn
+        tls: offer86.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.offer86.cn
+      - domain: notary-admin-dev.86offer.com
+        tls: 86offer.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.86offer.com
+      - domain: notary-admin-dev.86offer.cn
+        tls: 86offer.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.86offer.cn
     packages: []
     overrides:
       topology:
@@ -223,6 +367,54 @@ profiles:
         web: adaptive
         aliases:
           - notary.dtupay.cn
+      - domain: notary-admin.skubc.com
+        tls: skubc.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.skubc.com
+      - domain: notary-admin.skubc.cn
+        tls: skubc.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.skubc.cn
+      - domain: notary-admin.zowalk.com
+        tls: zowalk.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.zowalk.com
+      - domain: notary-admin.zowalk.cn
+        tls: zowalk.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.zowalk.cn
+      - domain: notary-admin.offer86.com
+        tls: offer86.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.offer86.com
+      - domain: notary-admin.offer86.cn
+        tls: offer86.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.offer86.cn
+      - domain: notary-admin.86offer.com
+        tls: 86offer.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.86offer.com
+      - domain: notary-admin.86offer.cn
+        tls: 86offer.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.86offer.cn
     packages: []
     overrides:
       topology:

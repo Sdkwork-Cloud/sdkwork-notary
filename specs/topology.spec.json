@@ -91,7 +91,15 @@
             "notary-dev.dtupay.com",
             "notary-dev.sdkwork.cn",
             "notary-dev.birdcoder.cn",
-            "notary-dev.dtupay.cn"
+            "notary-dev.dtupay.cn",
+            "notary-dev.skubc.com",
+            "notary-dev.skubc.cn",
+            "notary-dev.zowalk.com",
+            "notary-dev.zowalk.cn",
+            "notary-dev.offer86.com",
+            "notary-dev.offer86.cn",
+            "notary-dev.86offer.com",
+            "notary-dev.86offer.cn"
           ]
         },
         "test": {
@@ -101,7 +109,15 @@
             "notary-test.dtupay.com",
             "notary-test.sdkwork.cn",
             "notary-test.birdcoder.cn",
-            "notary-test.dtupay.cn"
+            "notary-test.dtupay.cn",
+            "notary-test.skubc.com",
+            "notary-test.skubc.cn",
+            "notary-test.zowalk.com",
+            "notary-test.zowalk.cn",
+            "notary-test.offer86.com",
+            "notary-test.offer86.cn",
+            "notary-test.86offer.com",
+            "notary-test.86offer.cn"
           ]
         },
         "staging": {
@@ -111,7 +127,15 @@
             "notary-staging.dtupay.com",
             "notary-staging.sdkwork.cn",
             "notary-staging.birdcoder.cn",
-            "notary-staging.dtupay.cn"
+            "notary-staging.dtupay.cn",
+            "notary-staging.skubc.com",
+            "notary-staging.skubc.cn",
+            "notary-staging.zowalk.com",
+            "notary-staging.zowalk.cn",
+            "notary-staging.offer86.com",
+            "notary-staging.offer86.cn",
+            "notary-staging.86offer.com",
+            "notary-staging.86offer.cn"
           ]
         }
       },
@@ -121,7 +145,15 @@
         "notary.dtupay.com",
         "notary.sdkwork.cn",
         "notary.birdcoder.cn",
-        "notary.dtupay.cn"
+        "notary.dtupay.cn",
+        "notary.skubc.com",
+        "notary.skubc.cn",
+        "notary.zowalk.com",
+        "notary.zowalk.cn",
+        "notary.offer86.com",
+        "notary.offer86.cn",
+        "notary.86offer.com",
+        "notary.86offer.cn"
       ]
     },
     "application.backend-http": {
@@ -134,7 +166,15 @@
             "notary-admin-dev.dtupay.com",
             "notary-admin-dev.sdkwork.cn",
             "notary-admin-dev.birdcoder.cn",
-            "notary-admin-dev.dtupay.cn"
+            "notary-admin-dev.dtupay.cn",
+            "notary-admin-dev.skubc.com",
+            "notary-admin-dev.skubc.cn",
+            "notary-admin-dev.zowalk.com",
+            "notary-admin-dev.zowalk.cn",
+            "notary-admin-dev.offer86.com",
+            "notary-admin-dev.offer86.cn",
+            "notary-admin-dev.86offer.com",
+            "notary-admin-dev.86offer.cn"
           ]
         },
         "test": {
@@ -144,7 +184,15 @@
             "notary-admin-test.dtupay.com",
             "notary-admin-test.sdkwork.cn",
             "notary-admin-test.birdcoder.cn",
-            "notary-admin-test.dtupay.cn"
+            "notary-admin-test.dtupay.cn",
+            "notary-admin-test.skubc.com",
+            "notary-admin-test.skubc.cn",
+            "notary-admin-test.zowalk.com",
+            "notary-admin-test.zowalk.cn",
+            "notary-admin-test.offer86.com",
+            "notary-admin-test.offer86.cn",
+            "notary-admin-test.86offer.com",
+            "notary-admin-test.86offer.cn"
           ]
         },
         "staging": {
@@ -154,7 +202,15 @@
             "notary-admin-staging.dtupay.com",
             "notary-admin-staging.sdkwork.cn",
             "notary-admin-staging.birdcoder.cn",
-            "notary-admin-staging.dtupay.cn"
+            "notary-admin-staging.dtupay.cn",
+            "notary-admin-staging.skubc.com",
+            "notary-admin-staging.skubc.cn",
+            "notary-admin-staging.zowalk.com",
+            "notary-admin-staging.zowalk.cn",
+            "notary-admin-staging.offer86.com",
+            "notary-admin-staging.offer86.cn",
+            "notary-admin-staging.86offer.com",
+            "notary-admin-staging.86offer.cn"
           ]
         }
       },
@@ -164,7 +220,15 @@
         "notary-admin.dtupay.com",
         "notary-admin.sdkwork.cn",
         "notary-admin.birdcoder.cn",
-        "notary-admin.dtupay.cn"
+        "notary-admin.dtupay.cn",
+        "notary-admin.skubc.com",
+        "notary-admin.skubc.cn",
+        "notary-admin.zowalk.com",
+        "notary-admin.zowalk.cn",
+        "notary-admin.offer86.com",
+        "notary-admin.offer86.cn",
+        "notary-admin.86offer.com",
+        "notary-admin.86offer.cn"
       ]
     },
     "platform.api-gateway": {
@@ -177,7 +241,15 @@
             "api-dev.dtupay.com",
             "api-dev.sdkwork.cn",
             "api-dev.birdcoder.cn",
-            "api-dev.dtupay.cn"
+            "api-dev.dtupay.cn",
+            "api-dev.skubc.com",
+            "api-dev.skubc.cn",
+            "api-dev.zowalk.com",
+            "api-dev.zowalk.cn",
+            "api-dev.offer86.com",
+            "api-dev.offer86.cn",
+            "api-dev.86offer.com",
+            "api-dev.86offer.cn"
           ]
         },
         "test": {
@@ -187,7 +259,15 @@
             "api-test.dtupay.com",
             "api-test.sdkwork.cn",
             "api-test.birdcoder.cn",
-            "api-test.dtupay.cn"
+            "api-test.dtupay.cn",
+            "api-test.skubc.com",
+            "api-test.skubc.cn",
+            "api-test.zowalk.com",
+            "api-test.zowalk.cn",
+            "api-test.offer86.com",
+            "api-test.offer86.cn",
+            "api-test.86offer.com",
+            "api-test.86offer.cn"
           ]
         },
         "staging": {
@@ -197,7 +277,15 @@
             "api-staging.dtupay.com",
             "api-staging.sdkwork.cn",
             "api-staging.birdcoder.cn",
-            "api-staging.dtupay.cn"
+            "api-staging.dtupay.cn",
+            "api-staging.skubc.com",
+            "api-staging.skubc.cn",
+            "api-staging.zowalk.com",
+            "api-staging.zowalk.cn",
+            "api-staging.offer86.com",
+            "api-staging.offer86.cn",
+            "api-staging.86offer.com",
+            "api-staging.86offer.cn"
           ]
         }
       },
@@ -207,7 +295,15 @@
         "api.dtupay.com",
         "api.sdkwork.cn",
         "api.birdcoder.cn",
-        "api.dtupay.cn"
+        "api.dtupay.cn",
+        "api.skubc.com",
+        "api.skubc.cn",
+        "api.zowalk.com",
+        "api.zowalk.cn",
+        "api.offer86.com",
+        "api.offer86.cn",
+        "api.86offer.com",
+        "api.86offer.cn"
       ]
     }
   },

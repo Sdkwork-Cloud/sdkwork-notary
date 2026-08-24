@@ -1,3 +1,11 @@
+import { resolveBrowserDistOutDir } from '../../../sdkwork-specs/tools/browser-dist-layout.mjs';
+function resolveViteEnvironment(mode, processEnv = process.env) {
+  const profileMatch = /^(standalone|cloud)\.(development|test|staging|production)$/u.exec(mode ?? '');
+  return profileMatch?.[2]
+    ?? (['development', 'test', 'staging', 'production'].includes(processEnv.SDKWORK_ENVIRONMENT ?? '')
+      ? processEnv.SDKWORK_ENVIRONMENT
+      : 'production');
+}
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
@@ -87,6 +95,7 @@ export default defineConfig(({ mode }) => {
       ],
     },
     build: {
+      outDir: resolveBrowserDistOutDir(resolveViteEnvironment(mode, process.env)),
       rollupOptions: {
         output: {
           manualChunks(id) {
