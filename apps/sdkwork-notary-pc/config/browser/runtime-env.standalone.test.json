@@ -1,0 +1,17 @@
+{
+  "environment": "test",
+  "deploymentProfile": "standalone",
+  "profileId": "standalone.test",
+  "runtimeTarget": "browser",
+  "browserOriginMode": "same-origin",
+  "profile": "development",
+  "appSdkBaseUrl": "http://127.0.0.1:18085",
+  "featureFlags": {
+    "notaryPcDashboard": true
+  },
+  "appApiBaseUrl": "/",
+  "backendApiBaseUrl": "/",
+  "driveAppApiBaseUrl": "/",
+  "appbaseAppApiBaseUrl": "/",
+  "deployAppApiBaseUrl": "/"
+}

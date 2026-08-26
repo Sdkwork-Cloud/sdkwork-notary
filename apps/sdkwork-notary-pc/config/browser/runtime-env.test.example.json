@@ -1,7 +1,0 @@
-{
-  "profile": "test",
-  "appSdkBaseUrl": "https://api-test.sdkwork.com/apps/sdkwork-notary",
-  "featureFlags": {
-    "notaryMobileDashboard": true
-  }
-}

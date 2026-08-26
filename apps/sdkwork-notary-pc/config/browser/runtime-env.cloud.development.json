@@ -1,0 +1,17 @@
+{
+  "environment": "development",
+  "deploymentProfile": "cloud",
+  "profileId": "cloud.development",
+  "runtimeTarget": "browser",
+  "browserOriginMode": "cross-origin",
+  "profile": "development",
+  "appSdkBaseUrl": "http://127.0.0.1:18085",
+  "featureFlags": {
+    "notaryPcDashboard": true
+  },
+  "appApiBaseUrl": "https://api-dev.sdkwork.com",
+  "backendApiBaseUrl": "https://api-dev.sdkwork.com",
+  "driveAppApiBaseUrl": "https://api-dev.sdkwork.com",
+  "appbaseAppApiBaseUrl": "https://api-dev.sdkwork.com",
+  "deployAppApiBaseUrl": "https://api-dev.sdkwork.com"
+}
