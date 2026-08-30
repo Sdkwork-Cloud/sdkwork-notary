@@ -54,8 +54,8 @@
         "id": "sdkwork-notary-h5-primary-icon",
         "type": "ICON",
         "purpose": "PRIMARY",
-        "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/assets/icon-1024.png",
-        "platform": "H5",
+        "url": "https://cdn.sdkwork.com/apps/sdkwork-notary-h5/assets/icon-1024.png",
+        "platform": "APP",
         "locale": "en-US",
         "width": 1024,
         "height": 1024,
@@ -69,10 +69,56 @@
         }
       },
       "platform": [],
-      "metadata": {}
+      "metadata": {
+        "generatedPlaceholder": true
+      }
     },
-    "screenshots": [],
-    "previews": [],
+    "screenshots": [
+      {
+        "id": "sdkwork-notary-h5-web-screenshot",
+        "type": "SCREENSHOT",
+        "purpose": "CATALOG_SCREENSHOT",
+        "url": "https://cdn.sdkwork.com/apps/sdkwork-notary-h5/media/web-screenshot.png",
+        "platform": "WEB",
+        "locale": "en-US",
+        "deviceClass": "BROWSER",
+        "displayType": "WEB_DESKTOP",
+        "width": 1920,
+        "height": 1080,
+        "format": "PNG",
+        "fileSizeBytes": 1048576,
+        "alphaChannel": false,
+        "caption": "SDKWork Notary product screenshot.",
+        "sortOrder": 0,
+        "enabled": true,
+        "metadata": {
+          "generatedPlaceholder": true,
+          "altText": "SDKWork Notary app screenshot."
+        }
+      }
+    ],
+    "previews": [
+      {
+        "id": "sdkwork-notary-h5-catalog-preview",
+        "type": "PREVIEW_IMAGE",
+        "purpose": "CATALOG_PREVIEW",
+        "url": "https://cdn.sdkwork.com/apps/sdkwork-notary-h5/media/preview-cover.png",
+        "platform": "WEB",
+        "locale": "en-US",
+        "width": 1600,
+        "height": 900,
+        "format": "PNG",
+        "fileSizeBytes": 786432,
+        "alphaChannel": false,
+        "caption": "SDKWork Notary preview.",
+        "sortOrder": 0,
+        "enabled": true,
+        "metadata": {
+          "generatedPlaceholder": true,
+          "altText": "SDKWork Notary preview cover."
+        }
+      }
+    ],
     "metadata": {
       "assetVersion": "0.1.0",
       "defaultLocale": "en-US"
@@ -93,6 +139,9 @@
       "workspaceRoot": ".",
       "framework": "react-h5",
       "managedBy": "apps/sdkwork-notary-h5"
+    },
+    "installSkill": {
+      "name": "sdkwork-skills-app"
     }
   },
   "environments": {
@@ -137,7 +186,26 @@
           "checksum": "aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0",
           "architecture": "universal",
           "deploymentProfile": "cloud",
-          "runtimeTarget": "mobile"
+          "runtimeTarget": "browser",
+          "profileBinding": "fixed",
+          "targetPlatform": "h5",
+          "clientArchitecture": "h5"
+        },
+        {
+          "id": "linux-x64-standalone-server-tar-gz",
+          "name": "Sdkwork Notary H5 standalone server archive",
+          "sourceType": "BINARY_URL",
+          "packageFormat": "TAR_GZ",
+          "platform": "API",
+          "url": "https://cdn.sdkwork.com/apps/sdkwork-notary-h5/STABLE/0.1.0/linux-x64-standalone-server-tar-gz-0.1.0.tar.gz",
+          "architecture": "x64",
+          "checksumAlgorithm": "SHA-256",
+          "checksum": "b7d340629c5c308882358159716d6e8ead2a4ae975fd937a807612e38231c611",
+          "deploymentProfile": "standalone",
+          "runtimeTarget": "server",
+          "profileBinding": "fixed",
+          "enabled": true,
+          "metadata": {}
         }
       ],
       "metadata": {
@@ -157,14 +225,17 @@
       {
         "version": "0.1.0",
         "releaseChannel": "STABLE",
-        "title": "SDKWork Notary H5 0.1.0",
-        "summary": "Initial H5 mobile client scaffold.",
-        "content": "Initial SDKWork App Standard v3 manifest for SDKWork Notary H5.",
+        "title": "SDKWork Notary 0.1.0",
+        "summary": "SDKWork Notary initialized standard release.",
+        "content": "Initial SDKWork App Standard v3 manifest for SDKWork Notary.",
         "highlights": [
-          "H5 architecture scaffold aligned with APP_H5_ARCHITECTURE_SPEC.md"
+          "SDKWork App Standard v3 configuration initialized",
+          "platform_app projection metadata standardized",
+          "Download package matrix normalized"
         ],
         "packageIds": [
-          "h5-universal-cloud-mobile-web-url"
+          "h5-universal-cloud-mobile-web-url",
+          "linux-x64-standalone-server-tar-gz"
         ],
         "publishedAt": "2026-06-21T00:00:00Z",
         "current": true,

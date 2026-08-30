@@ -78,7 +78,7 @@
       },
       "platform": [],
       "metadata": {
-        "generatedBy": "apps/scripts/initialize-sdkwork-app-standard-v3.mjs"
+        "generatedPlaceholder": true
       }
     },
     "screenshots": [
@@ -137,12 +137,8 @@
     "installSkill": {
       "name": "sdkwork-skills-app"
     },
-    "platforms": [
-      "LIBRARY"
-    ],
-    "installPlatforms": [
-      "LIBRARY"
-    ],
+    "platforms": [],
+    "installPlatforms": [],
     "defaultPackageId": "test-noarch-standalone-library-contracts-tar-gz",
     "storeUrl": "https://sdkwork.com/apps/sdkwork-notary",
     "stores": [],
@@ -164,7 +160,7 @@
           "name": "SDKWork Notary Domain Library Contracts",
           "sourceType": "BINARY_URL",
           "packageFormat": "TAR_GZ",
-          "platform": "LIBRARY",
+          "platform": "API",
           "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/STABLE/0.1.0/library/contracts.tar.gz",
           "enabled": true,
           "metadata": {
@@ -174,7 +170,24 @@
           "checksum": "aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0aa1d45e0",
           "architecture": "noarch",
           "deploymentProfile": "standalone",
-          "runtimeTarget": "test-runner"
+          "runtimeTarget": "test-runner",
+          "profileBinding": "fixed"
+        },
+        {
+          "id": "linux-x64-cloud-server-tar-gz",
+          "name": "Sdkwork Notary cloud server archive",
+          "sourceType": "BINARY_URL",
+          "packageFormat": "TAR_GZ",
+          "platform": "API",
+          "url": "https://cdn.sdkwork.com/apps/sdkwork-notary/STABLE/0.1.0/linux-x64-cloud-server-tar-gz-0.1.0.tar.gz",
+          "architecture": "x64",
+          "checksumAlgorithm": "SHA-256",
+          "checksum": "86c7dec4c8f13ffa57ee36771a2be705a5d97d35160603f323a853465a68b9c7",
+          "deploymentProfile": "cloud",
+          "runtimeTarget": "server",
+          "profileBinding": "fixed",
+          "enabled": true,
+          "metadata": {}
         }
       ],
       "metadata": {
@@ -204,7 +217,8 @@
           "Download package matrix normalized"
         ],
         "packageIds": [
-          "test-noarch-standalone-library-contracts-tar-gz"
+          "test-noarch-standalone-library-contracts-tar-gz",
+          "linux-x64-cloud-server-tar-gz"
         ],
         "publishedAt": "2026-05-07T00:00:00Z",
         "current": true,
@@ -229,6 +243,7 @@
   },
   "metadata": {
     "standardOwner": "sdkwork-platform",
-    "initializedAt": "2026-05-07T00:00:00Z"
+    "initializedAt": "2026-05-07T00:00:00Z",
+    "deploymentConfig": "etc/sdkwork.deployment.config.json"
   }
 }

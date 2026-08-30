@@ -12,10 +12,14 @@
     "capability": "admin-core",
     "surface": "backend-admin",
     "status": "ready",
-    "languages": ["typescript"],
+    "languages": [
+      "typescript"
+    ],
     "generated": false,
     "private": true,
-    "manifests": ["package.json"]
+    "manifests": [
+      "package.json"
+    ]
   },
   "canonicalSpecs": [
     {
@@ -56,7 +60,14 @@
   ],
   "contracts": {
     "layerRole": "frontend-core",
-    "publicExports": [".", "./sdk", "./modules", "./host", "./session", "./composition"],
+    "publicExports": [
+      ".",
+      "./sdk",
+      "./modules",
+      "./host",
+      "./session",
+      "./composition"
+    ],
     "providedPorts": [
       {
         "name": "notaryPcAdminBackendSdkRuntime",
@@ -95,12 +106,12 @@
     "permissionComposition": {
       "inheritanceMode": "module-catalog-with-overrides",
       "applicationModule": {
-        "manifestRef": "../../../../../specs/iam.module.manifest.json"
+        "manifestRef": "../../../../specs/iam.module.manifest.json"
       },
       "moduleCatalogRefs": [
         {
           "moduleId": "notary",
-          "manifestRef": "../../../../../specs/iam.module.manifest.json",
+          "manifestRef": "../../../../specs/iam.module.manifest.json",
           "inheritPermissions": true,
           "inheritRoles": true
         }

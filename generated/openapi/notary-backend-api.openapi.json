@@ -24,7 +24,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.organizationProfiles.list",
+        "operationId": "organizationProfiles.list",
         "summary": "List notary organization profiles",
         "security": [
           {
@@ -86,7 +86,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.organizationProfiles.create",
+        "operationId": "organizationProfiles.create",
         "summary": "Open notary business for an enterprise-verified organization",
         "security": [
           {
@@ -175,7 +175,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.organizationProfiles.retrieve",
+        "operationId": "organizationProfiles.retrieve",
         "summary": "Retrieve a notary organization profile",
         "security": [
           {
@@ -241,7 +241,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.organizationProfiles.update",
+        "operationId": "organizationProfiles.update",
         "summary": "Update notary organization profile settings or status",
         "security": [
           {
@@ -339,7 +339,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.matters.management.list",
+        "operationId": "matters.management.list",
         "summary": "List SKU-backed notary matters",
         "security": [
           {
@@ -407,7 +407,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.matters.create",
+        "operationId": "matters.create",
         "summary": "Create a notary matter through the Merchandise one-SPU/one-SKU model",
         "security": [
           {
@@ -496,7 +496,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.matters.update",
+        "operationId": "matters.update",
         "summary": "Update a SKU-backed notary matter",
         "security": [
           {
@@ -584,7 +584,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.cases.management.list",
+        "operationId": "cases.management.list",
         "summary": "List notary cases for operators",
         "security": [
           {
@@ -654,7 +654,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.cases.management.retrieve",
+        "operationId": "cases.management.retrieve",
         "summary": "Retrieve operator notary case detail",
         "security": [
           {
@@ -722,7 +722,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.cases.assignments.create",
+        "operationId": "cases.assignments.create",
         "summary": "Assign an IAM organization member to a notary case",
         "security": [
           {
@@ -810,7 +810,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.cases.assignments.delete",
+        "operationId": "cases.assignments.delete",
         "summary": "Release a case assignment",
         "security": [
           {
@@ -881,7 +881,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.staff.list",
+        "operationId": "staff.list",
         "summary": "List IAM organization members enabled for notary business",
         "security": [
           {
@@ -951,7 +951,7 @@
         "tags": [
           "notary"
         ],
-        "operationId": "notary.reports.caseSummary.retrieve",
+        "operationId": "reports.caseSummary.retrieve",
         "summary": "Retrieve notary case summary report",
         "security": [
           {

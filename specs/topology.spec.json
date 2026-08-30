@@ -394,6 +394,7 @@
           }
         ],
         "healthSurfaces": [
+          "application.public-ingress",
           "platform.api-gateway"
         ],
         "browserDeliveries": [
@@ -438,11 +439,49 @@
         ]
       },
       "standalone.production": {
-        "processes": [],
+        "processes": [
+          {
+            "id": "application.public-ingress",
+            "role": "api-standalone-gateway",
+            "script": "_sdkwork:gateway:standalone",
+            "required": true
+          }
+        ],
         "healthSurfaces": [
           "application.public-ingress",
-          "application.backend-http",
-          "platform.api-gateway"
+          "application.backend-http"
+        ],
+        "browserDeliveries": [
+          {
+            "id": "notary-static-pc-web",
+            "applicationRoot": "apps/sdkwork-notary-pc",
+            "clientArchitectures": [
+              "pc-web"
+            ],
+            "originMode": "same-origin",
+            "deliveryMode": "gateway-static",
+            "apiSurfaceId": "application.public-ingress",
+            "hostProcessId": "application.public-ingress",
+            "buildOutput": "apps/sdkwork-notary-pc/dist",
+            "runtimeRootEnv": "SDKWORK_NOTARY_PC_STATIC_ROOT",
+            "mountPath": "/",
+            "spaFallback": "/index.html"
+          },
+          {
+            "id": "notary-static-h5",
+            "applicationRoot": "apps/sdkwork-notary-pc",
+            "clientArchitectures": [
+              "h5"
+            ],
+            "originMode": "same-origin",
+            "deliveryMode": "gateway-static",
+            "apiSurfaceId": "application.public-ingress",
+            "hostProcessId": "application.public-ingress",
+            "buildOutput": "apps/sdkwork-notary-pc/dist",
+            "runtimeRootEnv": "SDKWORK_NOTARY_PC_STATIC_ROOT",
+            "mountPath": "/",
+            "spaFallback": "/index.html"
+          }
         ]
       },
       "standalone.test": {
@@ -504,7 +543,8 @@
         "healthSurfaces": [
           "application.public-ingress",
           "application.backend-http"
-        ]
+        ],
+        "browserDeliveries": []
       },
       "cloud.test": {
         "processes": [
@@ -630,7 +670,8 @@
       },
       "standalone.demo": {
         "processes": [],
-        "healthSurfaces": []
+        "healthSurfaces": [],
+        "browserDeliveries": []
       },
       "cloud.demo": {
         "processes": [],
