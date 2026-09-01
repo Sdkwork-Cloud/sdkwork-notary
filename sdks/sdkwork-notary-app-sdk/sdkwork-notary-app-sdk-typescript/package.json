@@ -1,6 +1,6 @@
 {
   "name": "@sdkwork/notary-app-sdk",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "SDKWork Notary App SDK with composed workflow facade.",
   "type": "module",
   "private": false,
