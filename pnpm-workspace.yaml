@@ -1,4 +1,5 @@
 packages:
+  - "../sdkwork-ui/sdkwork-ui-mobile-react"
   - "apps/sdkwork-notary-h5"
   - "apps/sdkwork-notary-h5/packages/*"
   - "apps/sdkwork-notary-pc"
