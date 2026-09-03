@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  applyDevelopmentLocalGatewayBinding,
   buildProfileId,
   createTopologyRuntime,
   isTcpPortReachable,
@@ -44,7 +45,10 @@ export function resolveDefaultBackendSdkBaseUrl(profileEnv = {}) {
   );
 }
 
-export const loadProfile = runtime.loadProfile;
+export const loadProfile = (profileId) => applyDevelopmentLocalGatewayBinding(
+  runtime.loadProfile(profileId),
+  { profileId },
+);
 export const applyProfileEnv = runtime.applyProfileEnv;
 export const mergeRuntimeEnv = runtime.mergeRuntimeEnv;
 export const loadEnvFile = runtime.loadEnvFile;
