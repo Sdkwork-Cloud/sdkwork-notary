@@ -38,6 +38,7 @@ effective(<profile>.<environment>) =
 | development | `server.development.toml` | 28 | `notary-dev.sdkwork.com` | 80 |
 | test | `server.test.toml` | 28 | `notary-test.sdkwork.com` | 80 |
 | staging | `server.staging.toml` | 28 | `notary-staging.sdkwork.com` | 80 |
+| demo | `server.demo.toml` | 28 | `notary-demo.sdkwork.com` | 80 |
 | production | `server.production.toml` | 28 | `notary.sdkwork.com` | 443 ssl + 80 |
 
 Surfaces: application.public-ingress, application.backend-http.

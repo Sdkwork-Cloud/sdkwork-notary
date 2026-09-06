@@ -392,7 +392,7 @@ pub async fn handle_notary_app_operation_with_metadata(
         "notary.cases.list" => {
             let organization_id = string_field(&body, &["organizationId", "organization_id"])
                 .or_else(|| context.organization_id.clone())
-                .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+                .unwrap_or_else(|| "0".to_string());
             ensure_organization_scope(context, &organization_id)?;
             let page_size =
                 page_size_field(&body, &["pageSize", "page_size"], default_list_page_size())?;
@@ -774,7 +774,7 @@ pub async fn handle_notary_backend_operation(
         "notary.organizationProfiles.create" => {
             let organization_id = string_field(&body, &["organizationId", "organization_id"])
                 .or_else(|| context.organization_id.clone())
-                .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+                .unwrap_or_else(|| "0".to_string());
             let opened_by_membership_id = string_field(
                 &body,
                 &[
@@ -852,7 +852,7 @@ pub async fn handle_notary_backend_operation(
         "notary.matters.create" => {
             let organization_id = string_field(&body, &["organizationId", "organization_id"])
                 .or_else(|| context.organization_id.clone())
-                .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+                .unwrap_or_else(|| "0".to_string());
             require_notary_admin_for_org(context, &organization_id, ports).await?;
             let matter = ports
                 .commerce
@@ -865,7 +865,7 @@ pub async fn handle_notary_backend_operation(
             let organization_id = context
                 .organization_id
                 .clone()
-                .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+                .unwrap_or_else(|| "0".to_string());
             require_notary_admin_for_org(context, &organization_id, ports).await?;
             let matter = ports
                 .commerce
@@ -929,7 +929,7 @@ async fn list_backend_cases(
 ) -> Result<(NotaryCaseListPage, i64), NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
-        .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+        .unwrap_or_else(|| "0".to_string());
     ensure_organization_scope(context, &organization_id)?;
     let page_size = page_size_field(body, &["pageSize", "page_size"], 20)?;
     let page = ports
@@ -999,7 +999,7 @@ async fn list_notary_staff(
 ) -> Result<Value, NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
-        .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+        .unwrap_or_else(|| "0".to_string());
     ensure_organization_scope(context, &organization_id)?;
     let staff_role = string_field(body, &["staffRole", "staff_role"]);
     let page_size = page_size_field(body, &["pageSize", "page_size"], default_list_page_size())?;
@@ -1087,7 +1087,7 @@ async fn list_notary_matters(
     validate_context(context)?;
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
-        .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+        .unwrap_or_else(|| "0".to_string());
     ensure_organization_scope(context, &organization_id)?;
     let page_size = page_size_field(body, &["pageSize", "page_size"], default_list_page_size())?;
     let offset = decode_offset_cursor(string_field(body, &["cursor"]).as_deref())?;
@@ -1446,9 +1446,10 @@ fn ensure_organization_scope(
     context: &NotaryRuntimeContext,
     organization_id: &str,
 ) -> Result<(), NotaryServiceError> {
-    let context_organization_id = context.organization_id.as_deref().ok_or_else(|| {
-        NotaryServiceError::unauthorized("organization scope is required in request context")
-    })?;
+    // Tenant-default policy: a personal (tenant-level) session has no organization
+    // context and is treated as organization "0"; only an actively claimed organization
+    // must match the requested scope.
+    let context_organization_id = context.organization_id.as_deref().unwrap_or("0");
     if context_organization_id != organization_id {
         return Err(NotaryServiceError::unauthorized(
             "organization scope does not match request context",
@@ -1526,7 +1527,7 @@ async fn ensure_report_staff_access(
 ) -> Result<(), NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
-        .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+        .unwrap_or_else(|| "0".to_string());
     let membership_id = context.membership_id.as_deref().ok_or_else(|| {
         NotaryServiceError::unauthorized(
             "organization membership is required for notary report operations",
@@ -1543,7 +1544,7 @@ fn report_organization_id(
 ) -> Result<String, NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
-        .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+        .unwrap_or_else(|| "0".to_string());
     ensure_organization_scope(context, &organization_id)?;
     Ok(organization_id)
 }
@@ -1612,7 +1613,7 @@ fn create_case_command_from_body(
 ) -> Result<NotaryCaseCommand, NotaryServiceError> {
     let organization_id = string_field(body, &["organizationId", "organization_id"])
         .or_else(|| context.organization_id.clone())
-        .ok_or_else(|| NotaryServiceError::validation("organizationId is required"))?;
+        .unwrap_or_else(|| "0".to_string());
     let sku_id = string_field(body, &["skuId", "sku_id"])
         .ok_or_else(|| NotaryServiceError::validation("skuId is required"))?;
     let title = string_field(body, &["title"])

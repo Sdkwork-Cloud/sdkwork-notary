@@ -249,9 +249,7 @@ impl CommercePort for CommerceOrderPort {
         &self,
         command: CommerceMatterCommand,
     ) -> Result<CommerceMatterRecord, NotaryServiceError> {
-        let organization_id = command.organization_id.as_deref().ok_or_else(|| {
-            NotaryServiceError::validation("organizationId is required for matter creation")
-        })?;
+        let organization_id = command.organization_id.as_deref().unwrap_or("0");
         let price_amount = major_amount_to_minor_units(
             command.price_amount.as_str(),
             command.currency_code.as_str(),
