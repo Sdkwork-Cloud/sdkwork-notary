@@ -34,6 +34,12 @@ profiles:
         web: adaptive
         aliases:
           - notary-dev.dtupay.com
+      - domain: notary-admin-dev.noaper.com
+        tls: noaper.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.noaper.com
       - domain: notary-admin-dev.sdkwork.cn
         tls: sdkwork.cn
         mode: web+api
@@ -52,6 +58,12 @@ profiles:
         web: adaptive
         aliases:
           - notary-dev.dtupay.cn
+      - domain: notary-admin-dev.noaper.cn
+        tls: noaper.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.noaper.cn
       - domain: notary-admin-dev.skubc.com
         tls: skubc.com
         mode: web+api
@@ -139,6 +151,12 @@ profiles:
         web: adaptive
         aliases:
           - notary.dtupay.com
+      - domain: notary-admin.noaper.com
+        tls: noaper.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.noaper.com
       - domain: notary-admin.sdkwork.cn
         tls: sdkwork.cn
         mode: web+api
@@ -157,6 +175,12 @@ profiles:
         web: adaptive
         aliases:
           - notary.dtupay.cn
+      - domain: notary-admin.noaper.cn
+        tls: noaper.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.noaper.cn
       - domain: notary-admin.skubc.com
         tls: skubc.com
         mode: web+api
@@ -244,6 +268,12 @@ profiles:
         web: adaptive
         aliases:
           - notary-dev.dtupay.com
+      - domain: notary-admin-dev.noaper.com
+        tls: noaper.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.noaper.com
       - domain: notary-admin-dev.sdkwork.cn
         tls: sdkwork.cn
         mode: web+api
@@ -262,6 +292,12 @@ profiles:
         web: adaptive
         aliases:
           - notary-dev.dtupay.cn
+      - domain: notary-admin-dev.noaper.cn
+        tls: noaper.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary-dev.noaper.cn
       - domain: notary-admin-dev.skubc.com
         tls: skubc.com
         mode: web+api
@@ -349,6 +385,12 @@ profiles:
         web: adaptive
         aliases:
           - notary.dtupay.com
+      - domain: notary-admin.noaper.com
+        tls: noaper.com
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.noaper.com
       - domain: notary-admin.sdkwork.cn
         tls: sdkwork.cn
         mode: web+api
@@ -367,6 +409,12 @@ profiles:
         web: adaptive
         aliases:
           - notary.dtupay.cn
+      - domain: notary-admin.noaper.cn
+        tls: noaper.cn
+        mode: web+api
+        web: adaptive
+        aliases:
+          - notary.noaper.cn
       - domain: notary-admin.skubc.com
         tls: skubc.com
         mode: web+api
